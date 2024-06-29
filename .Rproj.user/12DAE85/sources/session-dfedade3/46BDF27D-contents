@@ -1,0 +1,10 @@
+library(roxygen2)
+roxygenise()
+
+library(devtools)
+document()
+norma()
+
+help("norma")
+
+data(legal_forms_regex)
