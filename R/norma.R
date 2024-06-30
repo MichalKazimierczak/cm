@@ -1,3 +1,9 @@
+#' @import data.table
+#' @import stringr
+#' @import stringi
+#' @import dplyr
+#' @import tidyr
+
 #' @title returns an original dataset with normalized name
 #'
 #' @description This is the main function of the package

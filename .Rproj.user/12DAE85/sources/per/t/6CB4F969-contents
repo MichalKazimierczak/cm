@@ -1,0 +1,287 @@
+# Functions of the for normalization of the names of the owners in ORBIS and IPR repositories
+##as a part of matching procedures.
+###The first version of those algorithms has been prepared in May 2018 by FGV and modified in June
+##2024 by MK
+
+
+library("stringi")
+library("stringr")
+library("tidyr")
+library("dplyr")
+library("roxygen2")
+roxygenise()
+
+###This function is developed to deal with 'trading as' type of indications in the name. It identifies 'trading as' phrase
+###in different languages and creates three copies of record, for which this phrase has been identified: original version of name
+###a string preceding 'trading as' expression and a string following 'trading as' expression.
+
+#' Identify and deal with 'trading as' expression in the name
+#' @param r dataset to be transformed
+#' @param name name of the column storing name to be transformed, it has to be a string
+#' @returns an original dataframe with two additional copies of records containing 'trading as' expression
+#' @examples norma_short(df,"name")
+#'
+
+
+
+norma_short<- function(r,name)
+{
+  ##short contains 'trading as' type of phrases identified in different languages
+  short<-" (:?(?:ALSO)? TRADING AS|(?:TRADING|DOING BUSINESS?) UNDER THE NAME|HANDELND UNTER ?(?:DEN NAMEN)?|\\bC\\/O\\b|
+T? ?H(?:ANDELENDE)? ?O(?:NDER)? ?DE? ?N(?:AAM)?|OOK TE NOE?MEN|AGISSANT (?:AU NOM DE|COMME)|\\bDITE\\b|\\bDIT\\b|EN ABREGE|
+OPERANDO COMO|IN SIGLA|(?:O|E)? ?IN FORMA ABBREVI?A?T?A?|(?:O|E)? ?BREVEMENTE|(?:O|E)? ?ABBREV|(?:O|E)? ?DENOMINAZIONE ABBREVIATA|
+(?:O|E)? ?IN ABBREVIATO|(?:O|E)? ?(?:SIGLABILE|ABBREVIABLE) ?(?:IN)?|(?:O|E)? ?IN BREVE|(?:O|E)? ?ABBREVIATA O SIGLATA|SKROCONA NAZWA:?|NAZWA SKROCONA:?|UZYWA NAZWY SKROCONEJ:?|(?:O|E)? ?DENOM ABBREVIATA|(?:O|E)? ? IN FORMA A|(?:O|E)? ?OPERANTE IN COMERCIO COME|
+(?:WITH)? ?DISTINCTIVE TITLE|D ?T|DIAKRITIKOS TITL.OS|DIAKRITIKO TITLO|NOM D ?USAGE) "
+  ###create a column to store the part of string preceding 'trading as' expression
+  r$name_1<-ifelse(str_detect(r[,name],short),
+                   str_replace(r[,name],paste0("(.*)",short,"(.*)"),"\\1"),
+                   NA)
+  ###create a column to store the part of string following 'trading as' expression
+  r$name_2<-ifelse(str_detect(r[,name],short),
+                   str_replace(r[,name],paste0("(.*)",short,"(.*)"),"\\3"),
+                   NA)
+
+  ###create new datasets for those observations where we were able to identify 'trading as' types of expressions
+  rn1<-r[!is.na(r$name_1),]
+  rn2<-r[!is.na(r$name_2),]
+
+  ###convert new columns created for new names into old 'name' column
+  rn1[,name]<-rn1$name_1
+  rn2[,name]<-rn2$name_2
+
+  ###bind together original observations with additional ones created to accomodate new versions of name
+  r<-rbind(r,rn1,rn2)
+
+  ###delete additional columns created to store additional versions of name
+  r$name_1<-NULL
+  r$name_2<-NULL
+  ###leave only unique observations
+  r<-unique(r)
+}
+
+
+
+###This function is developed to transliterate the strings in other alphabets than Latin
+
+#' Transliterate characters other than Latin
+#' 'norma_trans' transliterates the names which are written using alphabets other than Latin
+#' @param r dataset to be transformed
+#' @param name name of the column storing name to be transformed, it has to be a string
+#' @param country name of the column storing country of seat, it has to be a string
+#' @param key name of the column storing key id, it has to be a string
+#' @returns an original dataframe with transliterated version of name
+#' @examples norma_trans(df,"name","country_code")
+#'
+norma_trans<-function(r,name,country,key){
+  ###This is a dataframe that stores the transliteration standards specific for a given country
+  ###of seat. If you want to modify standard of transliteration, modify this dataframe.
+  ###More than one standards per country are possible. This will multiply rows by number of
+  ###standards use to transliterate names
+  trans<-data.frame(country=c("BG","CY","GR"),
+                    standard=c("bg-bg_Latn/BGN","Greek-Latin/BGN","Greek-Latin/BGN"))
+
+  ##keep only those observations from BG, CY and GR and where names are written in cyrylic
+  r_trans<-r[r[,country]%in%c("BG","CY","GR")&!str_detect(r$name,"[A-Z]"),]
+  if(nrow(r_trans!=0)){
+    ###create a dataset to store transformed names
+    r_tr<-data.frame()
+    for (k in 1:nrow(trans))
+    {
+      r_t<-r_trans[r_trans[,country]==as.character(trans[k,"country"]),]
+      r_t$name<-stri_trans_general(r_t$name,as.character(trans[k,"standard"]))
+      r_tr<-rbind(r_tr,r_t)
+      if(as.character(trans[k,"country"])=="BG"){
+        r_t$name<-str_replace_all(r_t$name,"KH","H")
+        r_t$name<-str_replace_all(r_t$name,"IY","I")
+        r_t$name<-str_replace_all(r_t$name,"YU|IU|JU","U")
+        r_t$name<-str_replace_all(r_t$name,"YA|JA","A")
+        r_tr<-rbind(r_tr,r_t)
+      }
+    }
+    ###create a dataset with observations that were not transformed
+    r_n<-r[!r[,key]%in%r_trans[,key],]
+    ###and bind transformed and not transformed observations
+    r<-rbind(r_tr,r_n)
+    return(unique(r))
+  }
+  else{
+    return(r)
+  }
+}
+
+###This function is developed to deal with the legal forms expressions found in the names
+###Treatment is country specific and the algorithm is not dealing with legal forms, which may
+###be associated with countries other than countries of seat.
+
+#' This function deals with legal forms indications present in the names
+#' @param r dataset to be transformed
+#' @param name name of the column storing name to be transformed, it has to be a string
+#' @param country name of the column storing country of seat, it has to be a string
+#' @returns an original dataframe with cleaned version of original name and additional column with standardized version of legal form
+#' @examples norma_legal(df,"name","country_code")
+
+
+norma_legal <- function(r,name,country){
+  x<-r
+  ###Pre clean data before cleaning legal forms
+  x[,name] <- str_replace_all(x[,name],"GESELL?SC?HAFT"," GESELLSCHAFT")
+  x[,name] <- str_replace_all(x[,name],"(GESELL?SC?HAFT (?:FUE?R|ZUE?R)?)?(.*)(GES M B H|GES MBH|GESMBH|G ?M ?B ?H)","\\2  GMBH")
+  x[,name] <- str_replace_all(x[,name],"GES ?G ?M ?B ?H"," GMBH")
+  x[,name] <- str_replace_all(x[,name],"AKTIEN GESELL?SC?HAFT"," AKTIENGESELLSCHAFT")
+  x[,name] <- str_replace_all(x[,name],"KOMM?ANDIT ?(ERWERBS?)? ?GESELL?SC?HAFT"," KOMMANDITGESELLSCHAFT")
+  x[,name] <- str_replace_all(x[,name],"PARTNERSCHAFTS? GESELL?SC?HAFT"," PARTNERSCHAFTSGESELLSCHAFT")
+  x[,name] <- str_replace_all(x[,name],"OFFENE ?(ERWERBS?)? ?GESELL?SC?HAFT"," OFFENE GESELLSCHAFT")
+  x[,name] <- str_replace_all(x[,name],"EINZEL GESELL?SC?HAFT"," EINZELGESELLSCHAFT")
+  x[,name] <- str_replace_all(x[,name],"(.*)(?:^A(?:KTIE)? ?B(?:OLAGE?T?)? |A(?:KTIE)? ?B(?:OLAGE?T?)? |A(?:KTIE)? ?B(?:OLAGE?T?)?$)(.*)(?:PUBL)","\\1 \\2 AB PUBL")
+  x[,name] <- str_replace_all(x[,name],"(.*)(?:(?:ANONI?IMI|ANONYMI|ANONYMOU?S|ANONIMOS).+?(?:.ETERII?A|ETAII?RE?I?I?A| E$| ET$|\\bETAII\\b))(.*)","\\1 \\2 AE")
+  x[,name] <- str_replace_all(x[,name],"(.*)(?:(?:\\bOM\\b|\\bOMOR\\b|\\bOMORR?.THMOS\\b|\\bOMORR?.THMI\\b| O|^O).+?(?:ETERII?A|ETAII?RE?I?I?A))(.*)","\\1 \\2 OE")
+  x[,name] <- str_replace_all(x[,name],"GMBH(?:\\+|UND|&)(.*)","GMBH UND \\1")
+  x[,name] <- str_replace_all(x[,name],"\\b3 D\\b","3D")
+  ###create a data frame which will store transformed data
+  r<-data.frame()
+
+  ###read list of regex expressions that store the legal forms specific for EU MS countries
+  l<-data(legal_forms_regex)
+  # l<-read.csv("legal_forms.csv",colClasses=
+  #               c("character","character","character","integer"))
+  weak<-data(weak_words_regex)
+
+  # ###read list of regex expressions that store the second list of legal forms, that helps clean composed legal forms
+  # ###specific for some countries
+  # l2<-read.csv("legal_forms_second_step.csv", colClasses=
+  #                c("character","character","character","integer"))
+
+  ###As Benelux countries have one composed IPR register in some data sets we have to foresee special treatment of those countries,
+
+  if(str_detect(unique(x[,country]),"BX")&!str_detect(unique(x[,country]),"BE|LU|NL")){
+
+    l$Country<-ifelse(l$Country%in%c("BE","NL","LU"),"BX",l$Country)
+
+  }
+
+  ###create a list of legal forms limited only to countries present in a dataset
+  lis_co <- l[l$Country%in%unique(x[,country]),]
+  ###and then loop over all countries present in this dataset
+  for (i in unique(lis_co$Country))
+  {
+    ###create a list of legal forms limited to i country
+    co<-lis_co[lis_co$Country==i,]
+    ###and a list of weak words limited to i country
+    cw<-weak[weak$Country==i,]
+
+    ###a dataset with observations limited to i country
+    cd<-x[x[,country]==i,]
+    cd$lf<-""
+    ##and a dataset for storing cleaned data for i country
+    #cl<-data.frame()
+    ###Then loop over a list of legal forms specific for i country
+    rep<-0
+    repeat {
+
+      for (n in 1:nrow(co))
+      {
+        ###create a new column with standardized legal form information in case we found legal form expression
+        cd$lf<-ifelse(str_detect(cd[,name],as.character(co[n,"to.replace"])),
+                      paste(cd$lf,co[n,"replacement"],"; "),
+                      cd$lf)
+        ###replace legal form expression from the name
+        cd[,name]<-ifelse(str_detect(cd[,name],as.character(co[n,"to.replace"])),
+                          str_replace(cd[,name],as.character(co[n,"to.replace"])," "),
+                          cd[,name])
+
+      }
+
+      rep=rep+1
+      if (rep==2){
+        break
+      }
+    }
+    for (n in 1:nrow(cw))
+    {
+
+      ###replace legal form expression from the name
+      cd[,name]<-ifelse(str_detect(cd[,name],as.character(cw[n,"to.replace"])),
+                        str_replace(cd[,name],as.character(cw[n,"to.replace"])," "),
+                        cd[,name])
+
+    }
+    r<-rbind(r,cd)
+
+  }
+
+  ###do some additional cleaning for
+  r[,name]<-str_replace_all(r[,name],"\\s+"," ")
+  r[,name]<-str_trim(r[,name])
+
+  ##and return r
+  return(r)
+}
+
+
+###This is the main function of the package. It normalizes the raw name into its normalized form
+
+
+#' norma() returns an original dataset with normalized name
+#' @param r dataset to be transformed
+#' @param name name of the column storing name to be transformed, it has to be a string
+#' @param country name of the column storing name of the country of seat
+#' @key name of the column storing unique identifier of the entity
+#' @new_col if TRUE creates new column with normalized version of the name along with the original version of the name
+#' @short if TRUE looks for 'trading as' expressions with the name
+#' @translit if TRUE looks for names written in cyrylic and transforms them into their latin versions
+#' @legal if TRUE looks for legal form expressions in the name and deals with them
+#' @returns an original dataframe with two additional copies of records containing 'trading as' expression
+#' @examples df<-data.frame(name="Andrzej Beata Celina spółka z ograniczoną odpowiedzialnoscią nazwa skrócona ABC sp. z o.o. SP.J",
+                         country="PL",key=1)
+
+#dfn<-norma(df,"name","country","key",new_col=T,short=T,translit=T,legal=T)
+
+
+norma<-function(r,name,country,key,new_col=T,short=T,translit=T,legal=T){
+  ###This is to account for the choice of whether to create a new column for transliterated names
+  ##or to transform the column which stored the original name
+  r$norm_name<-r[,name]
+  r$norm_name <-stri_trans_general(r$norm_name, "latin-ascii; upper")
+  r$norm_name <-str_replace_all(r$norm_name,"\\.","")
+  r$norm_name <-str_replace_all(r$norm_name,"-"," ")
+  #r$norm_name <-stri_replace_all_regex(r$norm_name,"\\([[:alnum:]]{2})>", "\\\\u00$1")
+  r$norm_name <-stri_unescape_unicode(r$norm_name)
+  r$norm_name <-stri_enc_toutf8(r$norm_name)
+  r$norm_name <-str_replace_all(r$norm_name,"[^a-zA-Z0-9]"," ")
+  r$norm_name <-str_replace_all(r$norm_name,"\\n"," ")
+  r$norm_name <-str_replace_all(r$norm_name,"\\t"," ")
+  r$norm_name <-str_replace_all(r$norm_name,"\\s+"," ")
+  r$norm_name <-str_trim(r$norm_name)
+
+  if(short==T){
+    r<-norma_short(r,"norm_name")
+  }
+
+  if(translit==T&country%in%c("BG","CY","GR")){
+    r<-norma_trans(r,"norm_name",country,key)
+  }
+
+  if(legal==T){
+    r<-norma_legal(r,"norm_name",country)
+    r$lf<-str_replace(r$lf,";\\s+?$","")
+    r<-separate_rows(r,lf,sep=";")
+    r$lf<-str_trim(r$lf)
+    r<-r[order(r$lf),]
+    rlf<-unique(r[,c(key,"lf")])
+    rlf<-data.table(rlf)[,.(lf=paste0(lf,collapse=";")),
+                         by=key]
+    r$lf<-NULL
+    r<-merge(r,rlf,by=key)
+    r<-unique(r)
+    # r<-merge(r,rlf,by=key)
+  }
+
+  if(new_col==F){
+    r[,name]<-r$norm_name
+    r$norm_name<-NULL
+  }
+
+
+  return(r)
+}
+
