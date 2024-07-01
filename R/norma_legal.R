@@ -56,7 +56,7 @@ norma_legal <- function(r,name,country){
     ###create a list of legal forms limited to i country
     co<-lis_co[lis_co$Country==i,]
     ###and a list of weak words limited to i country
-    cw<-weak[weak$Country==i,]
+    cw<-w[w$Country==i,]
 
     ###a dataset with observations limited to i country
     cd<-x[x[,country]==i,]
