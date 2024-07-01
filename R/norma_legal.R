@@ -45,6 +45,7 @@ norma_legal <- function(r,name,country){
   if(str_detect(unique(x[,country]),"BX")&!str_detect(unique(x[,country]),"BE|LU|NL")){
 
     l$Country<-ifelse(l$Country%in%c("BE","NL","LU"),"BX",l$Country)
+    w$Country<-ifelse(w$Country%in%c("BE","NL","LU"),"BX",l$Country)
 
   }
 
