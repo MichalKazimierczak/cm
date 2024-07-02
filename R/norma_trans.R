@@ -9,6 +9,7 @@
 #' @examples norma_trans(df,"name","country_code")
 #' @export
 
+
 norma_trans<-function(r,name,country,key){
   ###This is a dataframe that stores the transliteration standards specific for a given country
   ###of seat. If you want to modify standard of transliteration, modify this dataframe.
@@ -18,20 +19,20 @@ norma_trans<-function(r,name,country,key){
                     standard=c("bg-bg_Latn/BGN","Greek-Latin/BGN","Greek-Latin/BGN"))
 
   ##keep only those observations from BG, CY and GR and where names are written in cyrylic
-  r_trans<-r[r[,country]%in%c("BG","CY","GR")&!str_detect(r$name,"[A-Z]"),]
+  r_trans<-r[r[,country]%in%c("BG","CY","GR")&!str_detect(r[,name],"[A-Z]"),]
   if(nrow(r_trans!=0)){
     ###create a dataset to store transformed names
     r_tr<-data.frame()
     for (k in 1:nrow(trans))
     {
       r_t<-r_trans[r_trans[,country]==as.character(trans[k,"country"]),]
-      r_t$name<-stri_trans_general(r_t$name,as.character(trans[k,"standard"]))
+      r_t[,name]<-stri_trans_general(r_t[,name],as.character(trans[k,"standard"]))
       r_tr<-rbind(r_tr,r_t)
       if(as.character(trans[k,"country"])=="BG"){
-        r_t$name<-str_replace_all(r_t$name,"KH","H")
-        r_t$name<-str_replace_all(r_t$name,"IY","I")
-        r_t$name<-str_replace_all(r_t$name,"YU|IU|JU","U")
-        r_t$name<-str_replace_all(r_t$name,"YA|JA","A")
+        r_t[,name]<-str_replace_all(r_t[,name],"KH","H")
+        r_t[,name]<-str_replace_all(r_t[,name],"IY","I")
+        r_t[,name]<-str_replace_all(r_t[,name],"YU|IU|JU","U")
+        r_t[,name]<-str_replace_all(r_t[,name],"YA|JA","A")
         r_tr<-rbind(r_tr,r_t)
       }
     }

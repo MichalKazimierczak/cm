@@ -39,13 +39,15 @@ norma<-function(r,name,country,key,new_col=T,short=T,translit=T,legal=T){
   r$norm_name <-str_replace_all(r$norm_name,"\\s+"," ")
   r$norm_name <-str_trim(r$norm_name)
 
+  if(translit==T&country%in%c("BG","CY","GR")){
+    r<-norma_trans(r,"norm_name",country,key)
+  }
+
+
   if(short==T){
     r<-norma_short(r,"norm_name")
   }
 
-  if(translit==T&country%in%c("BG","CY","GR")){
-    r<-norma_trans(r,"norm_name",country,key)
-  }
 
   if(legal==T){
     r<-norma_legal(r,"norm_name",country)
@@ -58,9 +60,12 @@ norma<-function(r,name,country,key,new_col=T,short=T,translit=T,legal=T){
                          by=key]
     r$lf<-NULL
     r<-merge(r,rlf,by=key)
+    r$lf<-str_replace_all("^;|;$","")
     r<-unique(r)
     # r<-merge(r,rlf,by=key)
   }
+
+  r$norm_name<-replace_all("GROUP|HOLDING|CORPORATION|INCORPORATED|\bCO\b|LIMITED|\bLTD\b")
 
   if(new_col==F){
     r[,name]<-r$norm_name
