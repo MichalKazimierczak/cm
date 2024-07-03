@@ -9,13 +9,6 @@
 #' @examples norma_trans(df,"name","country_code")
 #' @export
 
-s$norm_name<-s$ApplicantName
-r<-s
-name<-"norm_name"
-country<-"iso2"
-key<-"applicant_id"
-k<-1
-
 
 norma_trans<-function(r,name,country,key){
   ###This is a dataframe that stores the transliteration standards specific for a given country
