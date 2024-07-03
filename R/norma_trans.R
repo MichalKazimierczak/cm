@@ -9,6 +9,13 @@
 #' @examples norma_trans(df,"name","country_code")
 #' @export
 
+s$norm_name<-s$ApplicantName
+r<-s
+name<-"norm_name"
+country<-"iso2"
+key<-"applicant_id"
+k<-1
+
 
 norma_trans<-function(r,name,country,key){
   ###This is a dataframe that stores the transliteration standards specific for a given country
@@ -27,14 +34,14 @@ norma_trans<-function(r,name,country,key){
     {
       r_t<-r_trans[r_trans[,country]==as.character(trans[k,"country"]),]
       r_t[,name]<-stri_trans_general(r_t[,name],as.character(trans[k,"standard"]))
-      r_tr<-rbind(r_tr,r_t)
       if(as.character(trans[k,"country"])=="BG"){
         r_t[,name]<-str_replace_all(r_t[,name],"KH","H")
         r_t[,name]<-str_replace_all(r_t[,name],"IY","I")
         r_t[,name]<-str_replace_all(r_t[,name],"YU|IU|JU","U")
         r_t[,name]<-str_replace_all(r_t[,name],"YA|JA","A")
-        r_tr<-rbind(r_tr,r_t)
       }
+      r_tr<-rbind(r_tr,r_t)
+
     }
     ###create a dataset with observations that were not transformed
     r_n<-r[!r[,key]%in%r_trans[,key],]
