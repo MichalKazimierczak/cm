@@ -60,7 +60,7 @@ norma<-function(r,name,country,key,new_col=T,short=T,translit=T,legal=T){
                          by=key]
     r$lf<-NULL
     r<-merge(r,rlf,by=key)
-    r$lf<-str_replace_all("^;|;$","")
+    r$lf<-str_replace_all(r$lf,"^;|;$","")
     r<-unique(r)
     # r<-merge(r,rlf,by=key)
   }
