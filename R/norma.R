@@ -27,7 +27,7 @@ norma<-function(r,name,country,key,new_col=T,short=T,translit=T,legal=T){
   ###This is to account for the choice of whether to create a new column for transliterated names
   ##or to transform the column which stored the original name
   r$norm_name<-r[,name]
-  if(translit==T&country%in%c("BG","CY","GR")){
+  if(translit==T&unique(r[,country])%in%c("BG","CY","GR")){
     r<-norma_trans(r,"norm_name",country,key)
   }
   r$norm_name <-stri_trans_general(r$norm_name, "latin-ascii; upper")
