@@ -31,9 +31,11 @@ norma_legal <- function(r,name,country){
 
   ###read list of regex expressions that store the legal forms specific for EU MS countries
   data(legal_forms_regex)
+  l<-l[order(l$order),]
   # l<-read.csv("legal_forms.csv",colClasses=
   #               c("character","character","character","integer"))
   data(weak_words_regex)
+  w<-w[order(w$order),]
 
   # ###read list of regex expressions that store the second list of legal forms, that helps clean composed legal forms
   # ###specific for some countries

@@ -64,7 +64,7 @@ norma<-function(r,name,country,key,new_col=T,short=T,translit=T,legal=T){
     # r<-merge(r,rlf,by=key)
   }
 
-  r$norm_name<-str_replace_all(r$norm_name,"GROUP|HOLDING|CORPORATION|INCORPORATED|\bCO\b|LIMITED|\bLTD\b","")
+  r$norm_name<-str_replace_all(r$norm_name,"( |^)GROUP( |$)|HOLDING|CORPORATION|INCORPORATED|\bCO\b|LIMITED|\bLTD\b","")
 
   if(new_col==F){
     r[,name]<-r$norm_name
