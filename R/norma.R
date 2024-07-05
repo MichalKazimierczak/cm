@@ -30,17 +30,17 @@ norma<-function(r,name,country,key,new_col=T,short=T,translit=T,legal=T){
   if(translit==T&unique(r[,country])%in%c("BG","CY","GR")){
     r<-norma_trans(r,"norm_name",country,key)
   }
-  r$norm_name <-stri_trans_general(r$norm_name, "latin-ascii; upper")
-  r$norm_name <-str_replace_all(r$norm_name,"\\.","")
-  r$norm_name <-str_replace_all(r$norm_name,"-"," ")
+  r$norm_name <-stringi::stri_trans_general(r$norm_name, "latin-ascii; upper")
+  r$norm_name <-stringr::str_replace_all(r$norm_name,"\\.","")
+  r$norm_name <-stringr::str_replace_all(r$norm_name,"-"," ")
   #r$norm_name <-stri_replace_all_regex(r$norm_name,"\\([[:alnum:]]{2})>", "\\\\u00$1")
-  r$norm_name <-stri_unescape_unicode(r$norm_name)
-  r$norm_name <-stri_enc_toutf8(r$norm_name)
-  r$norm_name <-str_replace_all(r$norm_name,"[^a-zA-Z0-9]"," ")
-  r$norm_name <-str_replace_all(r$norm_name,"\\n"," ")
-  r$norm_name <-str_replace_all(r$norm_name,"\\t"," ")
-  r$norm_name <-str_replace_all(r$norm_name,"\\s+"," ")
-  r$norm_name <-str_trim(r$norm_name)
+  r$norm_name <-stringi::stri_unescape_unicode(r$norm_name)
+  r$norm_name <-stringi::stri_enc_toutf8(r$norm_name)
+  r$norm_name <-stringr::str_replace_all(r$norm_name,"[^a-zA-Z0-9]"," ")
+  r$norm_name <-stringr::str_replace_all(r$norm_name,"\\n"," ")
+  r$norm_name <-stringr::str_replace_all(r$norm_name,"\\t"," ")
+  r$norm_name <-stringr::str_replace_all(r$norm_name,"\\s+"," ")
+  r$norm_name <-stringr::str_trim(r$norm_name)
 
 
   if(short==T){
@@ -50,21 +50,21 @@ norma<-function(r,name,country,key,new_col=T,short=T,translit=T,legal=T){
 
   if(legal==T){
     r<-norma_legal(r,"norm_name",country)
-    r$lf<-str_replace(r$lf,";\\s+?$","")
-    r<-separate_rows(r,lf,sep=";")
-    r$lf<-str_trim(r$lf)
+    r$lf<-stringr::str_replace(r$lf,";\\s+?$","")
+    r<-tidyr::separate_rows(r,lf,sep=";")
+    r$lf<-stringr::str_trim(r$lf)
     r<-r[order(r$lf),]
     rlf<-unique(r[,c(key,"lf")])
-    rlf<-data.table(rlf)[,.(lf=paste0(lf,collapse=";")),
+    rlf<-data.table::data.table(rlf)[,.(lf=paste0(lf,collapse=";")),
                          by=key]
     r$lf<-NULL
     r<-merge(r,rlf,by=key)
-    r$lf<-str_replace_all(r$lf,"^;|;$","")
+    r$lf<-stringr::str_replace_all(r$lf,"^;|;$","")
     r<-unique(r)
     # r<-merge(r,rlf,by=key)
   }
 
-  r$norm_name<-str_replace_all(r$norm_name,"( |^)GROUP( |$)|HOLDING|CORPORATION|INCORPORATED|\bCO\b|LIMITED|\bLTD\b","")
+  r$norm_name<-stringr::str_replace_all(r$norm_name,"( |^)GROUP( |$)|HOLDING|CORPORATION|INCORPORATED|\\bCO\\b|LIMITED|\\bLTD\\b","")
 
   if(new_col==F){
     r[,name]<-r$norm_name

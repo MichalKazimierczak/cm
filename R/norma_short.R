@@ -21,12 +21,12 @@ OPERANDO COMO|IN SIGLA|(?:O|E)? ?IN FORMA ABBREVI?A?T?A?|(?:O|E)? ?BREVEMENTE|(?
 (?:O|E)? ?IN ABBREVIATO|(?:O|E)? ?(?:SIGLABILE|ABBREVIABLE) ?(?:IN)?|(?:O|E)? ?IN BREVE|(?:O|E)? ?ABBREVIATA O SIGLATA|SKROCONA NAZWA:?|NAZWA SKROCONA:?|UZYWA NAZWY SKROCONEJ:?|(?:O|E)? ?DENOM ABBREVIATA|(?:O|E)? ? IN FORMA A|(?:O|E)? ?OPERANTE IN COMERCIO COME|
 (?:WITH)? ?DISTINCTIVE TITLE|DIAKRITIKOS TITL.OS|DIAKRITIKO TITLO|NOM D ?USAGE|HANDELEND ONDER DE NAAM|\bHODN\b|TAMBEM COMERCIANDO COMO)"
   ###create a column to store the part of string preceding 'trading as' expression
-  r$name_1<-ifelse(str_detect(r[,name],short),
-                   str_replace(r[,name],paste0("(.*)",short,"(.*)"),"\\1"),
+  r$name_1<-ifelse(stringr::str_detect(r[,name],short),
+                   stringr::str_replace(r[,name],paste0("(.*)",short,"(.*)"),"\\1"),
                    NA)
   ###create a column to store the part of string following 'trading as' expression
-  r$name_2<-ifelse(str_detect(r[,name],short),
-                   str_replace(r[,name],paste0("(.*)",short,"(.*)"),"\\3"),
+  r$name_2<-ifelse(stringr::str_detect(r[,name],short),
+                   stringr::str_replace(r[,name],paste0("(.*)",short,"(.*)"),"\\3"),
                    NA)
 
   ###create new datasets for those observations where we were able to identify 'trading as' types of expressions
