@@ -26,6 +26,7 @@
 norma<-function(r,name,country,key,new_col=T,short=T,translit=T,legal=T){
   ###This is to account for the choice of whether to create a new column for transliterated names
   ##or to transform the column which stored the original name
+  r<-data.frame(r)
   r$norm_name<-r[,name]
   if(translit==T&unique(r[,country])%in%c("BG","CY","GR")){
     r<-norma_trans(r,"norm_name",country,key)
@@ -34,7 +35,7 @@ norma<-function(r,name,country,key,new_col=T,short=T,translit=T,legal=T){
   r$norm_name <-stringr::str_replace_all(r$norm_name,"\\.","")
   r$norm_name <-stringr::str_replace_all(r$norm_name,"-"," ")
   #r$norm_name <-stri_replace_all_regex(r$norm_name,"\\([[:alnum:]]{2})>", "\\\\u00$1")
-  r$norm_name <-stringi::stri_unescape_unicode(r$norm_name)
+  #r$norm_name <-stringi::stri_unescape_unicode(r$norm_name)
   r$norm_name <-stringi::stri_enc_toutf8(r$norm_name)
   r$norm_name <-stringr::str_replace_all(r$norm_name,"[^a-zA-Z0-9]"," ")
   r$norm_name <-stringr::str_replace_all(r$norm_name,"\\n"," ")
