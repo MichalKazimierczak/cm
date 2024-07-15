@@ -42,20 +42,24 @@ norma_legal <- function(r,name,country){
   # l2<-read.csv("legal_forms_second_step.csv", colClasses=
   #                c("character","character","character","integer"))
 
-  ###As Benelux countries have one composed IPR register in some data sets we have to foresee special treatment of those countries,
-
-  if(stringr::str_detect(unique(x[,country]),"BX")&!stringr::str_detect(unique(x[,country]),"BE|LU|NL")){
-
-    l$Country<-ifelse(l$Country%in%c("BE","NL","LU"),"BX",l$Country)
-    w$Country<-ifelse(w$Country%in%c("BE","NL","LU"),"BX",l$Country)
-
-  }
-
   ###create a list of legal forms limited only to countries present in a dataset
   lis_co <- l[l$Country%in%unique(x[,country]),]
   ###and then loop over all countries present in this dataset
   for (i in unique(lis_co$Country))
   {
+    ###As Benelux countries have one composed IPR register in some data sets we have to foresee special treatment of those countries,
+
+    if(stringr::str_detect(unique(x[,country]),"BX")&!stringr::str_detect(unique(x[,country]),"BE|LU|NL")){
+
+      lb<-l[l$Country%in%c("BE","NL","LU"),]
+      lb$Country<-"BX"
+      l<-rbind(l,lb)
+      wb<-w[w$Country%in%c("BE","NL","LU"),]
+      wb$Country<-"BX"
+      w<-rbind(w,wb)
+      remove(wb,lb)
+    }
+
     ###create a list of legal forms limited to i country
     co<-lis_co[lis_co$Country==i,]
     ###and a list of weak words limited to i country
