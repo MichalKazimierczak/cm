@@ -21,14 +21,6 @@
 #' @export
 
 #dfn<-norma(df,"name","country","key",new_col=T,short=T,translit=T,legal=T)
-r<-pat_applicants
-name<-"person_name"
-key<-"person_id"
-country<-"person_ctry_code"
-translit<-T
-legal<-T
-short<-T
-str(rt)
 
 norma<-function(r,name,country,key,new_col=T,short=T,translit=T,legal=T){
   ###This is to account for the choice of whether to create a new column for transliterated names
