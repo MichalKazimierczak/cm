@@ -27,14 +27,14 @@ norma<-function(r,name,country,key,new_col=T,short=T,translit=T,legal=T){
   ##or to transform the column which stored the original name
   r<-data.frame(r)
   r$norm_name<-r[,name]
-  rt<-r[r[,country]%in%c("BG","CY","GR"),]
+  rt<-r[r[,country]%in%c("BG","CY","GR")&!stringr::str_detect(r[,name],"[A-Z]"),]
+  r<-r[!r[,key]%in%rt[,key],]
   if(translit==T&nrow(rt)>0){
     for (t in unique(rt[,country]))
     {
-     rt[rt[,country]==t,]<-norma_trans(rt[rt[,country]==t,],"norm_name",country,key)
+     rtc<-norma_trans(rt[rt[,country]==t,],"norm_name",country,key)
+     r<-rbind(r,rtc)
     }
-    r<-r[!r[,key]%in%rt[,key],]
-    r<-rbind(r,rt)
   }
   r$norm_name <-stringi::stri_trans_general(r$norm_name, "latin-ascii; upper")
   r$norm_name <-stringr::str_replace_all(r$norm_name,"\\.","")
