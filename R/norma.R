@@ -21,15 +21,28 @@
 #' @export
 
 #dfn<-norma(df,"name","country","key",new_col=T,short=T,translit=T,legal=T)
-
+r<-pat_applicants
+name<-"person_name"
+key<-"person_id"
+country<-"person_ctry_code"
+translit<-T
+legal<-T
+short<-T
+str(rt)
 
 norma<-function(r,name,country,key,new_col=T,short=T,translit=T,legal=T){
   ###This is to account for the choice of whether to create a new column for transliterated names
   ##or to transform the column which stored the original name
   r<-data.frame(r)
   r$norm_name<-r[,name]
-  if(translit==T&unique(r[,country])%in%c("BG","CY","GR")){
-    r<-norma_trans(r,"norm_name",country,key)
+  rt<-r[r[,country]%in%c("BG","CY","GR"),]
+  if(translit==T&nrow(rt)>0){
+    for (t in unique(rt[,country]))
+    {
+     rt[rt[,country]==t,]<-norma_trans(rt[rt[,country]==t,],"norm_name",country,key)
+    }
+    r<-r[!r[,key]%in%rt[,key],]
+    r<-rbind(r,rt)
   }
   r$norm_name <-stringi::stri_trans_general(r$norm_name, "latin-ascii; upper")
   r$norm_name <-stringr::str_replace_all(r$norm_name,"\\.","")
