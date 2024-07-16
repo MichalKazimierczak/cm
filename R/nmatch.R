@@ -18,8 +18,8 @@ nmatch<-function(a,b,aname,bname,sort=T,unique=T){
   ###More than one standards per country are possible. This will multiply rows by number of
   ###standards use to transliterate names
 
-  a[,aname]<-str_split(a[,aname],"\\s")
-  b[,bname]<-str_split(b[,bname],"\\s")
+  a[,aname]<-stringr::str_split(a[,aname],"\\s")
+  b[,bname]<-stringr::str_split(b[,bname],"\\s")
 
 
   if(sort==T){
@@ -31,8 +31,8 @@ nmatch<-function(a,b,aname,bname,sort=T,unique=T){
   b[,bname]<-sapply(b[,bname],function(x) unlist(x))
 
   if (unique==T){
-    a[,aname]<-lapply(a[,aname], function(x) stri_unique(x))
-    b[,bname]<-lapply(b[,bname], function(x) stri_unique(x))
+    a[,aname]<-lapply(a[,aname], function(x) stringi::stri_unique(x))
+    b[,bname]<-lapply(b[,bname], function(x) stringi::stri_unique(x))
   }
 
   a[,aname]<-sapply(a[,aname], function(x) paste(x,collapse=""))
