@@ -16,7 +16,7 @@ norma_legal <- function(r,name,country){
   x[,name] <- stringr::str_replace_all(x[,name],"GESELL?SC?HAFT"," GESELLSCHAFT")
   x[,name] <- stringr::str_replace_all(x[,name],"(GESELL?SC?HAFT (?:FUE?R|ZUE?R)?)?(.*)(GES M B H|GES MBH|GESMBH|G ?M ?B ?H)","\\2  GMBH")
   x[,name] <- stringr::str_replace_all(x[,name],"GES ?G ?M ?B ?H"," GMBH")
-  x[,name] <- stringr::str_replace_all(x[,name],"AKTIEN GESELL?SC?HAFT"," AKTIENGESELLSCHAFT")
+  x[,name] <- stringr::str_replace_all(x[,name],"AKTIEN ?GESELL?SC?HAFT"," AKTIENGESELLSCHAFT")
   x[,name] <- stringr::str_replace_all(x[,name],"KOMM?ANDIT ?(ERWERBS?)? ?GESELL?SC?HAFT"," KOMMANDITGESELLSCHAFT")
   x[,name] <- stringr::str_replace_all(x[,name],"PARTNERSCHAFTS? GESELL?SC?HAFT"," PARTNERSCHAFTSGESELLSCHAFT")
   x[,name] <- stringr::str_replace_all(x[,name],"OFFENE ?(ERWERBS?)? ?GESELL?SC?HAFT"," OFFENE GESELLSCHAFT")
