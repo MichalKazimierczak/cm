@@ -83,7 +83,7 @@ norma<-function(r,name,country,key,new_col=T,short=T,translit=T,legal=T){
   {
     re<-norma(re,name,country,key,new_col=F,short=F,translit=F,legal=F)
     rf<-r[r$norm_name!="",]
-    r<-rbind(re,rf)
+    r<-plyr::rbind.fill(re,rf)
   }
 
   if(new_col==F){
