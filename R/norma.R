@@ -81,7 +81,7 @@ norma<-function(r,name,country,key,new_col=T,short=T,translit=T,legal=T){
 
   if(nrow(re)!=0)
   {
-    re<-norma[re,name,country,key,new_col=F,short=F,translit=F,legal=F]
+    re<-norma[re,re[,name],re[,country],re[,key],new_col=F,short=F,translit=F,legal=F]
     rf<-r[r$norm_name!="",]
     r<-rbind(re,rf)
   }
