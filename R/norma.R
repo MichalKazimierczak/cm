@@ -75,10 +75,22 @@ norma<-function(r,name,country,key,new_col=T,short=T,translit=T,legal=T){
 
   r$norm_name<-stringr::str_replace_all(r$norm_name,"( |^)GROUP( |$)|HOLDING|CORPORATION|INCORPORATED|\\bCO\\b|LIMITED|\\bLTD\\b| ALSO$","")
 
+  ###The last step of the process consists of correcting those cases where the process of normalization left normalized name as an empty string
+
+  re<-r[r$norm_name=="",]
+
+  if(nrow(re)!=0)
+  {
+    re<-norm[re,name,country,key,new_col=F,short=F,translit=F,legal=F]
+    rf<-r[r$norm_name!="",]
+    r<-rbind(re,rf)
+  }
+
   if(new_col==F){
     r[,name]<-r$norm_name
     r$norm_name<-NULL
   }
+
 
 
   return(r)
