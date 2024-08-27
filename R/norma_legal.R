@@ -22,8 +22,8 @@ norma_legal <- function(r,name,country){
   x[,name] <- stringr::str_replace_all(x[,name],"OFFENE ?(ERWERBS?)? ?GESELL?SC?HAFT"," OFFENE GESELLSCHAFT")
   x[,name] <- stringr::str_replace_all(x[,name],"EINZEL GESELL?SC?HAFT"," EINZELGESELLSCHAFT")
   x[,name] <- stringr::str_replace_all(x[,name],"(.*)(?:^A(?:KTIE)? ?B(?:OLAGE?T?)? |A(?:KTIE)? ?B(?:OLAGE?T?)? |A(?:KTIE)? ?B(?:OLAGE?T?)?$)(.*)(?:PUBL)","\\1 \\2 AB PUBL")
-  x[,name] <- stringr::str_replace_all(x[,name],"(.*)(?:(?:ANONI?IMI|ANONYMI|ANONYMOU?S|ANONIMOS).+?(?:.ETERII?A|ETAII?RE?I?I?A| E$| ET$|\\bETAII\\b))(.*)","\\1 \\2 AE")
-  x[,name] <- stringr::str_replace_all(x[,name],"(.*)(?:(?:\\bOM\\b|\\bOMOR\\b|\\bOMORR?.THMOS\\b|\\bOMORR?.THMI\\b| O|^O).+?(?:ETERII?A|ETAII?RE?I?I?A))(.*)","\\1 \\2 OE")
+  # x[,name] <- stringr::str_replace_all(x[,name],"(.*)(?:(?:ANONI?IMI|ANONYMI|ANONYMOU?S|ANONIMOS).+?(?:.ETERII?A|ETAII?RE?I?I?A| E$| ET$|\\bETAII\\b))(.*)","\\1 \\2 AE")
+  # x[,name] <- stringr::str_replace_all(x[,name],"(.*)(?:(?:\\bOM\\b|\\bOMOR\\b|\\bOMORR?.THMOS\\b|\\bOMORR?.THMI\\b| O|^O).+?(?:ETERII?A|ETAII?RE?I?I?A))(.*)","\\1 \\2 OE")
   x[,name] <- stringr::str_replace_all(x[,name],"GMBH(?:\\+|UND|&)(.*)","GMBH UND \\1")
   x[,name] <- stringr::str_replace_all(x[,name],"\\b3 D\\b","3D")
   ###create a data frame which will store transformed data
