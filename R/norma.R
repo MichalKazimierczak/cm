@@ -42,7 +42,7 @@ norma<-function(r,name,country,key,new_col=T,short=T,translit=T,legal=T){
   #r$norm_name <-stri_replace_all_regex(r$norm_name,"\\([[:alnum:]]{2})>", "\\\\u00$1")
   #r$norm_name <-stringi::stri_unescape_unicode(r$norm_name)
   r$norm_name <-stringi::stri_enc_toutf8(r$norm_name)
-  r$norm_name <-stringr::str_replace_all(r$norm_name,"[^a-zA-Z0-9]"," ")
+  r$norm_name <-stringr::str_replace_all(r$norm_name,"[^a-zA-Zα-ωΑ-Ωa-яA-Я]"," ")
   r$norm_name <-stringr::str_replace_all(r$norm_name,"W UPADLOSCI (LIKWIDACYJNEJ)?|W LIKWIDACJI","")
   r$norm_name <-stringr::str_replace_all(r$norm_name,"CREDIT NEEDED|DOUBLE DO ?NOT.*|(DOUBLE)? ?(PLE?A?S?E?)? ?(USE?|WITH|OF) ID ?W? ?(NO)? ?[1-9]+.*|DOUBLE ?(PLE?A?S?E?)? ?(USE?|WITH|OF).*|NOT VALID.*|PLEASE ?USE ?W? ?[1-9]+.*|(PLE?A?S?E?)? DO ?NOT USE.*|USE NOW ID*|PLS USE.*|DOUBLE.*USE.*[0-9]+?.*|DOUBLE$","")
   r$norm_name <-stringr::str_replace_all(r$norm_name,"\\n"," ")
