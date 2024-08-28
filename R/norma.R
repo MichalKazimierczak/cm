@@ -81,7 +81,7 @@ norma<-function(r,name,country,key,new_col=T,short=T,translit=T,legal=T){
 
   if(nrow(re)!=0)
   {
-    re$norm_name <-stringi::stri_trans_general(r[,name], "latin-ascii; upper")
+    re$norm_name <-stringi::stri_trans_general(re[,name], "latin-ascii; upper")
     re$norm_name <-stringi::stri_enc_toutf8(re$norm_name)
     re$norm_name <-stringr::str_replace_all(re$norm_name,"[^a-zA-Z0-9]"," ")
     re$norm_name <-stringr::str_replace_all(re$norm_name,"W UPADLOSCI (LIKWIDACYJNEJ)?|W LIKWIDACJI","")
