@@ -81,7 +81,15 @@ norma<-function(r,name,country,key,new_col=T,short=T,translit=T,legal=T){
 
   if(nrow(re)!=0)
   {
-    re<-norma(re,name,country,key,new_col=T,short=F,translit=F,legal=F)
+    re$norm_name <-stringi::stri_trans_general(r[,name], "latin-ascii; upper")
+    re$norm_name <-stringi::stri_enc_toutf8(re$norm_name)
+    re$norm_name <-stringr::str_replace_all(re$norm_name,"[^a-zA-Z0-9]"," ")
+    re$norm_name <-stringr::str_replace_all(re$norm_name,"W UPADLOSCI (LIKWIDACYJNEJ)?|W LIKWIDACJI","")
+    re$norm_name <-stringr::str_replace_all(re$norm_name,"CREDIT NEEDED|DOUBLE DO ?NOT.*|(DOUBLE)? ?(PLE?A?S?E?)? ?(USE?|WITH|OF) ID ?W? ?(NO)? ?[1-9]+.*|DOUBLE ?(PLE?A?S?E?)? ?(USE?|WITH|OF).*|NOT VALID.*|PLEASE ?USE ?W? ?[1-9]+.*|(PLE?A?S?E?)? DO ?NOT USE.*|USE NOW ID*|PLS USE.*|DOUBLE.*USE.*[0-9]+?.*|DOUBLE$","")
+    re$norm_name <-stringr::str_replace_all(re$norm_name,"\\n"," ")
+    re$norm_name <-stringr::str_replace_all(re$norm_name,"\\t"," ")
+    re$norm_name <-stringr::str_replace_all(re$norm_name,"\\s+"," ")
+    re$norm_name <-stringr::str_trim(re$norm_name)
     rf<-r[r$norm_name!="",]
     r<-plyr::rbind.fill(re,rf)
   }
