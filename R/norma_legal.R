@@ -97,7 +97,7 @@ norma_legal <- function(r,name,country){
 
       ###replace legal form expression from the name
       cd[,name]<-ifelse(stringr::str_detect(cd[,name],as.character(cw[n,"to.replace"])),
-                        stringr::str_replace(cd[,name],as.character(cw[n,"to.replace"])," "),
+                        stringr::str_replace(cd[,name],as.character(cw[n,"to.replace"]),cw[n,"replacement"]),
                         cd[,name])
 
     }
