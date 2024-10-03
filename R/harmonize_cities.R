@@ -17,8 +17,6 @@
 #' @examples
 #' @export
 
-harmonize_cities(r,orb_city,euipo_city,"AT")
-
 
 harmonize_cities<-function(r,city_a,city_b,cc){
   data(cities)
