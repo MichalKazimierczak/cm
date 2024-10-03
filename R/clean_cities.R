@@ -17,12 +17,12 @@
 #' @examples
 #' @export
 
-r<-d
+harmonize_cities(r,orb_city,euipo_city,"AT")
 
 
 harmonize_cities<-function(r,city_a,city_b,cc){
   data(cities)
-  citiesc<-cities[cities$Country.Code=cc,]
+  citiesc<-cities[cities$Country.Code==cc,]
   r$norm_city_a<-""
   r$norm_city_b<-""
   for (i in 1:nrow(citiesc)){
