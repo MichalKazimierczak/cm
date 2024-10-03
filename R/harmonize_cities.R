@@ -1,5 +1,5 @@
 #' @import data.table
-
+#' @import stringr
 
 #' @title returns a dataset with ordered and ranked matches
 #'
@@ -21,12 +21,13 @@
 harmonize_cities<-function(r,city_a,city_b,cc){
   data(cities)
   citiesc<-cities[cities$Country.Code==cc,]
-  r$norm_city_a<-""
-  r$norm_city_b<-""
+  r$city_norm_a<-""
+  r$city_norm_b<-""
   for (i in 1:nrow(citiesc)){
     cit<-paste0("(^| )",as.character(citiesc[i,"Alternate.Names"]),"( |$)")
-    r$norm_city_a<-ifelse(r$norm_city_a==""&str_detect(r[,city_a],cit),as.character(citiesc[i,"ASCII.Name"]),r$city_norm_a)
-    r$norm_city_b<-ifelse(r$norm_city_b==""&str_detect(r[,city_b],cit),as.character(citiesc[i,"ASCII.Name"]),r$city_norm_b)
+    r$norm_city_a<-ifelse(r$city_norm_a==""&stringr::str_detect(r[,city_a],cit),as.character(citiesc[i,"ASCII.Name"]),r$city_norm_a)
+    r$norm_city_b<-ifelse(r$city_norm_b==""&stringr::str_detect(r[,city_b],cit),as.character(citiesc[i,"ASCII.Name"]),r$city_norm_b)
+    print(i)
   }
 
 
