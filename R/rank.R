@@ -5,31 +5,22 @@
 #' @import dplyr
 #' @import tidyr
 
-#' @title returns a disambiguate match
+#' @title returns a dataset with ordered and ranked matches
 #'
-#' @description This function is being used after the match to correct multiple matches
-#' @param r matched dataset to be disambiguated
+#' @description This function is being used after the disambiguation of matches to rank possible candidates for the match
+#' @param r cleaned dataset to be ranked
 #'
-#' @param name name of the column storing name to be transformed, it has to be a string
-#' @param country name of the column storing name of the country of seat
-#' @param key name of the column storing unique identifier of the entity
-#' @param new_col if TRUE creates new column with normalized version of the name along with the original version of the name
-#' @param short if TRUE looks for 'trading as' expressions with the name
-#' @param translit if TRUE looks for names written in cyrylic and transforms them into their latin versions
-#' @param legal if TRUE looks for legal form expressions in the name and deals with them
-#' @returns an original dataframe with two additional copies of records containing 'trading as' expression
-#' @examples df<-data.frame(name="Andrzej Beata Celina spółka z ograniczoną odpowiedzialnoscią nazwa skrócona ABC sp. z o.o. SP.J",
-#'  country="PL",key=1)
+#' @param prefer_root logical variable indicating whether the ORBIS observations with the bvd_id number without hyphen should be preferred
+#' @param bvd_is_root weight assigned to the criterion of bvd_id_number not to include hyphen
+#' @param name_sim weight assigned to the similarity of original names
+#' @param lf_sim weight assigned to the similarity of legal forms
+#' @param reg_sim weight assigned to the similarity of seat regions as shown in respective datasets
+#' @param city_sim weight assigned to the similarity of cities of seat as shown in respective datasets
+#' @param street_sim weight assigned to the similarity of cities of seat as shown in respective datasets
+#' @returns an original dataframe with ordered and ranked matched dataframe
+#' @examples
 #' @export
 
-#dfn<-norma(df,"name","country","key",new_col=T,short=T,translit=T,legal=T)
-
-bvd_is_root<-1
-name_sim<-1
-lf_sim<-1
-reg_sim<-1
-city_sim<-1
-street_sim<-4
 
 
 

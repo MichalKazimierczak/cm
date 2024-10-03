@@ -2,41 +2,33 @@
 #' @import stringdist
 #' @import stringr
 #' @import stringi
-#' @import dplyr
-#' @import tidyr
 
-#' @title returns a disambiguate match
+
+#' @title returns a disambiguated match
 #'
-#' @description This function is being used after the match to correct multiple matches
+#' @description This function is being used after the match, to correct multiple matches. It uses additional features such as
+#' original names, address and legal form information to assign similarity scores
 #' @param r matched dataset to be disambiguated
 #'
-#' @param name name of the column storing name to be transformed, it has to be a string
-#' @param country name of the column storing name of the country of seat
-#' @param key name of the column storing unique identifier of the entity
-#' @param new_col if TRUE creates new column with normalized version of the name along with the original version of the name
-#' @param short if TRUE looks for 'trading as' expressions with the name
-#' @param translit if TRUE looks for names written in cyrylic and transforms them into their latin versions
-#' @param legal if TRUE looks for legal form expressions in the name and deals with them
-#' @returns an original dataframe with two additional copies of records containing 'trading as' expression
-#' @examples df<-data.frame(name="Andrzej Beata Celina spółka z ograniczoną odpowiedzialnoscią nazwa skrócona ABC sp. z o.o. SP.J",
-#'  country="PL",key=1)
+#' @param key_a indicates the name of the variable storing the identifier of the A dataset
+#' @param key_b indicates the name of the variable storing the identifier of the B dataset
+#' @param name_a indicates the name of the variable storing the original name before the normalization as stored in dataset A
+#' @param name_b indicates the name of the variable storing the original name before the normalization as stored in dataset B
+#' @param lf_a indicates the name of the variable storing the legal forms extracted from the name of entity stored in dataset A
+#' @param lf_b indicates the name of the variable storing the legal forms extracted from the name of entity stored in dataset B
+#' @param zip_a indicates the name of the variable storing the postal codes of the entity stored in dataset A
+#' @param zip_b indicates the name of the variable storing the postal codes of the entity stored in dataset B
+#' @param city_a indicates the name of the variable storing the name of the city of the entity stored in dataset A
+#' @param city_b indicates the name of the variable storing the name of the city of the entity stored in dataset B
+#' @param zip_a indicates the name of the variable storing the postal code of the entity stored in dataset A
+#' @param zip_b indicates the name of the variable storing the postal code of the entity stored in dataset B
+#' @param street_a indicates the name of the variable storing the street address of the entity stored in dataset A
+#' @param street_b indicates the name of the variable storing the street address of the entity stored in dataset B
+#' @param orb_reg indicates the name of the variable storing the information about the region of the entity, for instance NUTS3 in Orbis
+#' @param cc indicates the name of the variable storing the information about the country code of the entity
+#' @returns an original dataframe with additional variables with similarity scores
+#' @examples
 #' @export
-
-#dfn<-norma(df,"name","country","key",new_col=T,short=T,translit=T,legal=T)
-
-setwd("Y:/ESS/IP impact/2024_firm_level/data/matched/plain/enriched")
-r<-readRDS("AT_orbis_euipo.rds")
-r$key_a<-r$bvd_id_number
-r$key_b<-r$OWNER_CODE
-r$name_a<-r$name
-r$name_b<-r$OWNER_NAME
-r$lf_a<-r$lf.x
-r$lf_b<-r$lf.y
-r$zip_a<-r$orb_postcode
-r$zip_b<-r$euipo_postcode
-r$city_a<-r$orb_city
-r$city_b<-r$euipo_city
-
 
 
 clean<-function(r,key_a,key_b,name_a,name_b,lf_a,lf_b,zip_a,zip_b,city_a,city_b,street_a,street_b,orb_reg,cc){
@@ -88,13 +80,8 @@ clean<-function(r,key_a,key_b,name_a,name_b,lf_a,lf_b,zip_a,zip_b,city_a,city_b,
 
   ###then the zip codes
   iso<-unique(data.frame(r[,"iso2"]))
-  #zip<-data.table::fread(paste0("https://gisco-services.ec.europa.eu/tercet/NUTS-2024/pc2024_",iso,"_NUTS-2024_v1.0.zip"))
   data(zip_codes)
-  zip<-data.table::fread(paste0("C:/Users/KAZIMMI/Downloads/pc2024_NUTS-2024_v2.0/",zip))
-
-
-
-
+  zip<-zips[zips$country_code==cc,]
   r<-data.frame(r)
   r<-merge(r,zip,by.x=zip_a,by.y="CODE",all.x=T)
   colnames(r)[length(r)]<-"reg_a"
