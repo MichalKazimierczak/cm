@@ -17,7 +17,7 @@
 
 
 harmonize_cities<-function(r,city_a,city_b,cc,new_col=T){
-  #data(cities)
+  data(cities)
   citiesc<-cities[cities$Country.Code==cc,]
   r[,city_a]<-stringr::str_replace_all(r[,city_a], "[^a-zA-Zα-ωΑ-Ωa-яA-Я]"," ")
   r[,city_a]<-stringr::str_replace_all(r[,city_a],"\\s+"," ")
@@ -29,11 +29,11 @@ harmonize_cities<-function(r,city_a,city_b,cc,new_col=T){
   r[,city_b]<-stringr::str_trim(r[,city_b])
   r$city_norm_a<-""
   r$city_norm_b<-""
-  # for (i in 1:nrow(citiesc)){
-  #   cit<-as.character(citiesc[i,"Alternate.Names"])
-  #   r$city_norm_a<-ifelse(r$city_norm_a==""&stringr::str_detect(r[,city_a],cit),as.character(citiesc[i,"ASCII.Name"]),r$city_norm_a)
-  #   r$city_norm_b<-ifelse(r$city_norm_b==""&stringr::str_detect(r[,city_b],cit),as.character(citiesc[i,"ASCII.Name"]),r$city_norm_b)
-  # }
+  for (i in 1:nrow(citiesc)){
+    cit<-as.character(citiesc[i,"Alternate.Names"])
+    r$city_norm_a<-ifelse(r$city_norm_a==""&stringr::str_detect(r[,city_a],cit),as.character(citiesc[i,"ASCII.Name"]),r$city_norm_a)
+    r$city_norm_b<-ifelse(r$city_norm_b==""&stringr::str_detect(r[,city_b],cit),as.character(citiesc[i,"ASCII.Name"]),r$city_norm_b)
+  }
 
   r$city_norm_a<-ifelse(r$city_norm_a=="",r[,city_a],r$city_norm_a)
   r$city_norm_b<-ifelse(r$city_norm_b=="",r[,city_b],r$city_norm_b)
