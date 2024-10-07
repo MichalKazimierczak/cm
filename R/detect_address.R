@@ -21,39 +21,46 @@ detect_address<-function(r,address,prefix,cc){
   data(cities)
 
   pcc<-pc[pc$country==cc,]
-
-  ###first look for postal codes in the address
   citiesc<-cities[cities$Country.Code==cc,]
+  zipc<-zips[zips$country_code==cc,]
+
   r[,address]<-stringr::str_replace_all(r[,address], "[^a-zA-Zα-ωΑ-Ωa-яA-Я0-9]"," ")
   r[,address]<-stringr::str_replace_all(r[,address],"\\s+"," ")
-  zip<-stringr::str_extract(r[,address],paste0("(?:^| )?[A-Z]?(?:-| )?",pcc$expres))
   r[,address]<-stringr::str_replace(r[,address],paste0("(?:^| )?[A-Z]?(?:-| )?",pcc$expres),"")
+
+  ###first look for postal codes in the address
+  zip<-stringr::str_extract(r[,address],paste0("(?:^| )?[A-Z]?(?:-| )?",pcc$expres))
+  r[,address]<-str_replace(r[,address],paste0("(?:^| )?[A-Z]?(?:-| )?",pcc$expres)," ")
   zip<-stringr::str_replace(zip,paste0("(?:^| )?[A-Z]?(?:-| )?",pcc$expres),pcc$forma)
   zip<-ifelse(is.na(zip),"",zip)
 
-
   ####Now add information about the region based on extracted postal codes
-  zipc<-zips[zips$country_code==cc,]
   for (i in 1:nrow(zipc)){
     z<-zipc[i,]
     reg<-ifelse(stringr::str_detect(zip,z$CODE),z$NUTS3,"")
   }
 
   ####Finally detect city information in address
-  r[,address]<-stringr::str_replace_all(r[,address], "[^a-zA-Zα-ωΑ-Ωa-яA-Я0-9]"," ")
-  r[,address]<-stringr::str_replace_all(r[,address],"\\s+"," ")
-  r[,address]<-stringi::stri_trans_general(r[,address], "latin-ascii; upper")
-
   citiesc<-cities[cities$Country.Code==cc,]
-  city<-rep("",nrow(r))
+  r$city<-rep("",nrow(r))
 
   for (i in 1:nrow(citiesc)){
     cit<-as.character(citiesc[i,"Alternate.Names"])
-    r$city<-ifelse(r$city==""&stringr::str_detect(r[,address],cit),as.character(citiesc[i,"ASCII.Name"]),r$city)
+    r$miasto<-ifelse(r$city==""&stringr::str_detect(r[,address],cit),cit,"")
+    r$city<-ifelse(r$miasto!="",as.character(citiesc[i,"ASCII.Name"]),r$city)
+    r[,address]<-ifelse(r$miasto!="",str_replace(r[,address],r$miasto,""),r[,address])
+    r$miasto==""
   }
+  ####Now create a vector for street information
+
 
   r[,paste0(prefix,"_zip")]<-zip
   r[,paste0(prefix,"_region")]<-reg
   r[,paste0(prefix,"_city")]<-r$city
+  r[,paste0(prefix,"_street")]<-r[,address]
+
+  r$miasto<-NULL
+  r$city<-NULL
+
   return(r)
 }
