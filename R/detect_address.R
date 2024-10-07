@@ -25,8 +25,9 @@ detect_address<-function(r,address,prefix,cc){
   zipc<-zips[zips$country_code==cc,]
 
   r[,address]<-stringr::str_replace_all(r[,address], "[^a-zA-Zα-ωΑ-Ωa-яA-Я0-9]"," ")
+  r[,address]<-stringr::str_replace_all(r[,address],"CEDEX"," ")
   r[,address]<-stringr::str_replace_all(r[,address],"\\s+"," ")
-  r[,address]<-stringi::stri_trans_general(n$noa_city, "latin-ascii; upper")
+  r[,address]<-stringi::stri_trans_general(r[,address], "latin-ascii; upper")
 
   ###first look for postal codes in the address
   zip<-stringr::str_extract(r[,address],paste0("(?:^| )?[A-Z]?(?:-| )?",pcc$expres))
