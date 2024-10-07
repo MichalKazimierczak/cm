@@ -79,8 +79,8 @@ clean<-function(r,key_a,key_b,name_a,name_b,lf_a,lf_b,zip_a,zip_b,city_a,city_b,
   r$street_sim<-ifelse(is.na(r$street_sim),0,r$street_sim)
 
   ###then the zip codes
-  r$reg_a<-reg_detect_region(zip_a,cc)
-  r$reg_b<-reg_detect_region(zip_b,cc)
+  r$reg_a<-detect_region(zip_a,cc)
+  r$reg_b<-detect_region(zip_b,cc)
   # iso<-unique(data.frame(r[,"iso2"]))
   # data(zip_codes)
   # zip<-zips[zips$country_code==cc,]
