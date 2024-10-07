@@ -13,16 +13,16 @@
 
 
 
-detect_region<-function(zip,cc){
+detect_region<-function(pc,cc){
   data(zip_codes)
   zipc<-zips[zips$country_code==cc,]
 
-  r<-rep("",length(zip))
+  reg<-rep("",length(pc))
 
   for (i in 1:nrow(zipc)){
     z<-zipc[i,]
-    r<-ifelse(stringr::str_detect(zip,z$CODE),paste(r,z$NUTS3,sep=", "),r)
+    reg<-ifelse(stringr::str_detect(pc,z$CODE),paste(reg,z$NUTS3,sep=", "),reg)
   }
-  r<-str_remove(r,"^\\, ")
-  return(r)
+  reg<-str_remove(reg,"^\\, ")
+  return(reg)
 }
