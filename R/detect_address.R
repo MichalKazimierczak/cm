@@ -11,18 +11,17 @@
 #'
 #'along with the original version of the name
 #' @returns an original dataframe with ordered and ranked matched dataframe
-#' @examples
-#' @export
+
+
 
 
 detect_address<-function(r,address,prefix,cc){
   data(postal_codes_regex)
-  data(zip_codes)
   data(cities)
-
+  r<-data.frame(r)
   pcc<-pc[pc$country==cc,]
   citiesc<-cities[cities$Country.Code==cc,]
-  zipc<-zips[zips$country_code==cc,]
+
 
   r[,address]<-stringr::str_replace_all(r[,address], "[^a-zA-Zα-ωΑ-Ωa-яA-Я0-9]"," ")
   r[,address]<-stringr::str_replace_all(r[,address],"CEDEX"," ")
@@ -35,15 +34,9 @@ detect_address<-function(r,address,prefix,cc){
   zip<-stringr::str_replace(zip,paste0("(?:^| )?[A-Z]?(?:-| )?",pcc$expres),pcc$forma)
   zip<-ifelse(is.na(zip),"",zip)
 
-  ####Now add information about the region based on extracted postal codes
-  for (i in 1:nrow(zipc)){
-    z<-zipc[i,]
-    reg<-ifelse(stringr::str_detect(zip,z$CODE),z$NUTS3,"")
-  }
-
   ####Finally detect city information in address
   citiesc<-cities[cities$Country.Code==cc,]
-  r$city<-rep("",nrow(r))
+  r$city<-""
 
   for (i in 1:nrow(citiesc)){
     cit<-as.character(citiesc[i,"Alternate.Names"])
