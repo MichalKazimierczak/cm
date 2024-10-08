@@ -83,6 +83,7 @@ clean<-function(r,key_a,key_b,name_a,name_b,lf_a,lf_b,zip_a,zip_b,city_a,city_b,
   cc<-unique(r[,cc])
   r$reg_a<-detect_region(r[,zip_a],cc)
   r$reg_b<-detect_region(r[,zip_b],cc)
+  r$reg_a<-ifelse(r$reg_a=="",r[,orb_reg],r$reg_a)
   # iso<-unique(data.frame(r[,"iso2"]))
   # data(zip_codes)
   # zip<-zips[zips$country_code==cc,]
@@ -98,12 +99,10 @@ clean<-function(r,key_a,key_b,name_a,name_b,lf_a,lf_b,zip_a,zip_b,city_a,city_b,
 
   ####As there may be some old postcodes that are no longer associated with regions, we give the possibility to assign
   ###True to region similarity if two entities have the same postal code
-  r$reg_sim<-ifelse(!r$reg_sim&
-                      !is.na(r[,zip_a])&
-                      !is.na(r[,zip_b])&
+  r$reg_sim<-ifelse(!is.na(r[,zip_a])&!is.na(r[,zip_b])&
                       r[,zip_a]==r[,zip_b],
                     T,
-                    F)
+                    r$reg_sim)
 
   #
   # # ###at the end apply some weights to allow for evaluation of the distances
