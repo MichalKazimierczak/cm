@@ -12,7 +12,6 @@
 #' @returns an original dataframe with a column describing region added
 
 
-
 detect_region<-function(pc,cc){
   data(zip_codes)
   zipc<-zips[zips$country_code==cc,]
@@ -20,9 +19,8 @@ detect_region<-function(pc,cc){
   reg<-rep("",length(pc))
 
   for (i in 1:nrow(zipc)){
-    z<-zipc[i,]
-    reg<-ifelse(stringr::str_detect(pc,z$CODE),paste(reg,z$NUTS3,sep=", "),reg)
+    reg<-ifelse(stringr::str_detect(pc,zipc[i,"CODE"]),paste(reg,zipc[i,"NUTS3"],sep=", "),reg)
   }
-  reg<-str_remove(reg,"^\\, ")
+  reg<-stringr::str_remove(reg,"^\\, ")
   return(reg)
 }
