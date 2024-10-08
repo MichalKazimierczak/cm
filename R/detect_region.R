@@ -11,7 +11,6 @@
 #'along with the original version of the name
 #' @returns an original dataframe with a column describing region added
 
-
 detect_region<-function(pc,cc){
   data(zip_codes)
   zipc<-zips[zips$country_code==cc,]
