@@ -49,7 +49,6 @@ detect_address<-function(r,address,prefix,cc){
 
 
   r[,paste0(prefix,"_zip")]<-zip
-  r[,paste0(prefix,"_region")]<-reg
   r[,paste0(prefix,"_city")]<-r$city
   r[,paste0(prefix,"_street")]<-r[,address]
 
