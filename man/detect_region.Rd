@@ -4,16 +4,16 @@
 \alias{detect_region}
 \title{returns a dataset enriched with additional variables indicating region in the country}
 \usage{
-detect_region(zip, cc)
+detect_region(pc, cc)
 }
 \arguments{
-\item{zip}{name of the column containing zip code}
-
 \item{cc}{indicates a code of a country where the cities A and B are located
 
 along with the original version of the name}
 
 \item{r}{a dataset containing a column with a zip code}
+
+\item{zip}{name of the column containing zip code}
 }
 \value{
 an original dataframe with a column describing region added
