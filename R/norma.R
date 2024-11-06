@@ -27,7 +27,7 @@ norma<-function(r,name,country,key,new_col=T,short=T,translit=T,legal=T){
   ##or to transform the column which stored the original name
   r<-data.frame(r)
   r$norm_name<-r[,name]
-  rt<-r[r[,country]%in%c("BG","CY","GR")&!stringr::str_detect(r[,name],"[A-Z]"),]
+  rt<-r[r[,country]%in%c("BG","CY","GR")&stringr::str_detect(r[,name],"[α-ωΑ-Ωa-яA-Я]"),]
   r<-r[!r[,key]%in%rt[,key],]
   if(translit==T&nrow(rt)>0){
     for (t in unique(rt[,country]))
