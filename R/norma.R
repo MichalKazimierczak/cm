@@ -46,6 +46,7 @@ norma<-function(r,name,country,key,new_col=T,short=T,translit=T,legal=T){
   r$norm_name <-stringr::str_replace_all(r$norm_name,"\\n"," ")
   r$norm_name <-stringr::str_replace_all(r$norm_name,"\\t"," ")
   r$norm_name <-stringr::str_replace_all(r$norm_name,"\\s+"," ")
+  r$norm_name<-str_replace_all(r$norm_name,"\\\\","")
   r$norm_name <-stringr::str_trim(r$norm_name)
 
 
