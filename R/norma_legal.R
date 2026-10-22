@@ -76,14 +76,14 @@ norma_legal <- function(r,name,country){
 
       for (n in 1:nrow(co))
       {
-        ###create a new column with standardized legal form information in case we found legal form expression
-        cd$lf<-ifelse(stringr::str_detect(cd[,name],as.character(co[n,"to.replace"])),
-                      paste(cd$lf,co[n,"replacement"],"; "),
-                      cd$lf)
+        ###detect the legal form expression once and change only the names where it was found
+        found<-stringr::str_detect(cd[,name],as.character(co[n,"to.replace"]))
+        cd$lf[is.na(found)]<-NA
+        hit<-which(found)
+        ###add the standardized legal form to lf
+        cd$lf[hit]<-paste(cd$lf[hit],co[n,"replacement"],"; ")
         ###replace legal form expression from the name
-        cd[,name]<-ifelse(stringr::str_detect(cd[,name],as.character(co[n,"to.replace"])),
-                          stringr::str_replace(cd[,name],as.character(co[n,"to.replace"])," "),
-                          cd[,name])
+        cd[hit,name]<-stringr::str_replace(cd[hit,name],as.character(co[n,"to.replace"])," ")
 
       }
 
@@ -95,10 +95,8 @@ norma_legal <- function(r,name,country){
     for (n in 1:nrow(cw))
     {
 
-      ###replace legal form expression from the name
-      cd[,name]<-ifelse(stringr::str_detect(cd[,name],as.character(cw[n,"to.replace"])),
-                        stringr::str_replace(cd[,name],as.character(cw[n,"to.replace"]),cw[n,"replacement"]),
-                        cd[,name])
+      ###replace weak words in the name (str_replace leaves names without a match unchanged)
+      cd[,name]<-stringr::str_replace(cd[,name],as.character(cw[n,"to.replace"]),cw[n,"replacement"])
 
     }
     r<-rbind(r,cd)
