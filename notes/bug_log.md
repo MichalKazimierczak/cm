@@ -63,7 +63,9 @@ Priority: ⏫ changes match results, 🔼 can crash or corrupt your session, �
 	- Tested: `get(key_a)` inside `data.table` finds the column, not the argument: "invalid first argument".
 	- Fix: `data.table(d)[, .(n = uniqueN(.SD[[1]])), by = key_b, .SDcols = key_a]`, or base R `tapply`.
 - [ ] 🔼 `harmonize_cities`: wrong name for the new columns ➕ 2026-10-22
-	- From the code: `str_detect(city_a, colnames(r))` has its arguments swapped; it selects every column whose name appears inside `city_a`. With columns `city` and `city_a`, or a column `a`, the names come out wrong.
+	- Tested: `str_detect(city_a, colnames(r))` has its arguments swapped; it selects every column whose name appears inside `city_a`, and the first one gives the name.
+	- With columns `city` and `city_orbis`, both new columns are named `city_harmonized`; `r$city_harmonized` then returns only the first, so the second is silently lost, and a later `clean(..., "city_harmonized", "city_harmonized", ...)` would compare a column with itself (city similarity 1 for every pair).
+	- With an extra column `a` (before `city_a`), the new column is named `a_harmonized`. The only sign is the warning "number of items to replace is not a multiple of replacement length".
 	- Fix: `paste0(city_a, "_harmonized")`.
 - [ ] 🔼 `detect_address`: deletes your columns named `city` or `miasto` ➕ 2026-10-22
 	- From the code: it uses both as scratch columns and removes them at the end.
