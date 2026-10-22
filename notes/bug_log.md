@@ -54,6 +54,28 @@ Priority: ⏫ changes match results, 🔼 can crash or corrupt your session, �
 	- 0.1.0 read `[A ]` as a regex class, so `WIRZIBURG [A ]` matched only "WIRZIBURG A", never "WIRZIBURG".
 	- Fixed in commit `a9ed7bf`: `city_lookup()` keeps the name before the note and drops the `[IPA]` entry; `detect_address()` removes the matched key. About 90 old spellings now match. Three stripped names already exist as plain names (BUCKEBORCH, same city; NIENHAGEN and BARDORP, other cities listed earlier, which keep priority).
 
+- [ ] ⏫ `detect_region`: a postal code is found inside longer numbers and words ➕ 2026-10-22
+	- Tested on the real list: `556269` gives `DEB15, DEB18` (contains `55626` and `56269`); `647119` gives `DE71B, DEA12`; `803312` gives `DE212`; NL `1012 ABC` gives `NL32B` (contains `1012 AB`). House or phone numbers in a zip column can give wrong regions.
+	- Cause: the code is searched anywhere in the value, as `str_detect()` did in 0.1.0.
+	- Proposed fix (in the loop over code lengths): a piece counts only when the character before and after it is not of the same kind (digit or letter) as the code's first and last character:
+		```r
+		piece<-substr(u[id],st,st+len-1)
+		kind<-function(x) ifelse(grepl("[0-9]",x),"digit",ifelse(grepl("[A-Z]",x),"letter","other"))
+		before<-kind(substr(u[id],st-1,st-1))
+		after<-kind(substr(u[id],st+len,st+len))
+		alone<-before!=kind(substr(piece,1,1)) & after!=kind(substr(piece,len,len))
+		m<-match(piece,names(rows))
+		m[!alone]<-NA
+		```
+	- Trial (not committed): `80331`, `D-80331`, `D80331`, `PLZ:80331`, `80331 Muenchen`, `1012 AB`, `NL-1012 AB` keep their region; `803312`, `556269`, `1012 ABC` give `""`. The 0.1.0 fixtures for DE, CY and PL do not change.
+	- Make together with the two tasks below; add tests for `803312`, `556269` and `1012 ABC`, and a NEWS entry.
+- [ ] 🔼 `detect_region`: the same region is pasted twice ➕ 2026-10-22
+	- Tested: `80331 80333` gives `DE212, DE212` (two codes, one region).
+	- Proposed fix: keep each region once per value (`unique()` on the regions before `paste`).
+- [ ] 🔼 `detect_region`: Dutch codes written without the space are not found ➕ 2026-10-22
+	- Tested: `1012AB` gives `""`; the list stores `1012 AB`.
+	- Proposed fix: for NL, insert the space before the lookup (`1012AB` → `1012 AB`), for example `stringr::str_replace_all(u,"\\b([0-9]{4}) ?([A-Z]{2})\\b","\\1 \\2")`. Check that `1012 ABC` still gives `""`.
+
 ## Can crash or corrupt your session
 
 - [ ] 🔼 All functions that call `data()`: package data overwrite objects in your global environment ➕ 2026-10-22
