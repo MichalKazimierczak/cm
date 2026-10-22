@@ -48,6 +48,12 @@ Priority: ⏫ changes match results, 🔼 can crash or corrupt your session, �
 - [ ] 🔽 `nmatch`: words are pasted without a separator ➕ 2026-10-22
 	- `"AB C"` and `"A BC"` get the same key `ABC`. Decide whether this is wanted (it catches spacing variants) or use `collapse = " "`.
 
+- [x] ⏫ `cities` / city lookup: notes such as `[A ]` in historical names were read as regex ➕ 2026-10-22 ✅ 2026-10-22
+	- Tested: 94 German alternate names end in a note: `[A ]` (88), `[ A ]`, `[~ A ]`, `[~A ]` and `[IPA]`; for example `WIRZIBURG [A ]` (Wuerzburg), `GERSBEKE[A ]` (Gorsbach), `LEIVƏNƆ: [IPA]` (Liebenau).
+	- Probably "[a. 704]" (*anno*) or "[~a. 1000]" with digits and full stop removed when the list was cleaned; not confirmed against the source.
+	- 0.1.0 read `[A ]` as a regex class, so `WIRZIBURG [A ]` matched only "WIRZIBURG A", never "WIRZIBURG".
+	- Fixed in commit `a9ed7bf`: `city_lookup()` keeps the name before the note and drops the `[IPA]` entry; `detect_address()` removes the matched key. About 90 old spellings now match. Three stripped names already exist as plain names (BUCKEBORCH, same city; NIENHAGEN and BARDORP, other cities listed earlier, which keep priority).
+
 ## Can crash or corrupt your session
 
 - [ ] 🔼 All functions that call `data()`: package data overwrite objects in your global environment ➕ 2026-10-22
@@ -80,7 +86,7 @@ Priority: ⏫ changes match results, 🔼 can crash or corrupt your session, �
 - [ ] 🔽 `@return` texts copied from `rankmatch` ("ordered and ranked matched dataframe") in `harmonize_cities`, `detect_address` and others ➕ 2026-10-22
 - [ ] 🔽 `detect_address` and `detect_region` are not exported; decide whether they are internal ➕ 2026-10-22
 - [ ] 🔽 Document the datasets in `R/data.R` (`@format`, `@source`, version of GeoNames and NUTS) ➕ 2026-10-22
-- [ ] 🔽 `cities` data: 2,272 keys point to more than one city in the same country (AT `ALTENMARKT`: 4) and the first row wins silently; some entries are junk (a Wikipedia URL, regex classes such as `[A ]`) ➕ 2026-10-22
+- [ ] 🔽 `cities` data: 2,272 keys point to more than one city in the same country (AT `ALTENMARKT`: 4) and the first row wins silently; some entries are junk (a Wikipedia URL) ➕ 2026-10-22
 - [ ] 🔽 The regexes need a UTF-8 R session (Greek and Cyrillic ranges); R 4.2 or later on Windows is UTF-8. Say so in the README, or write the ranges as `\\u` escapes ➕ 2026-10-22
 - [ ] 🔽 `norma_trans`: `if(nrow(r_trans!=0))` has the bracket in the wrong place; it works by accident ➕ 2026-10-22
 - [ ] 🔽 `clean`: the `ifelse(is.na(...))` lines for `city_sim` and `street_sim` appear twice ➕ 2026-10-22

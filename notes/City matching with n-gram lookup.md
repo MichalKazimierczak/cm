@@ -165,11 +165,13 @@ This works because the rule never changes and `match()` never removes names from
 `harmonize_cities()` also cleans and looks up each **distinct** string only once, then maps the result
 back to the rows with `match()`.
 
-## Details that keep the output identical to the old loop
+## Details that keep the output identical to the old loop (with one deliberate change)
 
 - **Duplicate keys**: when the same key appears on several rows, only the first row is kept.
-- **Regex classes in keys**: 94 patterns end in a class such as `[A ]` or `[IPA]`; `city_lookup()` writes
-  one key per letter (`FOO [IPA]` → `FOO I`, `FOO P`, `FOO A`).
+- **Notes in historical names** (changed on purpose, not identical to 0.1.0): 94 German alternate names end
+  in a note such as `[A ]` (probably "[a. 704]" with the date removed). `city_lookup()` keeps the name
+  before the note (`WIRZIBURG [A ]` → `WIRZIBURG`) and drops the one `[IPA]` transcription. 0.1.0 read
+  the note as a regex class. See [[bug_log|CleanMatch bug log]].
 - **Spaces**: in `detect_address()`, double or edge spaces give empty words, which never equal a key,
   just as the regex would not match across them.
 - **No match**: `city_match()` returns `NA`; `harmonize_cities()` then keeps the cleaned name.
