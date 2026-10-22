@@ -1,7 +1,8 @@
 #' Build a lookup table from the city patterns of one country
 #'
 #' Every pattern in `cities` has the form "(^| )NAME( |$)": NAME must appear as a run of whole words.
-#' The table keeps NAME as a plain key, with the row of `citiesc` it came from. Each row gives at most one key.
+#' The table keeps NAME as a plain key, with the row of `citiesc` it came from. Each row gives at most one
+#' key.
 #' @param citiesc rows of `cities` for one country, in their original order
 #' @returns a list with the keys, their rows in `citiesc` and the largest number of words in a key
 #' @noRd
@@ -24,8 +25,9 @@ city_lookup<-function(citiesc){
 #' Find the first matching city pattern for each string
 #'
 #' Gives the same result as testing the patterns of `citiesc` one by one, in order, and keeping the first
-#' that matches (with the notes removed by city_lookup()). Each string is split into words and every run of consecutive words (an n-gram) is looked up
-#' in the table. Of all hits, the one with the lowest row in `citiesc` wins.
+#' that matches (with the notes removed by city_lookup()). Each string is split into words and every run
+#' of consecutive words (an n-gram) is looked up in the table. Of all hits, the one with the lowest row in
+#' `citiesc` wins.
 #' @param u distinct strings to look up, without NA
 #' @param lk the table returned by city_lookup()
 #' @returns for each string, the row of the matching city in `citiesc`, or NA when nothing matches
@@ -42,7 +44,7 @@ city_match<-function(u,lk){
   hit_id<-integer(0)
   hit_row<-integer(0)
   for(n in seq_len(lk$max_words)){
-    ###extend each n-gram by the next word; keep only the n-grams that stay inside their string
+    ###add the word that follows each n-gram; keep only the n-grams that stay inside their string
     if(n>1) gram<-paste(gram,c(word[-seq_len(n-1)],rep("",n-1)))
     ok<-pos+n-1<=last
     if(!any(ok)) break
