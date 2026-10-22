@@ -36,15 +36,18 @@ detect_address<-function(r,address,prefix,cc){
 
   ####Finally detect city information in address
   citiesc<-cities[cities$Country.Code==cc,]
-  r$city<-""
-
-  for (i in 1:nrow(citiesc)){
-    cit<-as.character(citiesc[i,"Alternate.Names"])
-    r$miasto<-ifelse(r$city==""&stringr::str_detect(r[,address],cit),cit,"")
-    r$city<-ifelse(r$miasto!="",as.character(citiesc[i,"ASCII.Name"]),r$city)
-    r[,address]<-ifelse(r$miasto!="",str_replace(r[,address],r$miasto,""),r[,address])
-    r$miasto==""
-  }
+  ###look each distinct address up once (see city_match()), then remove the matched city from it
+  u<-unique(r[,address])
+  u<-u[!is.na(u)]
+  m<-city_match(u,city_lookup(citiesc))
+  hit<-which(!is.na(m))
+  city<-rep("",length(u))
+  city[hit]<-as.character(citiesc$ASCII.Name[m[hit]])
+  rest<-u
+  rest[hit]<-stringr::str_replace(u[hit],as.character(citiesc$Alternate.Names[m[hit]]),"")
+  i<-match(r[,address],u)
+  r$city<-city[i]
+  r[,address]<-rest[i]
   ####Now create a vector for street information
 
 
