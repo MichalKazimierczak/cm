@@ -18,28 +18,18 @@ nmatch<-function(a,b,aname,bname,sort=T,unique=T){
   ###More than one standards per country are possible. This will multiply rows by number of
   ###standards use to transliterate names
 
-  an<-a[,aname]
-  bn<-b[,bname]
-
-  an<-stringr::str_split(an,"\\s")
-  bn<-stringr::str_split(bn,"\\s")
-
-
-  if(sort==T){
-    an<-lapply(an,sort)
-    bn<-lapply(bn,sort)
+  ###build the key once per distinct name, in one pass: split into words, sort, drop repeated words, paste
+  key<-function(x){
+    u<-base::unique(x)
+    k<-vapply(stringr::str_split(u,"\\s"),function(w){
+      if(sort==T) w<-base::sort(w)
+      if(unique==T) w<-stringi::stri_unique(w)
+      paste(w,collapse="")
+    },"")
+    k[match(x,u)]
   }
-
-  an<-lapply(an,function(x) unlist(x))
-  bn<-sapply(bn,function(x) unlist(x))
-
-  if (unique==T){
-    an<-lapply(an, function(x) stringi::stri_unique(x))
-    bn<-lapply(bn, function(x) stringi::stri_unique(x))
-  }
-
-  an<-sapply(an, function(x) paste(x,collapse=""))
-  bn<-sapply(bn, function(x) paste(x,collapse=""))
+  an<-key(a[,aname])
+  bn<-key(b[,bname])
 
   a[,aname]<-NULL
   b[,bname]<-NULL
