@@ -39,12 +39,14 @@ detect_address<-function(r,address,prefix,cc){
   ###look each distinct address up once (see city_match()), then remove the matched city from it
   u<-unique(r[,address])
   u<-u[!is.na(u)]
-  m<-city_match(u,city_lookup(citiesc))
+  lk<-city_lookup(citiesc)
+  m<-city_match(u,lk)
   hit<-which(!is.na(m))
   city<-rep("",length(u))
   city[hit]<-as.character(citiesc$ASCII.Name[m[hit]])
   rest<-u
-  rest[hit]<-stringr::str_replace(u[hit],as.character(citiesc$Alternate.Names[m[hit]]),"")
+  ###remove the matched key as a whole-word pattern, as in cities$Alternate.Names
+  rest[hit]<-stringr::str_replace(u[hit],paste0("(^| )",lk$key[match(m[hit],lk$row)],"( |$)"),"")
   i<-match(r[,address],u)
   r$city<-city[i]
   r[,address]<-rest[i]

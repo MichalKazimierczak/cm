@@ -11,3 +11,14 @@ test_that("harmonize_cities prefers official names, then longer names", {
   expect_equal(harmonize_cities(r[1, ], "a", "b", "DE")$a_harmonized, "MUNICH")
   expect_equal(harmonize_cities(r[2:3, ], "a", "b", "FR")$a_harmonized, c("PARIS", "XYZ"))
 })
+
+test_that("historical names with a note such as [A ] match without the note", {
+  r <- data.frame(a = c("Wirziburg", "Gersbeke", "Bardorpe"), b = "", stringsAsFactors = FALSE)
+  expect_equal(harmonize_cities(r, "a", "b", "DE")$a_harmonized, c("WUERZBURG", "GORSBACH", "BAHRDORF"))
+})
+
+test_that("city_lookup drops IPA transcriptions and keeps no bracket notes", {
+  lk <- city_lookup(as.data.frame(cities[cities$Country.Code == "DE", ]))
+  expect_false(any(grepl("[", lk$key, fixed = TRUE)))
+  expect_false(any(grepl("LEIV", lk$key)))
+})

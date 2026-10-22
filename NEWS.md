@@ -1,5 +1,12 @@
 # CleanMatch (development version)
 
+## Changes that affect results
+
+* `harmonize_cities()` and `detect_address()` now match 91 historical German city names that end in
+  a note in `cities`, such as `WIRZIBURG [A ]` for Wuerzburg (probably "[a. 704]" with the date
+  removed). 0.1.0 read the note as a regex class and matched only "WIRZIBURG A". The note is now
+  dropped, and the one phonetic transcription marked `[IPA]` (Liebenau) is no longer used.
+
 ## Performance
 
 These changes keep the output of 0.1.0; the tests in `tests/testthat/` check it.
