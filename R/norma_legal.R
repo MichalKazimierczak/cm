@@ -13,7 +13,8 @@
 #' @export
 
 norma_legal <- function(r,name,country){
-  x<-r
+  ###work on a plain data frame, so that tibbles and data.tables work too
+  x<-as.data.frame(r)
   ###Pre clean data before cleaning legal forms
   x[,name] <- stringr::str_replace_all(x[,name],"GESELL?SC?HAFT"," GESELLSCHAFT")
   x[,name] <- stringr::str_replace_all(x[,name],"(GESELL?SC?HAFT (?:FUE?R|ZUE?R)?)?(.*)(GES M B H|GES MBH|GESMBH|G ?M ?B ?H)","\\2  GMBH")

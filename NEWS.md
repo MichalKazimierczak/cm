@@ -116,6 +116,10 @@
 
 ## Bug fixes
 
+* All functions that take a table accept tibbles and data.tables as well as data frames; they return a data
+  frame. `harmonize_cities()`, `nmatch()`, `norma_short()`, `norma_legal()` and `norma_trans()` failed or gave
+  wrong results with them. Column names that are not syntactic R names (`city (old)`) are kept as they are.
+
 * `rankmatch()` works without a `bvd_is_root` column (an Orbis field no CleanMatch function creates): the term
   is left out of the score, `prefer_root` has no effect, and a message says so. Before, the score could not
   be computed.

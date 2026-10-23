@@ -14,6 +14,8 @@
 
 
 harmonize_cities<-function(r,city_a,city_b,cc,new_col=T){
+  ###work on a plain data frame, so that tibbles and data.tables work too
+  r<-as.data.frame(r)
   cities<-CleanMatch::cities
   citiesc<-cities[cities$Country.Code==cc,]
   ###clean each distinct name once and map the result back to the rows

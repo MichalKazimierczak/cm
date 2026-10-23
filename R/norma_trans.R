@@ -11,6 +11,8 @@
 
 
 norma_trans<-function(r,name,country,key){
+  ###work on a plain data frame, so that tibbles and data.tables work too
+  r<-as.data.frame(r)
   ###This is a dataframe that stores the transliteration standards specific for a given country
   ###of seat. If you want to modify standard of transliteration, modify this dataframe.
   ###More than one standards per country are possible. This will multiply rows by number of

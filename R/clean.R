@@ -43,7 +43,8 @@ clean<-function(r,key_a,key_b,name_a,name_b,lf_a,lf_b,zip_a,zip_b,city_a,city_b,
     return (data.frame(dd))
   }
 
-  r<-data.frame(r)
+  ###work on a plain data frame, so that tibbles and data.tables work too
+  r<-as.data.frame(r)
 
 
   ###In the first step separate unique matches from the multiple matches

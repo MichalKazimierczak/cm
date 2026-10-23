@@ -15,6 +15,8 @@
 
 norma_short<- function(r,name)
 {
+  ###work on a plain data frame, so that tibbles and data.tables work too
+  r<-as.data.frame(r)
   ###phrases meaning "trading as" in different languages, one per element, joined into one pattern.
   ##Phrases that can be short or occur inside words have word boundaries (\\b), for example H O D N,
   ##which would otherwise match inside ZACHODNI or WSCHODNIA

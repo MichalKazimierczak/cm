@@ -19,7 +19,8 @@
 norma<-function(r,name,country,key,new_col=T,short=T,translit=T,legal=T){
   ###This is to account for the choice of whether to create a new column for transliterated names
   ##or to transform the column which stored the original name
-  r<-data.frame(r)
+  ###work on a plain data frame, so that tibbles and data.tables work too
+  r<-as.data.frame(r)
   r$norm_name<-toupper(r[,name])
   r$norm_name <-stringi::stri_enc_toutf8(r$norm_name)
   r$norm_name <-stringr::str_replace_all(r$norm_name,"[^\\p{Latin}\\p{Greek}\\p{Cyrillic}0-9]"," ")

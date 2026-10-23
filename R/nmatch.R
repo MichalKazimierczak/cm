@@ -17,6 +17,9 @@
 
 
 nmatch<-function(a,b,aname,bname,sort=T,unique=T){
+  ###work on a plain data frame, so that tibbles and data.tables work too
+  a<-as.data.frame(a)
+  b<-as.data.frame(b)
   ###Records of a and b match when their names give the same key (exact match): every pair of a record of a
   ###and a record of b with the same key becomes one row of the result
 

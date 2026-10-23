@@ -17,7 +17,8 @@ detect_address<-function(r,address,prefix,cc){
   ###read the package data into local variables; data() would load them into the global environment
   pc<-CleanMatch::pc
   cities<-CleanMatch::cities
-  r<-data.frame(r)
+  ###work on a plain data frame, so that tibbles and data.tables work too
+  r<-as.data.frame(r)
   pcc<-pc[pc$country==cc,]
   citiesc<-cities[cities$Country.Code==cc,]
 
