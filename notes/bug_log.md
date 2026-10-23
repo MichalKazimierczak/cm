@@ -137,7 +137,11 @@ Priority: ⏫ changes match results, 🔼 can crash or corrupt your session, �
 - [ ] 🔽 Examples: empty in `clean`, `rankmatch`, `harmonize_cities`; the others use objects that do not exist (`df`, `x`, `y`). `R CMD check` runs them ➕ 2026-10-22
 - [ ] 🔽 `@return` texts copied from `rankmatch` ("ordered and ranked matched dataframe") in `harmonize_cities`, `detect_address` and others ➕ 2026-10-22
 - [ ] 🔽 `detect_address` and `detect_region` are not exported; decide whether they are internal ➕ 2026-10-22
-- [ ] 🔽 Document the datasets in `R/data.R` (`@format`, `@source`, version of GeoNames and NUTS) ➕ 2026-10-22
+- [x] 🔽 Document the datasets in `R/data.R` (`@format`, `@source`, version of GeoNames and NUTS) ➕ 2026-10-22 ✅ 2026-10-23
+	- Written, with source and licence: `cities` (GeoNames, CC BY 4.0), `zips` (Eurostat GISCO TERCET), `pc`, `l`, `w` (own work, EUPL). README.md has a data-sources table.
+- [ ] 🔽 Fill in the placeholders in `R/data.R`, then run `roxygen2::roxygenise()` ➕ 2026-10-23
+	- `cities`: GeoNames download date and file; whether countries were selected (the data hold 26 EU countries, without Greece).
+	- `zips`: NUTS version, TERCET file version and download date; check the GISCO conditions for individual countries.
 - [ ] 🔽 `cities` data: 2,272 keys point to more than one city in the same country (AT `ALTENMARKT`: 4) and the first row wins silently; some entries are junk (a Wikipedia URL) ➕ 2026-10-22
 - [ ] 🔽 The regexes need a UTF-8 R session (Greek and Cyrillic ranges); R 4.2 or later on Windows is UTF-8. Say so in the README, or write the ranges as `\\u` escapes ➕ 2026-10-22
 - [ ] 🔽 `norma_trans`: `if(nrow(r_trans!=0))` has the bracket in the wrong place; it works by accident ➕ 2026-10-22
