@@ -143,12 +143,14 @@ Priority: ⏫ changes match results, 🔼 can crash or corrupt your session, �
 	- Proposed fix: add LI rules for `AKTIENGESELLSCHAFT|\\bAG\\b` (AG), `ANSTALT` (AST), `STIFTUNG`, `TRUST REG`, modelled on the CH and AT rules; check the order against the existing LI rules.
 	- Fixed in commit `2d2b839`: AG, AKTIENGESELLSCHAFT, STIFTUNG, ANSTALT, TRUST REG added by `data-raw/legal_forms_li.R`; test.
 
-- [ ] 🔼 **[27]** `detect_address`: street and district words that are also place names are taken as the city ➕ 2026-10-23
+- [x] 🔼 **[27]** `detect_address`: street and district words that are also place names are taken as the city ➕ 2026-10-23 ✅ 2026-10-23
 	- Tested: `ul. Lesna 50 31-123 Ploty` gives the city LESNA (the street Lesna; Lesna is also a town) instead of PLOTY; `Marienplatz 1 Muenchen Altstadt` gives ALTSTADT instead of MUNICH. With names of equal length, the larger place wins (since the rebuild of `cities`); before, whichever row came first.
 	- Proposed fix: in `detect_address()` only, prefer the match that comes last in the address (cities usually follow the street), or skip a match directly after a street word (`UL`, `STRASSE`, `RUE`, `VIA`); decide which.
-- [ ] 🔼 **[28]** Eurostat country codes `EL` (Greece) and `UK` (United Kingdom) are not accepted ➕ 2026-10-23
+	- Fixed in commit `a2d01d0`: `detect_address()` chooses the place that follows the postal code most closely (or the one just before it); without a code, a place directly after a street word (`street_words`: UL, RUE, VIA, ...) comes last. On synthetic addresses: PL 91.8% → 100%, DE 97.7% → 99.4% correct; in the test fixture 42 of 150 cities changed, all `ul. Lesna` addresses. Without a postal code a district after the city can still win (DE). Also fixed in the same commit: the country letter before a postal code took the last letter of the word in front (`LONDON SW1A 2AA` → `LONDO`, `W1A 2AA`), and `Cedex` in lower case was not removed.
+- [x] 🔼 **[28]** Eurostat country codes `EL` (Greece) and `UK` (United Kingdom) are not accepted ➕ 2026-10-23 ✅ 2026-10-23
 	- `cities` and `zip_codes` use ISO codes (`GR`, `GB`); with `EL` or `UK`, `harmonize_cities()` and `detect_address()` stop with "no cities found" and `detect_region()` finds no region. Eurostat data often use `EL` and `UK`; this may be why Greece was missing from the first city list.
 	- Proposed fix: translate `EL` to `GR` and `UK` to `GB` at the start of these functions (and in `clean()`), and say so in the help pages.
+	- Fixed in commit `a17793f`: internal `iso_country()` turns `EL` into `GR`, `UK` into `GB` and lower case into capitals; used by `harmonize_cities()`, `detect_address()`, `detect_region()` (so `clean()`), `norma_legal()`, `norma()`, `norma_trans()`; the country column itself is not changed.
 
 ## Can crash or corrupt your session
 
