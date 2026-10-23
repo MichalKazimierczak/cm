@@ -4,7 +4,8 @@
 #' A code is also found inside a longer value (\code{"D-80331"}, \code{"80331 Muenchen"}). For NL, codes written
 #' without the space or in lower case are found too (\code{"1012ab"}).
 #' @param pc vector of postal codes (or values that contain them)
-#' @param cc ISO 3166-1 code of the country of the postal codes, for example \code{DE}
+#' @param cc ISO 3166-1 code of the country of the postal codes, for example \code{DE}; Eurostat's \code{EL} and
+#' \code{UK} and lower case work too
 #' @returns a character vector as long as \code{pc}: the NUTS 3 region of each value, several separated by
 #' \code{", "} when a value contains codes of several regions, \code{""} when no code is found (also for countries
 #' without postal codes in \code{zip_codes}), \code{NA} for a missing value
@@ -15,6 +16,8 @@
 
 detect_region<-function(pc,cc){
   zips<-CleanMatch::zips
+  ###country codes as in the package data: EL (Eurostat) is GR, UK is GB, lower case accepted
+  cc<-iso_country(cc)
   zipc<-zips[zips$country_code==cc,]
 
   ###no postal codes for this country (for example CH or GB): no region, so that clean() can use its fallback

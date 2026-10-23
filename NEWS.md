@@ -127,6 +127,12 @@
 
 ## Bug fixes
 
+* Country codes may be written as Eurostat writes them: `EL` for Greece and `UK` for the United Kingdom
+  are read as `GR` and `GB`, the ISO codes of the package data, and lower case is accepted (`de`). This
+  applies to `harmonize_cities()`, `detect_address()`, `detect_region()` (and so `clean()`), and to the
+  legal forms and transliteration in `norma()`, `norma_legal()` and `norma_trans()`. Before, `EL` and
+  `UK` found no cities, regions or legal forms. The country column itself is not changed.
+
 * All functions that take a table accept tibbles and data.tables as well as data frames; they return a data
   frame. `harmonize_cities()`, `nmatch()`, `norma_short()`, `norma_legal()` and `norma_trans()` failed or gave
   wrong results with them. Column names that are not syntactic R names (`city (old)`) are kept as they are.

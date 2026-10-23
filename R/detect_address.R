@@ -9,7 +9,7 @@
 #' code and city
 #' @param prefix text put before the names of the new columns
 #' @param cc ISO 3166-1 code of the country of the addresses (as used in \code{cities}, for example \code{DE}, \code{GR},
-#' \code{GB})
+#' \code{GB}); Eurostat's \code{EL} and \code{UK} and lower case work too
 #' @details When an address holds several place names (a street named after a town, a district after the city),
 #' the city is the place that follows the postal code most closely, or the one just before the code when none
 #' follows it (\code{London SW1A 2AA}). Without a postal code, a place directly after a street word (\code{UL},
@@ -28,6 +28,8 @@ detect_address<-function(r,address,prefix,cc){
   cities<-CleanMatch::cities
   ###work on a plain data frame, so that tibbles and data.tables work too
   r<-as.data.frame(r)
+  ###country codes as in the package data: EL (Eurostat) is GR, UK is GB, lower case accepted
+  cc<-iso_country(cc)
   pcc<-pc[pc$country==cc,]
   citiesc<-cities[cities$Country.Code==cc,]
 

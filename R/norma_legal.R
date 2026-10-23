@@ -44,7 +44,10 @@ norma_legal <- function(r,name,country){
 
   ###As Benelux countries have one composed IPR register in some data sets we have to foresee special treatment of those countries,
 
-  if("BX"%in%unique(x[,country])){
+  ###country codes as in the lists: EL (Eurostat) is GR, UK is GB; the country column itself is not changed
+  ctry<-iso_country(x[,country])
+
+  if("BX"%in%ctry){
 
     lb<-l[l$Country%in%c("BE","NL","LU"),]
     lb$Country<-"BX"
@@ -61,7 +64,7 @@ norma_legal <- function(r,name,country){
   #                c("character","character","character","integer"))
 
   ###create a list of legal forms limited only to countries present in a dataset
-  lis_co <- l[l$Country%in%unique(x[,country]),]
+  lis_co <- l[l$Country%in%unique(ctry),]
   ###and then loop over all countries present in this dataset
   for (i in unique(lis_co$Country))
   {
@@ -71,7 +74,7 @@ norma_legal <- function(r,name,country){
     cw<-w[w$Country==i,]
 
     ###a dataset with observations limited to i country
-    cd<-x[which(x[,country]==i),]
+    cd<-x[which(ctry==i),]
     cd$lf<-""
     ##and a dataset for storing cleaned data for i country
     #cl<-data.frame()
@@ -109,7 +112,7 @@ norma_legal <- function(r,name,country){
   }
 
   ###keep the rows of countries without a list of legal forms, and rows without a country, with an empty legal form
-  rest<-x[!x[,country]%in%lis_co$Country,]
+  rest<-x[!ctry%in%lis_co$Country,]
   if(nrow(rest)>0){
     rest$lf<-rep("",nrow(rest))
     r<-rbind(r,rest)

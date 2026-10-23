@@ -30,7 +30,7 @@ norma<-function(r,name,country,key,new_col=T,short=T,translit=T,legal=T){
   r$norm_name<-toupper(r[,name])
   r$norm_name <-stringi::stri_enc_toutf8(r$norm_name)
   r$norm_name <-stringr::str_replace_all(r$norm_name,"[^\\p{Latin}\\p{Greek}\\p{Cyrillic}0-9]"," ")
-  rt<-r[r[,country]%in%c("BG","CY","GR")&stringr::str_detect(r[,name],"[\\p{Greek}\\p{Cyrillic}]"),]
+  rt<-r[iso_country(r[,country])%in%c("BG","CY","GR")&stringr::str_detect(r[,name],"[\\p{Greek}\\p{Cyrillic}]"),]
   r<-r[!r[,key]%in%rt[,key],]
   if(translit==T&nrow(rt)>0){
     for (t in unique(rt[,country]))

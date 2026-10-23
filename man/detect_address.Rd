@@ -15,7 +15,7 @@ code and city}
 \item{prefix}{text put before the names of the new columns}
 
 \item{cc}{ISO 3166-1 code of the country of the addresses (as used in \code{cities}, for example \code{DE}, \code{GR},
-\code{GB})}
+\code{GB}); Eurostat's \code{EL} and \code{UK} and lower case work too}
 }
 \value{
 the dataset with three new columns: \code{<prefix>_zip} (postal code, \code{""} if none found),

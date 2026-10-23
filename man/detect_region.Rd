@@ -9,7 +9,8 @@ detect_region(pc, cc)
 \arguments{
 \item{pc}{vector of postal codes (or values that contain them)}
 
-\item{cc}{ISO 3166-1 code of the country of the postal codes, for example \code{DE}}
+\item{cc}{ISO 3166-1 code of the country of the postal codes, for example \code{DE}; Eurostat's \code{EL} and
+\code{UK} and lower case work too}
 }
 \value{
 a character vector as long as \code{pc}: the NUTS 3 region of each value, several separated by

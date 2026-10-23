@@ -6,7 +6,7 @@
 #' @param city_a indicates a name of the column storing a name of city A
 #' @param city_b indicates a name of the column storing a name of city B
 #' @param cc ISO 3166-1 code of the country where the cities A and B are located (as used in \code{cities}, for
-#' example \code{DE}, \code{GR}, \code{GB})
+#' example \code{DE}, \code{GR}, \code{GB}); Eurostat's \code{EL} and \code{UK} and lower case work too
 #' @param new_col if TRUE creates new columns with normalized version of the cities A and B names
 #'along with the original version of the name, named \code{<city_a>_harmonized} and \code{<city_b>_harmonized}
 #' @returns the dataset as a data frame, with \code{city_a} and \code{city_b} cleaned (capitals, without punctuation)
@@ -22,6 +22,8 @@ harmonize_cities<-function(r,city_a,city_b,cc,new_col=T){
   ###work on a plain data frame, so that tibbles and data.tables work too
   r<-as.data.frame(r)
   cities<-CleanMatch::cities
+  ###country codes as in the package data: EL (Eurostat) is GR, UK is GB, lower case accepted
+  cc<-iso_country(cc)
   citiesc<-cities[cities$Country.Code==cc,]
   ###clean each distinct name once and map the result back to the rows
   raw<-unique(c(r[,city_a],r[,city_b]))

@@ -14,7 +14,7 @@ harmonize_cities(r, city_a, city_b, cc, new_col = T)
 \item{city_b}{indicates a name of the column storing a name of city B}
 
 \item{cc}{ISO 3166-1 code of the country where the cities A and B are located (as used in \code{cities}, for
-example \code{DE}, \code{GR}, \code{GB})}
+example \code{DE}, \code{GR}, \code{GB}); Eurostat's \code{EL} and \code{UK} and lower case work too}
 
 \item{new_col}{if TRUE creates new columns with normalized version of the cities A and B names
 along with the original version of the name, named \code{<city_a>_harmonized} and \code{<city_b>_harmonized}}
