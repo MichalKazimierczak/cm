@@ -49,7 +49,8 @@ clean(
 
 \item{street_b}{indicates the name of the variable storing the street address of the entity stored in dataset B}
 
-\item{orb_reg}{indicates the name of the variable storing the information about the region of the entity, for instance NUTS3 in Orbis}
+\item{orb_reg}{indicates the name of the variable storing the information about the region of the entity, for instance NUTS3 in Orbis;
+used for entity A when its postal code gives no region (code not in the list, or no code)}
 
 \item{cc}{indicates the name of the variable storing the information about the country code of the entity}
 }

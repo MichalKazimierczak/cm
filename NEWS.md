@@ -41,6 +41,11 @@
   `city_orbis` both new columns were called `city_harmonized` (one result could no longer be reached by
   name), and an extra column `a` gave `a_harmonized`.
 
+* `clean()` uses the region from dataset A (`orb_reg`) whenever the postal code of A gives no region,
+  also when the postal code is missing. Before, only codes not found in the list fell back to `orb_reg`;
+  a missing code left `reg_a` as `NA` and `reg_sim` as `FALSE`, lowering the score of true matches in
+  `rankmatch()`.
+
 ## Performance
 
 These changes keep the output of 0.1.0; the tests in `tests/testthat/` check it.

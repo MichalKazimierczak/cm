@@ -24,7 +24,8 @@
 #' @param zip_b indicates the name of the variable storing the postal code of the entity stored in dataset B
 #' @param street_a indicates the name of the variable storing the street address of the entity stored in dataset A
 #' @param street_b indicates the name of the variable storing the street address of the entity stored in dataset B
-#' @param orb_reg indicates the name of the variable storing the information about the region of the entity, for instance NUTS3 in Orbis
+#' @param orb_reg indicates the name of the variable storing the information about the region of the entity, for instance NUTS3 in Orbis;
+#' used for entity A when its postal code gives no region (code not in the list, or no code)
 #' @param cc indicates the name of the variable storing the information about the country code of the entity
 #' @returns an original dataframe with additional variables with similarity scores
 #' @examples
@@ -85,7 +86,8 @@ clean<-function(r,key_a,key_b,name_a,name_b,lf_a,lf_b,zip_a,zip_b,city_a,city_b,
   reg<-detect_region(c(r[,zip_a],r[,zip_b]),cc)
   r$reg_a<-reg[seq_len(nrow(r))]
   r$reg_b<-reg[nrow(r)+seq_len(nrow(r))]
-  r$reg_a<-ifelse(r$reg_a=="",r[,orb_reg],r$reg_a)
+  ###no region from the postal code (code not in the list, or no code): use the region given in dataset A
+  r$reg_a<-ifelse(is.na(r$reg_a)|r$reg_a=="",r[,orb_reg],r$reg_a)
   # iso<-unique(data.frame(r[,"iso2"]))
   # data(zip_codes)
   # zip<-zips[zips$country_code==cc,]
