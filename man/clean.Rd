@@ -38,9 +38,9 @@ clean(
 
 \item{lf_b}{indicates the name of the variable storing the legal forms extracted from the name of entity stored in dataset B}
 
-\item{zip_a}{indicates the name of the variable storing the postal code of the entity stored in dataset A}
+\item{zip_a}{indicates the name of the variable storing the postal codes of the entity stored in dataset A}
 
-\item{zip_b}{indicates the name of the variable storing the postal code of the entity stored in dataset B}
+\item{zip_b}{indicates the name of the variable storing the postal codes of the entity stored in dataset B}
 
 \item{city_a}{indicates the name of the variable storing the name of the city of the entity stored in dataset A}
 
@@ -61,7 +61,10 @@ default) gives the Jaro similarity, as in earlier versions; 0.1 gives the usual 
 strings with a common start higher (maximum 0.25)}
 }
 \value{
-an original dataframe with additional variables with similarity scores
+the dataset as a data frame, rows of unique matches first, with new columns: \code{one_to_one}
+(\code{TRUE} when the B entity is matched to one A entity only), \code{name_sim}, \code{lf_sim}, \code{city_sim},
+\code{street_sim} (similarities between 0 and 1, 0 when a value is missing), \code{reg_a}, \code{reg_b} (NUTS 3
+regions) and \code{reg_sim} (\code{TRUE} when the regions or the postal codes are the same)
 }
 \description{
 This function is being used after the match, to correct multiple matches. It uses additional features such as

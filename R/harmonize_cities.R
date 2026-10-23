@@ -5,10 +5,13 @@
 #'
 #' @param city_a indicates a name of the column storing a name of city A
 #' @param city_b indicates a name of the column storing a name of city B
-#' @param cc indicates a code of a country where the cities A and B are located
+#' @param cc ISO 3166-1 code of the country where the cities A and B are located (as used in \code{cities}, for
+#' example \code{DE}, \code{GR}, \code{GB})
 #' @param new_col if TRUE creates new columns with normalized version of the cities A and B names
 #'along with the original version of the name, named \code{<city_a>_harmonized} and \code{<city_b>_harmonized}
-#' @returns an original dataframe with ordered and ranked matched dataframe
+#' @returns the dataset as a data frame, with \code{city_a} and \code{city_b} cleaned (capitals, without punctuation)
+#' and, with \code{new_col = TRUE}, two new columns with the official city names (the cleaned name when no city is
+#' found); with \code{new_col = FALSE} the official names replace \code{city_a} and \code{city_b}
 #' @examples
 #' @export
 

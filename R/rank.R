@@ -11,7 +11,7 @@
 #' @param lf_sim weight assigned to the similarity of legal forms
 #' @param reg_sim weight assigned to the similarity of seat regions as shown in respective datasets
 #' @param city_sim weight assigned to the similarity of cities of seat as shown in respective datasets
-#' @param street_sim weight assigned to the similarity of cities of seat as shown in respective datasets
+#' @param street_sim weight assigned to the similarity of streets as shown in respective datasets
 #' @returns the dataframe with a column \code{final_score} (between 0 and 1), sorted by it, highest first
 #' (with \code{prefer_root}, root entities first)
 #' @examples

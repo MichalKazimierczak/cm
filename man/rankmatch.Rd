@@ -32,7 +32,7 @@ the term is left out of the score, \code{prefer_root} has no effect, and a messa
 
 \item{city_sim}{weight assigned to the similarity of cities of seat as shown in respective datasets}
 
-\item{street_sim}{weight assigned to the similarity of cities of seat as shown in respective datasets}
+\item{street_sim}{weight assigned to the similarity of streets as shown in respective datasets}
 }
 \value{
 the dataframe with a column \code{final_score} (between 0 and 1), sorted by it, highest first

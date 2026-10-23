@@ -19,12 +19,15 @@ norma(r, name, country, key, new_col = T, short = T, translit = T, legal = T)
 
 \item{short}{if TRUE looks for 'trading as' expressions with the name}
 
-\item{translit}{if TRUE looks for names written in cyrylic and transforms them into their latin versions}
+\item{translit}{if TRUE transliterates names of BG, CY and GR entities written in Cyrillic or Greek into Latin}
 
 \item{legal}{if TRUE looks for legal form expressions in the name and deals with them}
 }
 \value{
-an original dataframe with two additional copies of records containing 'trading as' expression
+the dataset as a data frame with the normalised name in \code{norm_name} (or in \code{name} with
+\code{new_col = FALSE}) and, with \code{legal = TRUE}, the standardised legal forms in \code{lf} (several separated
+by \code{;}). With \code{short = TRUE}, records with a 'trading as' phrase appear more than once, once per part of
+the name
 }
 \description{
 This is the main function of the package

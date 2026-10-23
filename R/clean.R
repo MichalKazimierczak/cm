@@ -14,8 +14,6 @@
 #' @param zip_b indicates the name of the variable storing the postal codes of the entity stored in dataset B
 #' @param city_a indicates the name of the variable storing the name of the city of the entity stored in dataset A
 #' @param city_b indicates the name of the variable storing the name of the city of the entity stored in dataset B
-#' @param zip_a indicates the name of the variable storing the postal code of the entity stored in dataset A
-#' @param zip_b indicates the name of the variable storing the postal code of the entity stored in dataset B
 #' @param street_a indicates the name of the variable storing the street address of the entity stored in dataset A
 #' @param street_b indicates the name of the variable storing the street address of the entity stored in dataset B
 #' @param orb_reg indicates the name of the variable storing the information about the region of the entity, for instance NUTS3 in Orbis;
@@ -25,7 +23,10 @@
 #' @param p prefix weight of the Jaro-Winkler similarity used for names, legal forms, cities and streets: 0 (the
 #' default) gives the Jaro similarity, as in earlier versions; 0.1 gives the usual Jaro-Winkler similarity, which scores
 #' strings with a common start higher (maximum 0.25)
-#' @returns an original dataframe with additional variables with similarity scores
+#' @returns the dataset as a data frame, rows of unique matches first, with new columns: \code{one_to_one}
+#' (\code{TRUE} when the B entity is matched to one A entity only), \code{name_sim}, \code{lf_sim}, \code{city_sim},
+#' \code{street_sim} (similarities between 0 and 1, 0 when a value is missing), \code{reg_a}, \code{reg_b} (NUTS 3
+#' regions) and \code{reg_sim} (\code{TRUE} when the regions or the postal codes are the same)
 #' @examples
 #' @export
 
