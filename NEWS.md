@@ -15,6 +15,11 @@
   (for example US, CN or JP) or without a country. They are kept, after the other rows, with an empty
   legal form. 0.1.0 removed them without a warning.
 
+* `norma_legal()`, and so `norma()`, removes every weak word of a rule, not only the first one in the
+  name: `DIE DELTA HOLDING GMBH` now gives `DELTA` (0.1.0: `DELTA HOLDING`), and `MUELLER BAECKEREI`
+  gives `MULLER BACKEREI` (0.1.0: `MULLER BAECKEREI`). Names of the same company from two sources now
+  normalise alike more often.
+
 ## Performance
 
 These changes keep the output of 0.1.0; the tests in `tests/testthat/` check it.

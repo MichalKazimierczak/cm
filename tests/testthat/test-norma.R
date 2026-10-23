@@ -22,3 +22,9 @@ test_that("norma_legal keeps rows of countries without a list of legal forms", {
   expect_equal(x$name[x$key == 3], "ACME INC")
   expect_equal(x$name[x$key == 4], "FOO LTD")
 })
+
+test_that("norma_legal removes every weak word of a rule, not only the first", {
+  d <- data.frame(key = 1:3, name = c("DIE DELTA HOLDING GMBH", "DELTA GROUP HOLDING GMBH", "MUELLER BAECKEREI GMBH"),
+                  country = "DE", stringsAsFactors = FALSE)
+  expect_equal(norma_legal(d, "name", "country")$name, c("DELTA", "DELTA", "MULLER BACKEREI"))
+})

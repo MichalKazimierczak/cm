@@ -97,8 +97,8 @@ norma_legal <- function(r,name,country){
     for (n in 1:nrow(cw))
     {
 
-      ###replace weak words in the name (str_replace leaves names without a match unchanged)
-      cd[,name]<-stringr::str_replace(cd[,name],as.character(cw[n,"to.replace"]),cw[n,"replacement"])
+      ###replace every weak word of the rule in the name (str_replace_all leaves names without a match unchanged)
+      cd[,name]<-stringr::str_replace_all(cd[,name],as.character(cw[n,"to.replace"]),cw[n,"replacement"])
 
     }
     r<-rbind(r,cd)
