@@ -96,6 +96,15 @@
 * `detect_address()` keeps the words around a removed city apart: `UL LESNA 50 PLOTY` gave the street
   `UL50` after removing a city between `UL` and `50`, now `UL 50`. Extra spaces in the street are removed.
 
+* `norma_short()`, and so `norma()`, recognises five 'trading as' phrases that never matched: `OPERANDO
+  COMO`, `WITH DISTINCTIVE TITLE`, `IN ABBREVIATO`, `H O D N` (Dutch "handelende onder de naam") and
+  `HODN`. Line breaks inside the pattern and backspace characters (`"\bHODN\b"` in a normal R string) had disabled them; the
+  phrases are now a list. `H O D N` and `HODN` match only as whole words, so Polish names such as
+  `ZACHODNI` or `WSCHODNIA` are not split.
+
+* `norma_short()` splits a name at every phrase: `A TRADING AS B TRADING AS C` gives `A`, `B` and `C`
+  (0.1.0: `A TRADING AS B` and `C`). The parts no longer keep a trailing space.
+
 ## Bug fixes
 
 * `detect_address()` no longer overwrites and deletes columns of yours named `city` or `miasto`, which it

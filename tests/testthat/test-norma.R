@@ -58,3 +58,14 @@ test_that("the umlaut rules skip common spots where UE, AE, OE are not umlauts",
   expect_equal(norma_legal(d, "name", "country")$name,
                c("MICHAEL BAUER", "NEUE MEDIEN", "SAMUEL STEUER", "QUELLE ISRAEL", "MULLER GUNTHER", "MINERALOL WALDER"))
 })
+
+test_that("norma_short splits at every phrase and finds the repaired phrases", {
+  r <- data.frame(key = 1:5, name = c("A TRADING AS B TRADING AS C", "ABC OPERANDO COMO XYZ", "ABC H O D N XYZ",
+                                      "ABC WITH DISTINCTIVE TITLE XYZ", "BANK ZACHODNI WBK"), stringsAsFactors = FALSE)
+  x <- norma_short(r, "name")
+  expect_setequal(trimws(x$name[x$key == 1]), c("A TRADING AS B TRADING AS C", "A", "B", "C"))
+  expect_setequal(trimws(x$name[x$key == 2]), c("ABC OPERANDO COMO XYZ", "ABC", "XYZ"))
+  expect_setequal(trimws(x$name[x$key == 3]), c("ABC H O D N XYZ", "ABC", "XYZ"))
+  expect_setequal(trimws(x$name[x$key == 4]), c("ABC WITH DISTINCTIVE TITLE XYZ", "ABC", "XYZ"))
+  expect_equal(x$name[x$key == 5], "BANK ZACHODNI WBK")
+})

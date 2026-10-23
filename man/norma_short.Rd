@@ -12,12 +12,13 @@ norma_short(r, name)
 \item{name}{name of the column storing name to be transformed, it has to be a string}
 }
 \value{
-an original dataframe with two additional copies of records containing 'trading as' expression
+the original dataframe with the additional copies, without duplicate rows
 }
 \description{
 This function is developed to deal with 'trading as' type of indications in the name. It identifies 'trading as' phrase
-in different languages and creates three copies of record, for which this phrase has been identified: original version of name
-a string preceding 'trading as' expression and a string following 'trading as' expression.
+in different languages and adds copies of each record in which a phrase has been identified: one per part of the name
+before, between and after the phrases ("A TRADING AS B" gives A and B; "A TRADING AS B TRADING AS C" gives A, B and C).
+The record with the original name is kept.
 }
 \examples{
 norma_short(df,"name")
