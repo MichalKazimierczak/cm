@@ -12,8 +12,8 @@ city_lookup<-function(citiesc){
   pat<-as.character(citiesc$Alternate.Names)
   key<-substr(pat,6,nchar(pat)-5)
   row<-seq_along(key)
-  ###some historical German names end in a note such as "[A ]" (probably "[a. 704]" with the date removed):
-  ###the name is the part before the note. Phonetic transcriptions marked "[IPA]" never occur in addresses.
+  ###GeoNames marks some historical names with a note such as "[a. 704]" and phonetic transcriptions with
+  ###"[IPA]". data-raw/cities.R already removes them; this keeps lists built another way safe ("[A ]").
   ipa<-grepl("[IPA]",key,fixed=TRUE)
   key<-sub(" ?\\[[^]]*\\]$","",key)[!ipa]
   row<-row[!ipa]

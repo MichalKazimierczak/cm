@@ -1,26 +1,38 @@
 #' City names and their alternate names
 #'
 #' One row per name of a city: its official ASCII name and each alternate name (translations, transliterations,
-#' historical spellings), as a whole-word regex pattern. Used by \code{\link{harmonize_cities}} and \code{detect_address()}.
+#' historical spellings), as a whole-word regex pattern. Used by \code{\link{harmonize_cities}} and
+#' \code{detect_address()}.
 #'
-#' Rows are sorted official names first (\code{o}), then by length of the name (\code{l}), longest first; the first
-#' pattern that matches wins.
+#' Rows are sorted official names first (\code{o}), then by length of the name (\code{l}), longest first, then by
+#' population, largest first. The first pattern that matches wins, so when places share a name the largest one
+#' wins.
 #'
-#' @format A tibble with 184,546 rows (51,301 cities in 26 EU countries; Greece is not included) and 5 columns:
+#' Country codes are ISO 3166-1 codes as used by GeoNames: Greece is \code{GR} and the United Kingdom \code{GB}
+#' (Eurostat uses \code{EL} and \code{UK}).
+#'
+#' @format A data frame with 186,540 rows (61,576 places in 28 countries: the 27 EU countries and the United
+#'   Kingdom) and 7 columns:
 #' \describe{
-#'   \item{ASCII.Name}{official name of the city, in ASCII capitals}
-#'   \item{Alternate.Names}{one name of the city as a pattern \code{(^| )NAME( |$)}, in capitals}
+#'   \item{ASCII.Name}{official name of the place (GeoNames ASCII name), cleaned and in capitals}
+#'   \item{Alternate.Names}{one name of the place as a pattern \code{(^| )NAME( |$)}, in capitals}
 #'   \item{Country.Code}{ISO 3166-1 alpha-2 country code}
 #'   \item{o}{\code{TRUE} when the pattern holds the official name}
 #'   \item{l}{number of characters of the name in the pattern}
+#'   \item{geonameid}{GeoNames identifier of the place}
+#'   \item{population}{population according to GeoNames}
 #' }
 #' @source GeoNames (\url{https://www.geonames.org}), licensed under the Creative Commons Attribution 4.0
 #'   International licence (CC BY 4.0, \url{https://creativecommons.org/licenses/by/4.0/}).
-#'   Downloaded [date to confirm] from [file to confirm, for example the export of cities with a population of
-#'   1,000 or more].
+#'   File \code{cities1000.zip} (populated places with 1,000 or more inhabitants, and seats of administrative
+#'   divisions) from \url{https://download.geonames.org/export/dump/}, downloaded on 23 October 2026; latest
+#'   modification of a record used: 22 October 2026.
 #'
-#'   Changed from the original: kept 26 EU countries, all except Greece [selection to confirm]; kept the official
-#'   name, the alternate names and the country code; converted names to ASCII capitals; wrote each name as a
+#'   Changed from the original by \code{data-raw/cities.R}: kept 28 countries; for each place used its ASCII
+#'   name, its name and its alternate names; removed notes in square brackets and left out phonetic
+#'   transcriptions (\code{[IPA]}) and the alternate names GeoNames transliterated automatically (written
+#'   without capitals); cleaned each name (Latin, Greek and Cyrillic letters kept, Latin letters converted to
+#'   ASCII, capitals); left out names shorter than 2 characters and repeated names; wrote each name as a
 #'   whole-word regex pattern; added the columns \code{o} and \code{l}; sorted the rows.
 "cities"
 

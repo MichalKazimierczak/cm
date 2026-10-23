@@ -76,6 +76,20 @@
 * `detect_region()` finds Dutch postal codes written without the space or in lower case (`1012AB`,
   `1012ab`), which the list stores as `1012 AB`. `1012ABC` still gives no region.
 
+* `cities` is rebuilt from a fresh GeoNames download (`cities1000.zip`, 23 October 2026) by
+  `data-raw/cities.R`, which documents every step. It now covers the 27 EU countries and the United Kingdom
+  (61,576 places): Greece (`GR`) and the United Kingdom (`GB`) are new, so `harmonize_cities()` and
+  `detect_address()` work for them; they stopped with an error before. Other changes:
+  - Alternate names that GeoNames transliterated automatically from other scripts (`lu sen bao cheng`,
+    `wa te lin gen`) are left out; they gave junk patterns such as `TI` or `WL Z` that matched short words
+    in any address.
+  - Cyrillic names keep all their letters (the old list had lost `і`, `ї`, `є`: `Н ДЕРАНВЕН`).
+  - When places share a name, the one with the largest population wins (before, whichever row came first).
+  - Some official names now follow GeoNames' current spelling, often the English form: `PADOVA` is now
+    `PADUA`, `NUERNBERG` is `NUREMBERG`, `ANTWERPEN` is `ANTWERP`.
+  Of 144,041 names in both the old and the new list, 0.66% now give a different city, mostly because of these
+  new official names. The list has two new columns, `geonameid` and `population`.
+
 ## Bug fixes
 
 * `harmonize_cities()`, `detect_address()`, `detect_region()`, `norma_legal()` (and so `norma()` and

@@ -18,7 +18,7 @@ The bundled datasets keep the licences of their sources:
 
 | Dataset | Source | Licence |
 |---|---|---|
-| `cities` | [GeoNames](https://www.geonames.org), changed (see `?cities`) | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
+| `cities` | [GeoNames](https://www.geonames.org), `cities1000.zip` downloaded 23 October 2026, changed by `data-raw/cities.R` (see `?cities`) | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
 | `zip_codes` | Eurostat, GISCO: [postal codes to NUTS correspondence tables (TERCET)](https://ec.europa.eu/eurostat/web/gisco/geodata/administrative-units/postal-codes) | © European Union, Eurostat; reuse with acknowledgement of the source |
 | `legal_forms_regex`, `weak_words_regex`, `postal_codes_regex` | compiled for CleanMatch | EUPL 1.2, as the code |
 
