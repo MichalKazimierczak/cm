@@ -1,10 +1,3 @@
-#' @import data.table
-#' @import stringdist
-#' @import stringr
-#' @import stringi
-#' @import dplyr
-#' @import tidyr
-
 #' @title returns a dataset with ordered and ranked matches
 #'
 #' @description This function is being used after the disambiguation of matches to rank possible candidates for the match

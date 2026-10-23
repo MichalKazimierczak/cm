@@ -1,5 +1,3 @@
-#' @import stringr
-
 #' @title returns a dataset enriched with additional variables indicating region in the country
 #'
 #' @description This function is using a zip code to return information on the NUTS3 region

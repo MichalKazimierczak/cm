@@ -1,6 +1,3 @@
-#' @import data.table
-#' @import stringr
-
 #' @title returns a dataset with harmonized names of the cities
 #'
 #' @description This function allows for proper comparison of the cities' names if they come from different sources

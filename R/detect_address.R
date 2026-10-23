@@ -1,5 +1,3 @@
-#' @import stringr
-
 #' @title returns a dataset enriched with additional variables indicating elements of address
 #'
 #' @description This functions detects different elements of address in the unstructured address field and puts it into separate columns
@@ -31,7 +29,7 @@ detect_address<-function(r,address,prefix,cc){
 
   ###first look for postal codes in the address
   zip<-stringr::str_extract(r[,address],paste0("(?:^| )?[A-Z]?(?:-| )?",pcc$expres))
-  r[,address]<-str_replace(r[,address],paste0("(?:^| )?[A-Z]?(?:-| )?",pcc$expres)," ")
+  r[,address]<-stringr::str_replace(r[,address],paste0("(?:^| )?[A-Z]?(?:-| )?",pcc$expres)," ")
   zip<-stringr::str_replace(zip,paste0("(?:^| )?[A-Z]?(?:-| )?",pcc$expres),pcc$forma)
   zip<-ifelse(is.na(zip),"",zip)
 

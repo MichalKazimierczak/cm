@@ -74,6 +74,12 @@
   was replaced by the package data. They now read the data with `CleanMatch::cities` and so on.
   `data(zip_codes)` and the other `data()` calls still work as before when you use them yourself.
 
+## Packaging
+
+* `DESCRIPTION` lists every package the code uses (`stringdist`, `plyr` and `utils` added; `dplyr` removed,
+  it was not used). The package no longer imports whole packages, so loading it no longer warns about
+  "replacing previous import" (`first`, `last`, `between`, `extract`).
+
 ## Performance
 
 These changes on their own keep the output of 0.1.0; the tests in `tests/testthat/` checked it when they were

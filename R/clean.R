@@ -1,9 +1,3 @@
-#' @import data.table
-#' @import stringdist
-#' @import stringr
-#' @import stringi
-
-
 #' @title returns a disambiguated match
 #'
 #' @description This function is being used after the match, to correct multiple matches. It uses additional features such as
@@ -36,7 +30,7 @@ clean<-function(r,key_a,key_b,name_a,name_b,lf_a,lf_b,zip_a,zip_b,city_a,city_b,
 
   ##create internal function which separates unique matches from the multiple matches
   filter<-function(d,key_a,key_b){
-    st<-data.table::data.table(d)[,.(n=uniqueN(get(key_a))),by=key_b]
+    st<-data.table::data.table(d)[,list(n=data.table::uniqueN(get(key_a))),by=key_b]
     st<-data.frame(st)
     dd<-d[d[,key_b]%in%st[st$n==1,key_b],]
     return (data.frame(dd))

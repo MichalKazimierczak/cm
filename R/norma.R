@@ -1,9 +1,3 @@
-#' @import data.table
-#' @import stringr
-#' @import stringi
-#' @import dplyr
-#' @import tidyr
-
 #' @title returns an original dataset with normalized name
 #'
 #' @description This is the main function of the package
@@ -46,7 +40,7 @@ norma<-function(r,name,country,key,new_col=T,short=T,translit=T,legal=T){
   r$norm_name <-stringr::str_replace_all(r$norm_name,"\\n"," ")
   r$norm_name <-stringr::str_replace_all(r$norm_name,"\\t"," ")
   r$norm_name <-stringr::str_replace_all(r$norm_name,"\\s+"," ")
-  r$norm_name<-str_replace_all(r$norm_name,"\\\\","")
+  r$norm_name<-stringr::str_replace_all(r$norm_name,"\\\\","")
   r$norm_name <-stringr::str_trim(r$norm_name)
 
 
@@ -63,7 +57,7 @@ norma<-function(r,name,country,key,new_col=T,short=T,translit=T,legal=T){
     r$lf<-stringr::str_trim(r$lf)
     r<-r[order(r$lf),]
     rlf<-unique(r[,c(key,"lf")])
-    rlf<-data.table::data.table(rlf)[,.(lf=paste0(lf,collapse=";")),
+    rlf<-data.table::data.table(rlf)[,list(lf=paste0(lf,collapse=";")),
                          by=key]
     r$lf<-NULL
     r<-merge(r,rlf,by=key)
