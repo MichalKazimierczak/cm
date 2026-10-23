@@ -29,3 +29,10 @@ test_that("harmonize_cities keeps all Latin, Greek and Cyrillic letters and drop
   r <- data.frame(a = "Esch°sur°Alzette", b = "", stringsAsFactors = FALSE)
   expect_equal(harmonize_cities(r, "a", "b", "LU")$a_harmonized, "ESCH SUR ALZETTE")
 })
+
+test_that("harmonize_cities names the new columns after city_a and city_b", {
+  r <- data.frame(id = 1, city = "Esch-sur-Alzette", city_orbis = "Luxemburg", a = 1, stringsAsFactors = FALSE)
+  x <- harmonize_cities(r, "city", "city_orbis", "LU")
+  expect_equal(names(x), c("id", "city", "city_orbis", "a", "city_harmonized", "city_orbis_harmonized"))
+  expect_equal(x$city_orbis_harmonized, "LUXEMBOURG")
+})

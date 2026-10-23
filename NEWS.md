@@ -36,6 +36,11 @@
   name got the empty key and was paired with every empty name in the other dataset, which could create
   many false pairs. Matched pairs between real names are unchanged; their order within a key can differ.
 
+* `harmonize_cities()` names the new columns `<city_a>_harmonized` and `<city_b>_harmonized` in all
+  cases. It picked every column whose name appears inside `city_a`, so with columns `city` and
+  `city_orbis` both new columns were called `city_harmonized` (one result could no longer be reached by
+  name), and an extra column `a` gave `a_harmonized`.
+
 ## Performance
 
 These changes keep the output of 0.1.0; the tests in `tests/testthat/` check it.

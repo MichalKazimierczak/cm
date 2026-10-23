@@ -10,7 +10,7 @@
 #' @param city_b indicates a name of the column storing a name of city B
 #' @param cc indicates a code of a country where the cities A and B are located
 #' @param new_col if TRUE creates new columns with normalized version of the cities A and B names
-#'along with the original version of the name
+#'along with the original version of the name, named \code{<city_a>_harmonized} and \code{<city_b>_harmonized}
 #' @returns an original dataframe with ordered and ranked matched dataframe
 #' @examples
 #' @export
@@ -39,10 +39,8 @@ harmonize_cities<-function(r,city_a,city_b,cc,new_col=T){
   r$city_norm_b<-ifelse(is.na(r$city_norm_b),r[,city_b],r$city_norm_b)
 
   if(new_col==T){
-    cla<-paste0(colnames(r)[str_detect(city_a,colnames(r))],"_harmonized")
-    colnames(r)[str_detect(colnames(r),"city_norm_a")]<-cla
-    clb<-paste0(colnames(r)[str_detect(city_b,colnames(r))],"_harmonized")
-    colnames(r)[str_detect(colnames(r),"city_norm_b")]<-clb
+    colnames(r)[colnames(r)=="city_norm_a"]<-paste0(city_a,"_harmonized")
+    colnames(r)[colnames(r)=="city_norm_b"]<-paste0(city_b,"_harmonized")
 
   } else{
     r[,city_a]<-r$city_norm_a

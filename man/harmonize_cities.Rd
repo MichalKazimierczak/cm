@@ -16,7 +16,7 @@ harmonize_cities(r, city_a, city_b, cc, new_col = T)
 \item{cc}{indicates a code of a country where the cities A and B are located}
 
 \item{new_col}{if TRUE creates new columns with normalized version of the cities A and B names
-along with the original version of the name}
+along with the original version of the name, named \code{<city_a>_harmonized} and \code{<city_b>_harmonized}}
 }
 \value{
 an original dataframe with ordered and ranked matched dataframe
