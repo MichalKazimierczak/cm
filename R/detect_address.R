@@ -1,17 +1,18 @@
-#' @title returns a dataset enriched with additional variables indicating elements of address
+#' @title Split a free-text address into postal code, city and street
 #'
-#' @description This functions detects different elements of address in the unstructured address field and puts it into separate columns
-#' @param r dataset containing freeline address data
-#'
-#' @param address name of the column containing unstructured address data
-#' @param prefix a string that will be addedd to the names of the column with found address elements
-#' @param cc indicates a code of a country where the cities A and B are located
-#'
-#'along with the original version of the name
-#' @returns an original dataframe with ordered and ranked matched dataframe
-
-
-
+#' @description Finds the postal code (with the country's pattern in \code{postal_codes_regex}) and the city (with
+#' the names in \code{cities}) in a free-text address, and puts them into new columns; what is left is the street.
+#' The address is cleaned first: Latin, Greek and Cyrillic letters and digits are kept, Latin letters converted to
+#' ASCII capitals, \code{CEDEX} removed.
+#' @param r dataset containing free-text addresses
+#' @param address name of the column containing the address; it is replaced by the cleaned address without postal
+#' code and city
+#' @param prefix text put before the names of the new columns
+#' @param cc ISO 3166-1 code of the country of the addresses (as used in \code{cities}, for example \code{DE}, \code{GR},
+#' \code{GB})
+#' @returns the dataset with three new columns: \code{<prefix>_zip} (postal code, \code{""} if none found),
+#' \code{<prefix>_city} (official name of the city, \code{""} if none found) and \code{<prefix>_street} (the rest)
+#' @export
 
 detect_address<-function(r,address,prefix,cc){
   ###read the package data into local variables; data() would load them into the global environment

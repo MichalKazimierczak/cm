@@ -138,6 +138,9 @@
 
 ## Packaging
 
+* `detect_address()` and `detect_region()` are exported and documented: they can be used on their own
+  (`clean()` uses `detect_region()`).
+
 * `DESCRIPTION` lists every package the code uses (`stringdist`, `plyr` and `utils` added; `dplyr` removed,
   it was not used). The package no longer imports whole packages, so loading it no longer warns about
   "replacing previous import" (`first`, `last`, `between`, `extract`).

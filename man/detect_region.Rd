@@ -2,22 +2,22 @@
 % Please edit documentation in R/detect_region.R
 \name{detect_region}
 \alias{detect_region}
-\title{returns a dataset enriched with additional variables indicating region in the country}
+\title{Find the NUTS 3 region of postal codes}
 \usage{
 detect_region(pc, cc)
 }
 \arguments{
-\item{cc}{indicates a code of a country where the cities A and B are located
+\item{pc}{vector of postal codes (or values that contain them)}
 
-along with the original version of the name}
-
-\item{r}{a dataset containing a column with a zip code}
-
-\item{zip}{name of the column containing zip code}
+\item{cc}{ISO 3166-1 code of the country of the postal codes, for example \code{DE}}
 }
 \value{
-an original dataframe with a column describing region added
+a character vector as long as \code{pc}: the NUTS 3 region of each value, several separated by
+\code{", "} when a value contains codes of several regions, \code{""} when no code is found (also for countries
+without postal codes in \code{zip_codes}), \code{NA} for a missing value
 }
 \description{
-This function is using a zip code to return information on the NUTS3 region
+Looks postal codes up in \code{zip_codes} (Eurostat TERCET tables) and returns their NUTS 3 regions.
+A code is also found inside a longer value (\code{"D-80331"}, \code{"80331 Muenchen"}). For NL, codes written
+without the space or in lower case are found too (\code{"1012ab"}).
 }
