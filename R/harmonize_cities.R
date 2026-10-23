@@ -17,7 +17,7 @@
 
 
 harmonize_cities<-function(r,city_a,city_b,cc,new_col=T){
-  data(cities)
+  cities<-CleanMatch::cities
   citiesc<-cities[cities$Country.Code==cc,]
   ###clean each distinct name once and map the result back to the rows
   raw<-unique(c(r[,city_a],r[,city_b]))

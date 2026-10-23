@@ -46,6 +46,14 @@
   a missing code left `reg_a` as `NA` and `reg_sim` as `FALSE`, lowering the score of true matches in
   `rankmatch()`.
 
+## Bug fixes
+
+* `harmonize_cities()`, `detect_address()`, `detect_region()`, `norma_legal()` (and so `norma()` and
+  `clean()`) no longer create or overwrite objects in your global environment. They called `data()`,
+  which loads into the global environment, so an object of yours named `cities`, `zips`, `pc`, `l` or `w`
+  was replaced by the package data. They now read the data with `CleanMatch::cities` and so on.
+  `data(zip_codes)` and the other `data()` calls still work as before when you use them yourself.
+
 ## Performance
 
 These changes keep the output of 0.1.0; the tests in `tests/testthat/` check it.

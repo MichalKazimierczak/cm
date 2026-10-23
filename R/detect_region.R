@@ -12,7 +12,7 @@
 #' @returns an original dataframe with a column describing region added
 
 detect_region<-function(pc,cc){
-  data(zip_codes)
+  zips<-CleanMatch::zips
   zipc<-zips[zips$country_code==cc,]
 
   if(nrow(zipc)==0) stop("detect_region: no postal codes for country ",cc)

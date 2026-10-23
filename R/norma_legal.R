@@ -32,11 +32,11 @@ norma_legal <- function(r,name,country){
   r<-data.frame()
 
   ###read list of regex expressions that store the legal forms specific for EU MS countries
-  data(legal_forms_regex)
+  l<-CleanMatch::l
   l<-l[order(l$order),]
   # l<-read.csv("legal_forms.csv",colClasses=
   #               c("character","character","character","integer"))
-  data(weak_words_regex)
+  w<-CleanMatch::w
   w<-w[order(w$order),]
 
   ###As Benelux countries have one composed IPR register in some data sets we have to foresee special treatment of those countries,
