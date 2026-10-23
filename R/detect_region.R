@@ -1,25 +1,63 @@
-#' @import stringr
-
-#' @title returns a dataset enriched with additional variables indicating region in the country
+#' @title Find the NUTS 3 region of postal codes
 #'
-#' @description This function is using a zip code to return information on the NUTS3 region
-#' @param r a dataset containing a column with a zip code
-#'
-#' @param zip name of the column containing zip code
-#' @param cc indicates a code of a country where the cities A and B are located
-#'
-#'along with the original version of the name
-#' @returns an original dataframe with a column describing region added
+#' @description Looks postal codes up in \code{zip_codes} (Eurostat TERCET tables) and returns their NUTS 3 regions.
+#' A code is also found inside a longer value (\code{"D-80331"}, \code{"80331 Muenchen"}). For NL, codes written
+#' without the space or in lower case are found too (\code{"1012ab"}).
+#' @param pc vector of postal codes (or values that contain them)
+#' @param cc ISO 3166-1 code of the country of the postal codes, for example \code{DE}; Eurostat's \code{EL} and
+#' \code{UK} and lower case work too
+#' @returns a character vector as long as \code{pc}: the NUTS 3 region of each value, several separated by
+#' \code{", "} when a value contains codes of several regions, \code{""} when no code is found (also for countries
+#' without postal codes in \code{zip_codes}), \code{NA} for a missing value
+#' @examples
+#' detect_region(c("80331", "D-10115", "99999", NA), "DE")
+#' detect_region(c("1012 AB", "1012ab"), "NL")
+#' @export
 
 detect_region<-function(pc,cc){
-  data(zip_codes)
+  zips<-CleanMatch::zips
+  ###country codes as in the package data: EL (Eurostat) is GR, UK is GB, lower case accepted
+  cc<-iso_country(cc)
   zipc<-zips[zips$country_code==cc,]
 
-  reg<-rep("",length(pc))
-
-  for (i in 1:nrow(zipc)){
-    reg<-ifelse(stringr::str_detect(pc,zipc[i,"CODE"]),paste(reg,zipc[i,"NUTS3"],sep=", "),reg)
+  ###no postal codes for this country (for example CH or GB): no region, so that clean() can use its fallback
+  if(nrow(zipc)==0){
+    reg<-rep("",length(pc))
+    reg[is.na(pc)]<-NA
+    return(reg)
   }
+  if(any(stringr::str_detect(zipc$CODE,"[^A-Z0-9 -]"))) stop("detect_region: postal codes with regex characters")
+
+  ###A code is found in pc when a piece of pc as long as the code equals it, so look those pieces up
+  ###in a table instead of testing every code of the country (462,780 for NL) on every value
+  u<-unique(as.character(pc))
+  u<-u[!is.na(u)]
+  rows<-split(seq_len(nrow(zipc)),zipc$CODE)
+  ###Dutch codes are listed as "1012 AB"; also find them written without the space or in lower case
+  look<-u
+  if(cc=="NL") look<-stringr::str_replace_all(toupper(u),"\\b([0-9]{4}) ?([A-Z]{2})\\b","\\1 \\2")
+  hit_id<-integer(0)
+  hit_row<-integer(0)
+  for(len in unique(nchar(zipc$CODE))){
+    k<-pmax(nchar(look)-len+1,0)
+    id<-rep(seq_along(look),k)
+    st<-sequence(k)
+    m<-match(substr(look[id],st,st+len-1),names(rows))
+    f<-!is.na(m)
+    ###a code can belong to more than one NUTS3 region
+    hit_id<-c(hit_id,rep(id[f],lengths(rows[m[f]])))
+    hit_row<-c(hit_row,unlist(rows[m[f]],use.names=FALSE))
+  }
+  ###paste each region once per value, in the order of zips (two codes of one region give it once)
+  h<-data.frame(id=hit_id,row=hit_row)
+  h<-h[order(h$id,h$row),]
+  h<-h[!duplicated(data.frame(h$id,zipc$NUTS3[h$row])),]
+  ru<-rep("",length(u))
+  if(nrow(h)>0){
+    p<-tapply(zipc$NUTS3[h$row],h$id,paste,collapse=", ")
+    ru[as.integer(names(p))]<-paste0(", ",p)
+  }
+  reg<-ru[match(as.character(pc),u)]
   reg<-stringr::str_remove(reg,"^\\, ")
   return(reg)
 }

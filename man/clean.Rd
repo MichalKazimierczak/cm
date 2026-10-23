@@ -19,7 +19,8 @@ clean(
   street_a,
   street_b,
   orb_reg,
-  cc
+  cc,
+  p = 0
 )
 }
 \arguments{
@@ -37,9 +38,9 @@ clean(
 
 \item{lf_b}{indicates the name of the variable storing the legal forms extracted from the name of entity stored in dataset B}
 
-\item{zip_a}{indicates the name of the variable storing the postal code of the entity stored in dataset A}
+\item{zip_a}{indicates the name of the variable storing the postal codes of the entity stored in dataset A}
 
-\item{zip_b}{indicates the name of the variable storing the postal code of the entity stored in dataset B}
+\item{zip_b}{indicates the name of the variable storing the postal codes of the entity stored in dataset B}
 
 \item{city_a}{indicates the name of the variable storing the name of the city of the entity stored in dataset A}
 
@@ -49,14 +50,36 @@ clean(
 
 \item{street_b}{indicates the name of the variable storing the street address of the entity stored in dataset B}
 
-\item{orb_reg}{indicates the name of the variable storing the information about the region of the entity, for instance NUTS3 in Orbis}
+\item{orb_reg}{indicates the name of the variable storing the information about the region of the entity, for instance NUTS3 in Orbis;
+used for entity A when its postal code gives no region (code not in the list, or no code)}
 
-\item{cc}{indicates the name of the variable storing the information about the country code of the entity}
+\item{cc}{indicates the name of the variable storing the information about the country code of the entity;
+the data may hold several countries, and each postal code is looked up in the list of its row's country}
+
+\item{p}{prefix weight of the Jaro-Winkler similarity used for names, legal forms, cities and streets: 0 (the
+default) gives the Jaro similarity, as in earlier versions; 0.1 gives the usual Jaro-Winkler similarity, which scores
+strings with a common start higher (maximum 0.25)}
 }
 \value{
-an original dataframe with additional variables with similarity scores
+the dataset as a data frame, rows of unique matches first, with new columns: \code{one_to_one}
+(\code{TRUE} when the B entity is matched to one A entity only), \code{name_sim}, \code{lf_sim}, \code{city_sim},
+\code{street_sim} (similarities between 0 and 1, 0 when a value is missing), \code{reg_a}, \code{reg_b} (NUTS 3
+regions) and \code{reg_sim} (\code{TRUE} when the regions or the postal codes are the same)
 }
 \description{
 This function is being used after the match, to correct multiple matches. It uses additional features such as
 original names, address and legal form information to assign similarity scores
+}
+\examples{
+m <- data.frame(id_a = c(1, 1, 2), id_b = c(10, 11, 12),
+                name_a = c("Alpha GmbH", "Alpha GmbH", "Beta AG"),
+                name_b = c("ALPHA GMBH", "ALPHA HOLDING", "BETA AG"),
+                lf_a = c("GMBH", "GMBH", "AG"), lf_b = c("GMBH", "", "AG"),
+                zip_a = c("80331", "80331", "10115"), zip_b = c("80331", "80333", "10115"),
+                city_a = c("MUNICH", "MUNICH", "BERLIN"), city_b = c("MUNICH", "MUNICH", "BERLIN"),
+                street_a = c("MARIENPLATZ 1", "MARIENPLATZ 1", "UNTER DEN LINDEN 5"),
+                street_b = c("MARIENPLATZ 1", "KAUFINGERSTR 2", "UNTER DEN LINDEN 5"),
+                nuts = c("DE212", "DE212", "DE300"), cc = "DE")
+clean(m, "id_a", "id_b", "name_a", "name_b", "lf_a", "lf_b", "zip_a", "zip_b",
+      "city_a", "city_b", "street_a", "street_b", "nuts", "cc")
 }

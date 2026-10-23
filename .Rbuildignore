@@ -1,2 +1,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^notes$
+^CLAUDE\.md$
+^LICENSE\.md$
+^data-raw$

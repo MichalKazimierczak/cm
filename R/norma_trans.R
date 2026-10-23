@@ -6,11 +6,17 @@
 #' @param country name of the column storing country of seat, it has to be a string
 #' @param key name of the column storing key id, it has to be a string
 #' @returns an original dataframe with transliterated version of name
-#' @examples norma_trans(df,"name","country_code")
+#' @examples
+#' ## a Bulgarian name in Cyrillic (written with intToUtf8 to keep this example ASCII)
+#' cyr <- intToUtf8(c(1052, 1040, 1071, 32, 1061, 1056, 1048, 1057, 1058, 1054, 1042, 1040))
+#' df <- data.frame(key = 1:2, name = c(cyr, "ALPHA OOD"), country = "BG")
+#' norma_trans(df, "name", "country", "key")
 #' @export
 
 
 norma_trans<-function(r,name,country,key){
+  ###work on a plain data frame, so that tibbles and data.tables work too
+  r<-as.data.frame(r)
   ###This is a dataframe that stores the transliteration standards specific for a given country
   ###of seat. If you want to modify standard of transliteration, modify this dataframe.
   ###More than one standards per country are possible. This will multiply rows by number of
@@ -19,13 +25,13 @@ norma_trans<-function(r,name,country,key){
                     standard=c("bg-bg_Latn/BGN","Greek-Latin/BGN","Greek-Latin/BGN"))
 
   ##keep only those observations from BG, CY and GR and where names are written in cyrylic
-  r_trans<-r[r[,country]%in%c("BG","CY","GR")&stringr::str_detect(r[,name],"[Α-ΩA-Я]"),]
-  if(nrow(r_trans!=0)){
+  r_trans<-r[iso_country(r[,country])%in%c("BG","CY","GR")&stringr::str_detect(r[,name],"[\\p{Greek}\\p{Cyrillic}]"),]
+  if(nrow(r_trans)!=0){
     ###create a dataset to store transformed names
     r_tr<-data.frame()
     for (k in 1:nrow(trans))
     {
-      r_t<-r_trans[r_trans[,country]==as.character(trans[k,"country"]),]
+      r_t<-r_trans[iso_country(r_trans[,country])==as.character(trans[k,"country"]),]
       r_t[,name]<-stringi::stri_trans_general(r_t[,name],as.character(trans[k,"standard"]))
       if(as.character(trans[k,"country"])=="BG"){
         r_t[,name]<-stringr::str_replace_all(r_t[,name],"KH","H")

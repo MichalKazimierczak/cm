@@ -1,12 +1,16 @@
 Package: CleanMatch
 Type: Package
 Title: CleanMatch
-Version: 0.1.0
+Version: 1.0.0
 Author: Michał Kazimierczak
 Maintainer: The package maintainer <michal.kazimierczak@euipo.europa.eu>
-Description: Package normalizes names in different datasources, helps to match and disambiguate matches
-License: 
+Description: Normalises company names from different data sources (legal forms, 'trading as' phrases,
+    transliteration, cities, postal codes), matches them and scores the candidate matches.
+License: EUPL (>= 1.2)
 Encoding: UTF-8
 LazyData: true
+LazyDataCompression: xz
 RoxygenNote: 7.3.1
-Imports: data.table, stringi, stringr, tidyr, dplyr
+Imports: data.table, plyr, stringdist, stringi, stringr, tidyr, utils
+Suggests: testthat (>= 3.0.0), tibble, withr
+Config/testthat/edition: 3

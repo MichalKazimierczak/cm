@@ -1,9 +1,3 @@
-#' @import data.table
-#' @import stringr
-#' @import stringi
-#' @import dplyr
-#' @import tidyr
-
 #' @title returns an original dataset with normalized name
 #'
 #' @description This is the main function of the package
@@ -13,11 +7,17 @@
 #' @param key name of the column storing unique identifier of the entity
 #' @param new_col if TRUE creates new column with normalized version of the name along with the original version of the name
 #' @param short if TRUE looks for 'trading as' expressions with the name
-#' @param translit if TRUE looks for names written in cyrylic and transforms them into their latin versions
+#' @param translit if TRUE transliterates names of BG, CY and GR entities written in Cyrillic or Greek into Latin
 #' @param legal if TRUE looks for legal form expressions in the name and deals with them
-#' @returns an original dataframe with two additional copies of records containing 'trading as' expression
-#' @examples df<-data.frame(name="Andrzej Beata Celina spółka z ograniczoną odpowiedzialnoscią nazwa skrócona ABC sp. z o.o. SP.J",
-#'  country="PL",key=1)
+#' @returns the dataset as a data frame with the normalised name in \code{norm_name} (or in \code{name} with
+#' \code{new_col = FALSE}) and, with \code{legal = TRUE}, the standardised legal forms in \code{lf} (several separated
+#' by \code{;}). With \code{short = TRUE}, records with a 'trading as' phrase appear more than once, once per part of
+#' the name
+#' @examples
+#' df <- data.frame(key = 1:3, country = c("PL", "DE", "BG"),
+#'                  name = c("Nowak spolka z ograniczona odpowiedzialnoscia nazwa skrocona NWK sp. z o.o.",
+#'                           "Mueller Baeckerei GmbH & Co. KG", "Maya Khristov Trading OOD"))
+#' norma(df, "name", "country", "key")
 #' @export
 
 #dfn<-norma(df,"name","country","key",new_col=T,short=T,translit=T,legal=T)
@@ -25,11 +25,12 @@
 norma<-function(r,name,country,key,new_col=T,short=T,translit=T,legal=T){
   ###This is to account for the choice of whether to create a new column for transliterated names
   ##or to transform the column which stored the original name
-  r<-data.frame(r)
+  ###work on a plain data frame, so that tibbles and data.tables work too
+  r<-as.data.frame(r)
   r$norm_name<-toupper(r[,name])
   r$norm_name <-stringi::stri_enc_toutf8(r$norm_name)
-  r$norm_name <-stringr::str_replace_all(r$norm_name,"[^A-ZΑ-ΩA-Я0-9]"," ")
-  rt<-r[r[,country]%in%c("BG","CY","GR")&stringr::str_detect(r[,name],"[Α-ΩA-Я]"),]
+  r$norm_name <-stringr::str_replace_all(r$norm_name,"[^\\p{Latin}\\p{Greek}\\p{Cyrillic}0-9]"," ")
+  rt<-r[iso_country(r[,country])%in%c("BG","CY","GR")&stringr::str_detect(r[,name],"[\\p{Greek}\\p{Cyrillic}]"),]
   r<-r[!r[,key]%in%rt[,key],]
   if(translit==T&nrow(rt)>0){
     for (t in unique(rt[,country]))
@@ -46,7 +47,7 @@ norma<-function(r,name,country,key,new_col=T,short=T,translit=T,legal=T){
   r$norm_name <-stringr::str_replace_all(r$norm_name,"\\n"," ")
   r$norm_name <-stringr::str_replace_all(r$norm_name,"\\t"," ")
   r$norm_name <-stringr::str_replace_all(r$norm_name,"\\s+"," ")
-  r$norm_name<-str_replace_all(r$norm_name,"\\\\","")
+  r$norm_name<-stringr::str_replace_all(r$norm_name,"\\\\","")
   r$norm_name <-stringr::str_trim(r$norm_name)
 
 
@@ -63,7 +64,7 @@ norma<-function(r,name,country,key,new_col=T,short=T,translit=T,legal=T){
     r$lf<-stringr::str_trim(r$lf)
     r<-r[order(r$lf),]
     rlf<-unique(r[,c(key,"lf")])
-    rlf<-data.table::data.table(rlf)[,.(lf=paste0(lf,collapse=";")),
+    rlf<-data.table::data.table(rlf)[,list(lf=paste0(lf,collapse=";")),
                          by=key]
     r$lf<-NULL
     r<-merge(r,rlf,by=key)
@@ -82,7 +83,7 @@ norma<-function(r,name,country,key,new_col=T,short=T,translit=T,legal=T){
   {
     re$norm_name <-stringi::stri_trans_general(re[,name], "latin-ascii; upper")
     re$norm_name <-stringi::stri_enc_toutf8(re$norm_name)
-    re$norm_name <-stringr::str_replace_all(re$norm_name,"[^a-zA-Zα-ωΑ-Ωa-яA-Я0-9]"," ")
+    re$norm_name <-stringr::str_replace_all(re$norm_name,"[^\\p{Latin}\\p{Greek}\\p{Cyrillic}0-9]"," ")
     re$norm_name <-stringr::str_replace_all(re$norm_name,"W UPADLOSCI (LIKWIDACYJNEJ)?|W LIKWIDACJI","")
     re$norm_name <-stringr::str_replace_all(re$norm_name,"CREDIT NEEDED|DOUBLE DO ?NOT.*|(DOUBLE)? ?(PLE?A?S?E?)? ?(USE?|WITH|OF) ID ?W? ?(NO)? ?[1-9]+.*|DOUBLE ?(PLE?A?S?E?)? ?(USE?|WITH|OF).*|NOT VALID.*|PLEASE ?USE ?W? ?[1-9]+.*|(PLE?A?S?E?)? DO ?NOT USE.*|USE NOW ID*|PLS USE.*|DOUBLE.*USE.*[0-9]+?.*|DOUBLE$","")
     re$norm_name <-stringr::str_replace_all(re$norm_name,"\\n"," ")
