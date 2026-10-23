@@ -67,11 +67,9 @@ clean<-function(r,key_a,key_b,name_a,name_b,lf_a,lf_b,zip_a,zip_b,city_a,city_b,
   ###compare cities of the matched entities
   r$city_sim<-stringdist::stringsim(toupper(r[,city_a]),toupper(r[,city_b]),method="jw")
   r$city_sim<-ifelse(is.na(r$city_sim),0,r$city_sim)
-  r$city_sim<-ifelse(is.na(r$city_sim),0,r$city_sim)
 
   ###and street address
   r$street_sim<-stringdist::stringsim(toupper(r[,street_a]),toupper(r[,street_b]),method="jw")
-  r$street_sim<-ifelse(is.na(r$street_sim),0,r$street_sim)
   r$street_sim<-ifelse(is.na(r$street_sim),0,r$street_sim)
 
 
