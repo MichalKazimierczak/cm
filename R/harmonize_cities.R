@@ -21,7 +21,7 @@ harmonize_cities<-function(r,city_a,city_b,cc,new_col=T){
   citiesc<-cities[cities$Country.Code==cc,]
   ###clean each distinct name once and map the result back to the rows
   raw<-unique(c(r[,city_a],r[,city_b]))
-  cln<-stringr::str_replace_all(raw, "[^a-zA-Zα-ωΑ-Ωa-яA-Я]"," ")
+  cln<-stringr::str_replace_all(raw, "[^\\p{Latin}\\p{Greek}\\p{Cyrillic}]"," ")
   cln<-stringr::str_replace_all(cln,"\\s+"," ")
   cln<-stringi::stri_trans_general(cln, "latin-ascii; upper")
   cln<-stringr::str_trim(cln)

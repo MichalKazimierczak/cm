@@ -28,3 +28,12 @@ test_that("norma_legal removes every weak word of a rule, not only the first", {
                   country = "DE", stringsAsFactors = FALSE)
   expect_equal(norma_legal(d, "name", "country")$name, c("DELTA", "DELTA", "MULLER BACKEREI"))
 })
+
+test_that("norma transliterates only names written in Greek or Cyrillic", {
+  d <- data.frame(key = 1:2, name = c("Maya Khristov Trading OOD", "Мая Христова ООД"),
+                  country = "BG", stringsAsFactors = FALSE)
+  x <- norma(d, "name", "country", "key")
+  expect_equal(x$norm_name[x$key == 1], "MAYA KHRISTOV TRADING")
+  expect_equal(x$norm_name[x$key == 2], "MAA HRISTOVA")
+  expect_equal(x$lf, c("OOD", "OOD"))
+})

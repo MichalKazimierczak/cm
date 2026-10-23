@@ -22,3 +22,10 @@ test_that("city_lookup drops IPA transcriptions and keeps no bracket notes", {
   expect_false(any(grepl("[", lk$key, fixed = TRUE)))
   expect_false(any(grepl("LEIV", lk$key)))
 })
+
+test_that("harmonize_cities keeps all Latin, Greek and Cyrillic letters and drops other characters", {
+  r <- data.frame(a = c("пфаффенгофен ан дер ільм", "München"), b = "", stringsAsFactors = FALSE)
+  expect_equal(harmonize_cities(r, "a", "b", "DE")$a_harmonized, c("PFAFFENHOFEN AN DER ILM", "MUNICH"))
+  r <- data.frame(a = "Esch°sur°Alzette", b = "", stringsAsFactors = FALSE)
+  expect_equal(harmonize_cities(r, "a", "b", "LU")$a_harmonized, "ESCH SUR ALZETTE")
+})

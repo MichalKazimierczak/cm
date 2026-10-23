@@ -20,6 +20,18 @@
   gives `MULLER BACKEREI` (0.1.0: `MULLER BAECKEREI`). Names of the same company from two sources now
   normalise alike more often.
 
+* `norma()` and `norma_trans()` transliterate only names that contain Greek or Cyrillic letters. The
+  test for "Greek or Cyrillic" (`[Α-ΩA-Я]`) began with a Latin `A`, so it covered every Latin capital and
+  sent nearly every BG, CY and GR name through transliteration: `Maya Khristov Trading OOD` became
+  `MAA HRISTOV TRADING`, now `MAYA KHRISTOV TRADING`.
+
+* `harmonize_cities()`, `detect_address()` and `norma()` keep exactly the letters of the Latin, Greek and
+  Cyrillic alphabets (`\\p{Latin}`, `\\p{Greek}`, `\\p{Cyrillic}`) and turn everything else into spaces.
+  The old ranges (`a-я`, `A-Я`) also began with Latin letters: they kept symbols such as `°` and `©`, and
+  dropped Cyrillic letters outside `а-я`, such as `ё`, `і` and `ј`, which the city list contains. For
+  example `пфаффенгофен ан дер ільм` matched the wrong city (PFAFFENHOFEN), now PFAFFENHOFEN AN DER ILM.
+  The R code is now pure ASCII.
+
 ## Performance
 
 These changes keep the output of 0.1.0; the tests in `tests/testthat/` check it.

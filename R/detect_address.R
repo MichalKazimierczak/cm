@@ -23,7 +23,7 @@ detect_address<-function(r,address,prefix,cc){
   citiesc<-cities[cities$Country.Code==cc,]
 
 
-  r[,address]<-stringr::str_replace_all(r[,address], "[^a-zA-Zα-ωΑ-Ωa-яA-Я0-9]"," ")
+  r[,address]<-stringr::str_replace_all(r[,address], "[^\\p{Latin}\\p{Greek}\\p{Cyrillic}0-9]"," ")
   r[,address]<-stringr::str_replace_all(r[,address],"CEDEX"," ")
   r[,address]<-stringr::str_replace_all(r[,address],"\\s+"," ")
   r[,address]<-stringi::stri_trans_general(r[,address], "latin-ascii; upper")

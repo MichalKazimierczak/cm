@@ -28,8 +28,8 @@ norma<-function(r,name,country,key,new_col=T,short=T,translit=T,legal=T){
   r<-data.frame(r)
   r$norm_name<-toupper(r[,name])
   r$norm_name <-stringi::stri_enc_toutf8(r$norm_name)
-  r$norm_name <-stringr::str_replace_all(r$norm_name,"[^A-ZΑ-ΩA-Я0-9]"," ")
-  rt<-r[r[,country]%in%c("BG","CY","GR")&stringr::str_detect(r[,name],"[Α-ΩA-Я]"),]
+  r$norm_name <-stringr::str_replace_all(r$norm_name,"[^\\p{Latin}\\p{Greek}\\p{Cyrillic}0-9]"," ")
+  rt<-r[r[,country]%in%c("BG","CY","GR")&stringr::str_detect(r[,name],"[\\p{Greek}\\p{Cyrillic}]"),]
   r<-r[!r[,key]%in%rt[,key],]
   if(translit==T&nrow(rt)>0){
     for (t in unique(rt[,country]))
@@ -82,7 +82,7 @@ norma<-function(r,name,country,key,new_col=T,short=T,translit=T,legal=T){
   {
     re$norm_name <-stringi::stri_trans_general(re[,name], "latin-ascii; upper")
     re$norm_name <-stringi::stri_enc_toutf8(re$norm_name)
-    re$norm_name <-stringr::str_replace_all(re$norm_name,"[^a-zA-Zα-ωΑ-Ωa-яA-Я0-9]"," ")
+    re$norm_name <-stringr::str_replace_all(re$norm_name,"[^\\p{Latin}\\p{Greek}\\p{Cyrillic}0-9]"," ")
     re$norm_name <-stringr::str_replace_all(re$norm_name,"W UPADLOSCI (LIKWIDACYJNEJ)?|W LIKWIDACJI","")
     re$norm_name <-stringr::str_replace_all(re$norm_name,"CREDIT NEEDED|DOUBLE DO ?NOT.*|(DOUBLE)? ?(PLE?A?S?E?)? ?(USE?|WITH|OF) ID ?W? ?(NO)? ?[1-9]+.*|DOUBLE ?(PLE?A?S?E?)? ?(USE?|WITH|OF).*|NOT VALID.*|PLEASE ?USE ?W? ?[1-9]+.*|(PLE?A?S?E?)? DO ?NOT USE.*|USE NOW ID*|PLS USE.*|DOUBLE.*USE.*[0-9]+?.*|DOUBLE$","")
     re$norm_name <-stringr::str_replace_all(re$norm_name,"\\n"," ")
