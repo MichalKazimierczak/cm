@@ -53,6 +53,13 @@
   `ATHINAIKI ZYTHOPOIIA` gave `IKI ZYTHOPOIIA` (now `ZYTHOPOIIA`), `GREEKFOOD` gave `FOOD`, `ANELLADA`
   gave `A`. The change is made by `data-raw/weak_words_gr_boundaries.R`.
 
+* The weak-word rule that turns `UE`, `AE` and `OE` into `U`, `A` and `O` (so that `MUELLER`, `MÜLLER`
+  and `MULLER` all give `MULLER`) now applies in the German-speaking countries DE, AT, CH and LI. It is
+  new for CH and LI, and removed for BG, where Latin-script names have no umlaut spellings and it only
+  shortened them (`BOEV` gave `BOV`). LU is left out because its rules are also used for BX (Benelux),
+  where Dutch names would be changed (`HOEK` would give `HOK`). The change is made by
+  `data-raw/weak_words_umlaut_countries.R`.
+
 ## Bug fixes
 
 * `harmonize_cities()`, `detect_address()`, `detect_region()`, `norma_legal()` (and so `norma()` and

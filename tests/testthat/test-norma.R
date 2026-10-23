@@ -43,3 +43,11 @@ test_that("Greek weak words are removed only as whole words", {
                   country = "GR", stringsAsFactors = FALSE)
   expect_equal(norma_legal(d, "name", "country")$name, c("ZYTHOPOIIA", "ANELLADA", "GREEKFOOD", "TRADE"))
 })
+
+test_that("the umlaut rule applies in DE, AT, CH and LI but not in BG", {
+  d <- data.frame(key = 1:5, name = c("MUELLER BAECKEREI GMBH", "MUELLER BAECKEREI GMBH", "MUELLER BAECKEREI AG",
+                                      "MUELLER BAECKEREI GMBH", "BOEV EOOD"),
+                  country = c("DE", "AT", "CH", "LI", "BG"), stringsAsFactors = FALSE)
+  x <- norma_legal(d, "name", "country")
+  expect_equal(x$name[order(x$key)], c(rep("MULLER BACKEREI", 4), "BOEV"))
+})

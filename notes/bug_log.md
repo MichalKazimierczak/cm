@@ -126,6 +126,10 @@ Priority: ⏫ changes match results, 🔼 can crash or corrupt your session, �
 	- Proposed fix: add word boundaries to the GR weak words (`\\bATHINAS?\\b`, `\\bATHINAIK[OI]\\b`, also `\\bGREECE\\b`, `\\bGREEK\\b`, `\\bINTERNATIONAL\\b`, `\\bATHENS\\b`), or move `ATHINAIK[OI]` before `ATHINAS?`; rule 4 also starts with `\\H` instead of `\\b`. Changes `weak_words_regex`.
 	- Fixed in commit `e875fbd`: word boundaries on six GR rules, `\\H` replaced by `\\b` in the fourth (`ANELLADA` had become `A`, `GREEKFOOD` `FOOD`); made by `data-raw/weak_words_gr_boundaries.R`; test added.
 
+- [ ] ⏫ `legal_forms_regex` (LI): `AG` and `AKTIENGESELLSCHAFT` are not recognised ➕ 2026-10-23
+	- Tested: `MUELLER BAECKEREI AG` (LI) keeps `AG` in the name and gets no legal form. The LI list recognises AG only in its French form (`SA`, `SOCIETE ANONYME`), although German is the language of Liechtenstein and AG is its most common legal form; `ANSTALT`, `STIFTUNG` and `TRUST REG` are missing too.
+	- Proposed fix: add LI rules for `AKTIENGESELLSCHAFT|\\bAG\\b` (AG), `ANSTALT` (AST), `STIFTUNG`, `TRUST REG`, modelled on the CH and AT rules; check the order against the existing LI rules.
+
 ## Can crash or corrupt your session
 
 - [x] 🔼 All functions that call `data()`: package data overwrite objects in your global environment ➕ 2026-10-22 ✅ 2026-10-23

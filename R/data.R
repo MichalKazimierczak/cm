@@ -105,7 +105,8 @@ NULL
 #' }
 #' @source Compiled for CleanMatch by Michal Kazimierczak; part of the package, licensed under the EUPL 1.2.
 #'   Later corrections are made by scripts in \code{data-raw/}: \code{weak_words_gr_boundaries.R} added word
-#'   boundaries to the Greek rules (2026-10-23).
+#'   boundaries to the Greek rules; \code{weak_words_umlaut_countries.R} limited the umlaut rule
+#'   (\code{UE}, \code{AE}, \code{OE} to \code{U}, \code{A}, \code{O}) to DE, AT, CH and LI (2026-10-23).
 #' @name w
 #' @aliases weak_words_regex
 #' @usage data(weak_words_regex)

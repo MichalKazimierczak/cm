@@ -4,6 +4,7 @@
 # The fourth rule started with \H (in ICU regex: any character that is not a
 # horizontal space) instead of \b, so ANELLADA became A.
 # Run once from the package root; it changes data/weak_words_regex.rda (2026-10-23).
+# Already applied: running it again stops at the check below.
 
 load("data/weak_words_regex.rda")
 fix <- c(
