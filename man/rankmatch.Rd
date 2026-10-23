@@ -18,7 +18,9 @@ rankmatch(
 \arguments{
 \item{r}{cleaned dataset to be ranked}
 
-\item{prefer_root}{logical variable indicating whether the ORBIS observations with the bvd_id number without hyphen should be preferred}
+\item{prefer_root}{logical variable indicating whether the ORBIS observations with the bvd_id number without hyphen should be preferred.
+Needs a logical or 0/1 column \code{bvd_is_root} in \code{r} (Orbis data; no CleanMatch function creates it). Without that column
+the term is left out of the score, \code{prefer_root} has no effect, and a message says so}
 
 \item{bvd_is_root}{weight assigned to the criterion of bvd_id_number not to include hyphen}
 
@@ -33,7 +35,8 @@ rankmatch(
 \item{street_sim}{weight assigned to the similarity of cities of seat as shown in respective datasets}
 }
 \value{
-an original dataframe with ordered and ranked matched dataframe
+the dataframe with a column \code{final_score} (between 0 and 1), sorted by it, highest first
+(with \code{prefer_root}, root entities first)
 }
 \description{
 This function is being used after the disambiguation of matches to rank possible candidates for the match

@@ -111,6 +111,10 @@
 
 ## Bug fixes
 
+* `rankmatch()` works without a `bvd_is_root` column (an Orbis field no CleanMatch function creates): the term
+  is left out of the score, `prefer_root` has no effect, and a message says so. Before, the score could not
+  be computed.
+
 * `clean()` works when the key columns are literally named `key_a` or `key_b`; it stopped with
   "invalid first argument".
 
