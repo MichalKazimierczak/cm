@@ -161,9 +161,12 @@ Priority: ⏫ changes match results, 🔼 can crash or corrupt your session, �
 
 ## Packaging and tidying
 
-- [ ] 🔽 Weak-word rule `(U|A|O)E` → `\\1` (DE, AT, BG) also changes names without umlauts ➕ 2026-10-23
+- [x] 🔽 Weak-word rule `(U|A|O)E` → `\\1` (DE, AT, BG) also changes names without umlauts ➕ 2026-10-23 ✅ 2026-10-23
 	- Tested: `MICHAEL` → `MICHAL`, `BAUER` → `BAUR`, `ISRAEL` → `ISRAL`, `MANUEL` → `MANUL`. Since commit `327d644` the rule applies to every occurrence; before, only the first one (so `MICHAEL MUELLER` kept `MUELLER`).
 	- Both datasets are normalised the same way, so exact matching is mostly unaffected, but different names can become identical (MICHAEL and MICHAL). Decide whether to limit the rule (for example to `UE`, or to names that come from umlauts) and whether it belongs in the BG list.
+	- Decided (Michal, 2026-10-23): option A (write umlauts as `UE` with ICU `de-ASCII`) is out, because source data may already have lost the umlauts (`MULLER`); only collapsing brings `MUELLER` and `MULLER` together.
+	- Fixed in commit `f121d8d`: rule removed for BG (`BOEV` had become `BOV`), added for CH and LI; LU left out because its rules are copied to BX (Dutch `HOEK` would become `HOK`). Script `data-raw/weak_words_umlaut_countries.R`.
+	- Fixed in commit `0d3f8a0` (option B): three rules per country; `UE` kept after A, E, Q and in a final `-UEL`, `AE` kept in a final `-AEL`, `OE` always collapsed (`MINERALOEL`). MICHAEL, BAUER, NEUE, FEUER, STEUER, QUELLE, SAMUEL, ISRAEL keep their letters; all umlaut spellings still match. Still collapsed: POET, BLUE, AERO, MICHAELA, RAFFAELE. Script `data-raw/weak_words_umlaut_exceptions.R`; tests added.
 - [ ] 🔽 `nmatch`: the comment at the top (lines 16 to 19) about transliteration standards was copied from `norma_trans()`; replace it with one that describes `nmatch()` ➕ 2026-10-23
 - [ ] 🔽 `DESCRIPTION`: `stringdist` and `plyr` are used but missing from `Imports` (`R CMD check` stops with an ERROR) ➕ 2026-10-22
 - [x] 🔽 `DESCRIPTION`: `License:` was empty (`R CMD check` stopped with an ERROR) ➕ 2026-10-22 ✅ 2026-10-23
