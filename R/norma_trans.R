@@ -20,7 +20,7 @@ norma_trans<-function(r,name,country,key){
 
   ##keep only those observations from BG, CY and GR and where names are written in cyrylic
   r_trans<-r[r[,country]%in%c("BG","CY","GR")&stringr::str_detect(r[,name],"[\\p{Greek}\\p{Cyrillic}]"),]
-  if(nrow(r_trans!=0)){
+  if(nrow(r_trans)!=0){
     ###create a dataset to store transformed names
     r_tr<-data.frame()
     for (k in 1:nrow(trans))
