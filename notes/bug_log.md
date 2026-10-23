@@ -82,6 +82,12 @@ Priority: ⏫ changes match results, 🔼 can crash or corrupt your session, �
 	- Effect: true matches whose A record has no postal code lose the `reg_sim` part of their score in `rankmatch()`.
 	- Proposed fix: `r$reg_a<-ifelse(is.na(r$reg_a)|r$reg_a=="",r[,orb_reg],r$reg_a)`; update the `clean` fixture and add a NEWS entry.
 
+- [ ] ⏫ `clean`: similarities are Jaro, not Jaro-Winkler, and `p` cannot be set ➕ 2026-10-23
+	- Tested: `stringsim(..., method = "jw")` uses the default `p = 0`, which is pure Jaro similarity. Jaro-Winkler, which adds a bonus for a common start (useful for names), needs `p > 0`, usually `0.1`: `MUNCHEN` / `MUENCHEN` scores 0.863 with `p = 0` and 0.890 with `p = 0.1`.
+	- `p` is hard-coded: `clean()` has no argument for it, so users cannot choose. Affects `name_sim`, `lf_sim`, `city_sim` and `street_sim` (four `stringsim()` calls).
+	- The comment above `name_sim` says "Leventshein distance", a third method.
+	- Proposed fix: add an argument `p = 0` to `clean()` and pass it to the four `stringsim()` calls; document it (`p = 0.1` for Jaro-Winkler, maximum 0.25). The default `p = 0` keeps today's results; decide whether to change the default to 0.1, which changes scores. Correct the comment.
+
 ## Can crash or corrupt your session
 
 - [ ] 🔼 All functions that call `data()`: package data overwrite objects in your global environment ➕ 2026-10-22
