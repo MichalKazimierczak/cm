@@ -38,9 +38,10 @@ detect_region<-function(pc,cc){
     hit_id<-c(hit_id,rep(id[f],lengths(rows[m[f]])))
     hit_row<-c(hit_row,unlist(rows[m[f]],use.names=FALSE))
   }
-  ###count each code once per value and paste the regions in the order of zips, as the loop did
-  h<-unique(data.frame(id=hit_id,row=hit_row))
+  ###paste each region once per value, in the order of zips (two codes of one region give it once)
+  h<-data.frame(id=hit_id,row=hit_row)
   h<-h[order(h$id,h$row),]
+  h<-h[!duplicated(data.frame(h$id,zipc$NUTS3[h$row])),]
   ru<-rep("",length(u))
   if(nrow(h)>0){
     p<-tapply(zipc$NUTS3[h$row],h$id,paste,collapse=", ")
