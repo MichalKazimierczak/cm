@@ -121,9 +121,10 @@ Priority: ⏫ changes match results, 🔼 can crash or corrupt your session, �
 		- Only Greece (suggested), or rebuild the whole list from one fresh download: consistent and documented, but changes results for every country, and the original build script is not in the repository.
 		- Greek-script names (`Αθήνα`) match only when the accents are the same (`Αθηνα` does not match), as for the 846 Greek-script names already in the list for other countries. Accent-free variants could be added, but the other countries do not have them; suggested to leave out of the first version.
 
-- [ ] ⏫ `norma_legal` (GR weak words): `ATHINAS?` cuts `ATHINA` out of longer words ➕ 2026-10-23
+- [x] ⏫ `norma_legal` (GR weak words): `ATHINAS?` cuts `ATHINA` out of longer words ➕ 2026-10-23 ✅ 2026-10-23
 	- Tested: `ATHINAIKI ZYTHOPOIIA AE` (GR) gives `IKI ZYTHOPOIIA`. The GR rule `ATHINAS?` has no word boundary and comes before `ATHINAIK[OI]`, so it removes `ATHINA` from `ATHINAIKI` and leaves `IKI`. Same in 0.1.0.
 	- Proposed fix: add word boundaries to the GR weak words (`\\bATHINAS?\\b`, `\\bATHINAIK[OI]\\b`, also `\\bGREECE\\b`, `\\bGREEK\\b`, `\\bINTERNATIONAL\\b`, `\\bATHENS\\b`), or move `ATHINAIK[OI]` before `ATHINAS?`; rule 4 also starts with `\\H` instead of `\\b`. Changes `weak_words_regex`.
+	- Fixed in commit `e875fbd`: word boundaries on six GR rules, `\\H` replaced by `\\b` in the fourth (`ANELLADA` had become `A`, `GREEKFOOD` `FOOD`); made by `data-raw/weak_words_gr_boundaries.R`; test added.
 
 ## Can crash or corrupt your session
 
