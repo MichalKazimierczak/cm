@@ -45,19 +45,16 @@ detect_address<-function(r,address,prefix,cc){
   city[hit]<-as.character(citiesc$ASCII.Name[m[hit]])
   rest<-u
   ###remove the matched key as a whole-word pattern, as in cities$Alternate.Names
-  rest[hit]<-stringr::str_replace(u[hit],paste0("(^| )",lk$key[match(m[hit],lk$row)],"( |$)"),"")
+  ###the pattern takes the spaces on both sides, so put one back: the words around the city stay apart
+  rest[hit]<-stringr::str_replace(u[hit],paste0("(^| )",lk$key[match(m[hit],lk$row)],"( |$)")," ")
+  rest<-stringr::str_squish(rest)
   i<-match(r[,address],u)
-  r$city<-city[i]
   r[,address]<-rest[i]
-  ####Now create a vector for street information
 
-
+  ###the results go into new columns only; the other columns of r are left as they are
   r[,paste0(prefix,"_zip")]<-zip
-  r[,paste0(prefix,"_city")]<-r$city
+  r[,paste0(prefix,"_city")]<-city[i]
   r[,paste0(prefix,"_street")]<-r[,address]
-
-  r$miasto<-NULL
-  r$city<-NULL
 
   return(r)
 }

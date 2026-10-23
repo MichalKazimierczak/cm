@@ -93,7 +93,13 @@
 * `clean()` handles data with several countries: each postal code is looked up in the list of its row's
   country. Before, all codes were looked up with every country code at once, which mixed the lists up.
 
+* `detect_address()` keeps the words around a removed city apart: `UL LESNA 50 PLOTY` gave the street
+  `UL50` after removing a city between `UL` and `50`, now `UL 50`. Extra spaces in the street are removed.
+
 ## Bug fixes
+
+* `detect_address()` no longer overwrites and deletes columns of yours named `city` or `miasto`, which it
+  used for its own intermediate results.
 
 * `harmonize_cities()`, `detect_address()`, `detect_region()`, `norma_legal()` (and so `norma()` and
   `clean()`) no longer create or overwrite objects in your global environment. They called `data()`,

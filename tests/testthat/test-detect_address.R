@@ -9,3 +9,17 @@ test_that("detect_address removes a historical name matched without its note", {
   expect_equal(x$x_city, "WUERZBURG")
   expect_false(grepl("WIRZIBURG", x$x_street))
 })
+
+test_that("detect_address keeps the words around the city apart", {
+  r <- data.frame(adr = "Marienplatz 1 Muenchen Hinterhaus", stringsAsFactors = FALSE)
+  x <- detect_address(r, "adr", "x", "DE")
+  expect_equal(x$x_city, "MUNICH")
+  expect_equal(x$x_street, "MARIENPLATZ 1 HINTERHAUS")
+})
+
+test_that("detect_address keeps your columns named city or miasto", {
+  r <- data.frame(adr = "Marienplatz 1 Muenchen", city = "mine", miasto = "mine too", stringsAsFactors = FALSE)
+  x <- detect_address(r, "adr", "x", "DE")
+  expect_equal(x$city, "mine")
+  expect_equal(x$miasto, "mine too")
+})
