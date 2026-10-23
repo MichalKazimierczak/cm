@@ -1,4 +1,4 @@
-test_that("harmonize_cities gives the 0.1.0 output", {
+test_that("harmonize_cities gives the saved reference output", {
   x <- fixture("harmonize_cities")
   for (cc in names(x)) {
     expect_equal(harmonize_cities(x[[cc]]$input, "city_a", "city_b", cc), x[[cc]]$new_col)

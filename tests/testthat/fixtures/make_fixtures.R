@@ -1,7 +1,9 @@
-# Builds the regression fixtures: fixed inputs and the output CleanMatch 0.1.0
-# gave for them. Run from the package root with the 0.1.0 code loaded:
+# Builds the regression fixtures: fixed inputs and the reference output for them.
+# First built with CleanMatch 0.1.0; rebuilt after each change meant to alter output
+# (listed in NEWS.md under "Changes that affect results"). Run from the package root:
 #   pkgload::load_all(); source("tests/testthat/fixtures/make_fixtures.R")
-# Re-run it only when a change is meant to alter output, and say so in NEWS.md.
+# Re-run it only when a change is meant to alter output, compare old and new output,
+# and say so in NEWS.md.
 
 out <- "tests/testthat/fixtures"
 set.seed(2026)
