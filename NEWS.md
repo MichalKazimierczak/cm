@@ -11,6 +11,10 @@
   removed). 0.1.0 read the note as a regex class and matched only "WIRZIBURG A". The note is now
   dropped, and the one phonetic transcription marked `[IPA]` (Liebenau) is no longer used.
 
+* `norma_legal()`, and so `norma()`, no longer drops rows from countries without a list of legal forms
+  (for example US, CN or JP) or without a country. They are kept, after the other rows, with an empty
+  legal form. 0.1.0 removed them without a warning.
+
 ## Performance
 
 These changes keep the output of 0.1.0; the tests in `tests/testthat/` check it.

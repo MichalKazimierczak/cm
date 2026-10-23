@@ -12,3 +12,13 @@ test_that("norma_legal gives the 0.1.0 output", {
   x <- fixture("norma_legal")
   expect_equal(norma_legal(x$input, "name", "country"), x$output)
 })
+
+test_that("norma_legal keeps rows of countries without a list of legal forms", {
+  d <- data.frame(key = 1:4, name = c("ABC GMBH", "XYZ SARL", "ACME INC", "FOO LTD"),
+                  country = c("DE", "FR", "US", NA), stringsAsFactors = FALSE)
+  x <- norma_legal(d, "name", "country")
+  expect_equal(sort(x$key), 1:4)
+  expect_equal(x$lf[x$key == 3], "")
+  expect_equal(x$name[x$key == 3], "ACME INC")
+  expect_equal(x$name[x$key == 4], "FOO LTD")
+})

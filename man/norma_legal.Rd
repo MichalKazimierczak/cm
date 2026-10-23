@@ -14,7 +14,9 @@ norma_legal(r, name, country)
 \item{country}{name of the column storing country of seat, it has to be a string}
 }
 \value{
-an original dataframe with cleaned version of original name and additional column with standardized version of legal form
+an original dataframe with cleaned version of original name and additional column with standardized version of legal form.
+Rows from countries without a list of legal forms, or without a country, are kept with an empty legal form;
+they come after the other rows.
 }
 \description{
 This function is developed to deal with the legal forms expressions found in the names

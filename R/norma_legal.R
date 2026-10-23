@@ -6,7 +6,9 @@
 #' @param r dataset to be transformed
 #' @param name name of the column storing name to be transformed, it has to be a string
 #' @param country name of the column storing country of seat, it has to be a string
-#' @returns an original dataframe with cleaned version of original name and additional column with standardized version of legal form
+#' @returns an original dataframe with cleaned version of original name and additional column with standardized version of legal form.
+#' Rows from countries without a list of legal forms, or without a country, are kept with an empty legal form;
+#' they come after the other rows.
 #' @examples norma_legal(df,"name","country_code")
 #' @export
 
@@ -66,7 +68,7 @@ norma_legal <- function(r,name,country){
     cw<-w[w$Country==i,]
 
     ###a dataset with observations limited to i country
-    cd<-x[x[,country]==i,]
+    cd<-x[which(x[,country]==i),]
     cd$lf<-""
     ##and a dataset for storing cleaned data for i country
     #cl<-data.frame()
@@ -101,6 +103,13 @@ norma_legal <- function(r,name,country){
     }
     r<-rbind(r,cd)
 
+  }
+
+  ###keep the rows of countries without a list of legal forms, and rows without a country, with an empty legal form
+  rest<-x[!x[,country]%in%lis_co$Country,]
+  if(nrow(rest)>0){
+    rest$lf<-rep("",nrow(rest))
+    r<-rbind(r,rest)
   }
 
   ###do some additional cleaning for
