@@ -26,13 +26,16 @@ detect_region<-function(pc,cc){
   u<-unique(as.character(pc))
   u<-u[!is.na(u)]
   rows<-split(seq_len(nrow(zipc)),zipc$CODE)
+  ###Dutch codes are listed as "1012 AB"; also find them written without the space or in lower case
+  look<-u
+  if(cc=="NL") look<-stringr::str_replace_all(toupper(u),"\\b([0-9]{4}) ?([A-Z]{2})\\b","\\1 \\2")
   hit_id<-integer(0)
   hit_row<-integer(0)
   for(len in unique(nchar(zipc$CODE))){
-    k<-pmax(nchar(u)-len+1,0)
-    id<-rep(seq_along(u),k)
+    k<-pmax(nchar(look)-len+1,0)
+    id<-rep(seq_along(look),k)
     st<-sequence(k)
-    m<-match(substr(u[id],st,st+len-1),names(rows))
+    m<-match(substr(look[id],st,st+len-1),names(rows))
     f<-!is.na(m)
     ###a code can belong to more than one NUTS3 region
     hit_id<-c(hit_id,rep(id[f],lengths(rows[m[f]])))

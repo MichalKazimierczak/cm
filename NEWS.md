@@ -73,6 +73,9 @@
 * `detect_region()` gives each region once per value. `80331 80333` (two codes in DE212) gave
   `DE212, DE212`, now `DE212`; in Cyprus, where many codes are listed twice, `CY000, CY000` is now `CY000`.
 
+* `detect_region()` finds Dutch postal codes written without the space or in lower case (`1012AB`,
+  `1012ab`), which the list stores as `1012 AB`. `1012ABC` still gives no region.
+
 ## Bug fixes
 
 * `harmonize_cities()`, `detect_address()`, `detect_region()`, `norma_legal()` (and so `norma()` and
