@@ -101,6 +101,11 @@ Priority: ⏫ changes match results, 🔼 can crash or corrupt your session, �
 	- Effect: every A record without a name pairs with every B record with an empty name (1,000 × 1,000 gives a million false pairs), which also slows down `clean()` and `rankmatch()`.
 	- Proposed fix: drop rows whose key is `""` or whose name is `NA` before `merge()` (or give them a key that cannot match); update the `nmatch` fixture and add a NEWS entry.
 
+- [ ] ⏫ `cities`: no Greek cities ➕ 2026-10-23
+	- Tested: `harmonize_cities(r, "a", "b", "GR")` stops with "no cities found for this country code"; `detect_address()` likewise. `cities` covers 26 EU countries, all except Greece; `zip_codes` covers all 27.
+	- Cause unknown: the GeoNames export may have lacked Greece, or Greece was dropped when the list was built (the build script is not in the repository).
+	- Proposed fix: add the Greek cities from GeoNames in the same format (official name, alternate names as patterns, `o`, `l`, sorted), with a script in `data-raw/` so the list can be rebuilt. Decide whether to add only Greece or rebuild the whole list from one fresh download.
+
 ## Can crash or corrupt your session
 
 - [ ] 🔼 All functions that call `data()`: package data overwrite objects in your global environment ➕ 2026-10-22
