@@ -22,3 +22,14 @@ test_that("clean falls back to orb_reg for a country without postal codes", {
   expect_equal(out$reg_a, "CH040")
   expect_true(out$reg_sim)
 })
+
+test_that("clean looks postal codes up in each row's own country", {
+  m <- data.frame(id_a = 1:2, id_b = 3:4, name_a = c("ALPHA GMBH", "BETA SP Z O O"), name_b = c("ALPHA GMBH", "BETA SP Z O O"),
+                  lf_a = c("GMBH", "SPZOO"), lf_b = c("GMBH", "SPZOO"), zip_a = c("80331", "00-002"), zip_b = c("80331", "00-002"),
+                  city_a = c("MUNICH", "WARSAW"), city_b = c("MUNICH", "WARSAW"), street_a = "X", street_b = "X",
+                  nuts = NA, cc = c("DE", "PL"), stringsAsFactors = FALSE)
+  out <- clean(m, "id_a", "id_b", "name_a", "name_b", "lf_a", "lf_b", "zip_a", "zip_b",
+               "city_a", "city_b", "street_a", "street_b", "nuts", "cc")
+  expect_equal(out$reg_a[order(out$id_a)], c("DE212", "PL911"))
+  expect_true(all(out$reg_sim))
+})

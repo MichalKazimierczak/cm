@@ -20,7 +20,8 @@
 #' @param street_b indicates the name of the variable storing the street address of the entity stored in dataset B
 #' @param orb_reg indicates the name of the variable storing the information about the region of the entity, for instance NUTS3 in Orbis;
 #' used for entity A when its postal code gives no region (code not in the list, or no code)
-#' @param cc indicates the name of the variable storing the information about the country code of the entity
+#' @param cc indicates the name of the variable storing the information about the country code of the entity;
+#' the data may hold several countries, and each postal code is looked up in the list of its row's country
 #' @returns an original dataframe with additional variables with similarity scores
 #' @examples
 #' @export
@@ -75,11 +76,17 @@ clean<-function(r,key_a,key_b,name_a,name_b,lf_a,lf_b,zip_a,zip_b,city_a,city_b,
 
 
   ###then the zip codes
-  cc<-unique(r[,cc])
-  ###one call for both columns, so the postal code table is built once
-  reg<-detect_region(c(r[,zip_a],r[,zip_b]),cc)
-  r$reg_a<-reg[seq_len(nrow(r))]
-  r$reg_b<-reg[nrow(r)+seq_len(nrow(r))]
+  ###look the postal codes up in the list of each row's own country; one call per country for both
+  ###columns, so each country's postal code table is built once (rows without a country get no region)
+  ccs<-as.character(r[,cc])
+  r$reg_a<-rep(NA_character_,nrow(r))
+  r$reg_b<-rep(NA_character_,nrow(r))
+  for(k in unique(ccs[!is.na(ccs)])){
+    i<-which(ccs==k)
+    reg<-detect_region(c(r[i,zip_a],r[i,zip_b]),k)
+    r$reg_a[i]<-reg[seq_along(i)]
+    r$reg_b[i]<-reg[length(i)+seq_along(i)]
+  }
   ###no region from the postal code (code not in the list, or no code): use the region given in dataset A
   r$reg_a<-ifelse(is.na(r$reg_a)|r$reg_a=="",r[,orb_reg],r$reg_a)
   # iso<-unique(data.frame(r[,"iso2"]))

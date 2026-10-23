@@ -90,6 +90,9 @@
   Of 144,041 names in both the old and the new list, 0.66% now give a different city, mostly because of these
   new official names. The list has two new columns, `geonameid` and `population`.
 
+* `clean()` handles data with several countries: each postal code is looked up in the list of its row's
+  country. Before, all codes were looked up with every country code at once, which mixed the lists up.
+
 ## Bug fixes
 
 * `harmonize_cities()`, `detect_address()`, `detect_region()`, `norma_legal()` (and so `norma()` and

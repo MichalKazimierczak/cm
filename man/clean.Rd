@@ -52,7 +52,8 @@ clean(
 \item{orb_reg}{indicates the name of the variable storing the information about the region of the entity, for instance NUTS3 in Orbis;
 used for entity A when its postal code gives no region (code not in the list, or no code)}
 
-\item{cc}{indicates the name of the variable storing the information about the country code of the entity}
+\item{cc}{indicates the name of the variable storing the information about the country code of the entity;
+the data may hold several countries, and each postal code is looked up in the list of its row's country}
 }
 \value{
 an original dataframe with additional variables with similarity scores
