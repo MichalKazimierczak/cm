@@ -19,7 +19,8 @@ clean(
   street_a,
   street_b,
   orb_reg,
-  cc
+  cc,
+  p = 0
 )
 }
 \arguments{
@@ -54,6 +55,10 @@ used for entity A when its postal code gives no region (code not in the list, or
 
 \item{cc}{indicates the name of the variable storing the information about the country code of the entity;
 the data may hold several countries, and each postal code is looked up in the list of its row's country}
+
+\item{p}{prefix weight of the Jaro-Winkler similarity used for names, legal forms, cities and streets: 0 (the
+default) gives the Jaro similarity, as in earlier versions; 0.1 gives the usual Jaro-Winkler similarity, which scores
+strings with a common start higher (maximum 0.25)}
 }
 \value{
 an original dataframe with additional variables with similarity scores

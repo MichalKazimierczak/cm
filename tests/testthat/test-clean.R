@@ -44,3 +44,15 @@ test_that("clean works when the key columns are named key_a and key_b", {
   expect_equal(out$one_to_one, x$output$one_to_one)
   expect_equal(out$key_b, x$output$id_b)
 })
+
+test_that("clean uses Jaro by default and Jaro-Winkler with p", {
+  x <- fixture("clean")
+  args <- list(x$input, "id_a", "id_b", "name_a", "name_b", "lf_a", "lf_b", "zip_a", "zip_b",
+               "city_a", "city_b", "street_a", "street_b", "nuts", "cc")
+  jaro <- do.call(clean, args)
+  jw <- do.call(clean, c(args, p = 0.1))
+  jaro_ref <- stringdist::stringsim(toupper(jaro$city_a), toupper(jaro$city_b), method = "jw")
+  expect_equal(jaro$city_sim, ifelse(is.na(jaro_ref), 0, jaro_ref))
+  expect_true(all(jw$name_sim >= jaro$name_sim))
+  expect_gt(jw$city_sim[1], jaro$city_sim[1])
+})

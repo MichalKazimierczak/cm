@@ -109,6 +109,11 @@
   (AG), `STIFTUNG` (FOUNDATION, as for CH), `ANSTALT` and `TRUST REG` / `TREUUNTERNEHMEN`. The LI list had only
   the French forms, so `MUELLER AG` kept `AG` in the name. The change is made by `data-raw/legal_forms_li.R`.
 
+* `clean()` has a new argument `p`, the prefix weight of the Jaro-Winkler similarity used for names, legal
+  forms, cities and streets. The default `p = 0` gives the Jaro similarity, as before (the code said
+  "jw" and a comment said Levenshtein, but the result was Jaro); `p = 0.1` gives the usual Jaro-Winkler
+  similarity.
+
 ## Bug fixes
 
 * `rankmatch()` works without a `bvd_is_root` column (an Orbis field no CleanMatch function creates): the term

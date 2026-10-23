@@ -22,12 +22,15 @@
 #' used for entity A when its postal code gives no region (code not in the list, or no code)
 #' @param cc indicates the name of the variable storing the information about the country code of the entity;
 #' the data may hold several countries, and each postal code is looked up in the list of its row's country
+#' @param p prefix weight of the Jaro-Winkler similarity used for names, legal forms, cities and streets: 0 (the
+#' default) gives the Jaro similarity, as in earlier versions; 0.1 gives the usual Jaro-Winkler similarity, which scores
+#' strings with a common start higher (maximum 0.25)
 #' @returns an original dataframe with additional variables with similarity scores
 #' @examples
 #' @export
 
 
-clean<-function(r,key_a,key_b,name_a,name_b,lf_a,lf_b,zip_a,zip_b,city_a,city_b,street_a,street_b,orb_reg,cc){
+clean<-function(r,key_a,key_b,name_a,name_b,lf_a,lf_b,zip_a,zip_b,city_a,city_b,street_a,street_b,orb_reg,cc,p=0){
 
   ##create internal function which separates unique matches from the multiple matches
   ###(base R: data.table's get(key_a) found a column named "key_a" instead of the argument)
@@ -58,21 +61,21 @@ clean<-function(r,key_a,key_b,name_a,name_b,lf_a,lf_b,zip_a,zip_b,city_a,city_b,
   }
 
 
-  ###compare the Leventshein distance between original names of matched entities
+  ###compare the original names of matched entities with the Jaro similarity (Jaro-Winkler when p > 0)
 
-  r$name_sim<-stringdist::stringsim(toupper(r[,name_a]),toupper(r[,name_b]),method="jw")
+  r$name_sim<-stringdist::stringsim(toupper(r[,name_a]),toupper(r[,name_b]),method="jw",p=p)
 
 
   ####compare legal forms of the matched entities
-  r$lf_sim<-stringdist::stringsim(r[,lf_a],r[,lf_b],method="jw")
+  r$lf_sim<-stringdist::stringsim(r[,lf_a],r[,lf_b],method="jw",p=p)
   r$lf_sim<-ifelse(is.na(r$lf_sim),0,r$lf_sim)
 
   ###compare cities of the matched entities
-  r$city_sim<-stringdist::stringsim(toupper(r[,city_a]),toupper(r[,city_b]),method="jw")
+  r$city_sim<-stringdist::stringsim(toupper(r[,city_a]),toupper(r[,city_b]),method="jw",p=p)
   r$city_sim<-ifelse(is.na(r$city_sim),0,r$city_sim)
 
   ###and street address
-  r$street_sim<-stringdist::stringsim(toupper(r[,street_a]),toupper(r[,street_b]),method="jw")
+  r$street_sim<-stringdist::stringsim(toupper(r[,street_a]),toupper(r[,street_b]),method="jw",p=p)
   r$street_sim<-ifelse(is.na(r$street_sim),0,r$street_sim)
 
 
