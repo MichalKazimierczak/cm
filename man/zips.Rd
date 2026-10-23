@@ -16,8 +16,9 @@ A data frame with 805,026 rows and 3 columns, covering 27 EU countries:
 Eurostat, GISCO: postal codes to NUTS correspondence tables (TERCET),
   \url{https://ec.europa.eu/eurostat/web/gisco/geodata/administrative-units/postal-codes}.
   Copyright European Union, Eurostat; reuse is authorised provided the source is acknowledged
-  (Commission Decision 2011/833/EU). NUTS version [to confirm], file version [to confirm], downloaded
-  [date to confirm]. Check the conditions for individual countries on the GISCO download page.
+  (Commission Decision 2011/833/EU). NUTS version: 2021 or later (the Croatian regions HR050 and
+  HR061 to HR065 exist only from NUTS 2021) [exact version to confirm]; file version and download date
+  [to confirm]. Check the conditions for individual countries on the GISCO download page.
 
   Changed from the original: files of all countries combined, columns \code{NUTS3}, \code{CODE} and \code{country_code}
   kept.
