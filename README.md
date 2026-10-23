@@ -5,8 +5,18 @@ matches them, and scores the candidate matches with names, legal forms, cities, 
 
 ## Installation
 
+From GitHub:
+
 ```r
 remotes::install_github("MichalKazimierczak/cm")
+```
+
+From a package file (`CleanMatch_1.0.0.tar.gz`, no compiler or Rtools needed, also on Windows):
+
+```r
+install.packages(c("data.table", "plyr", "stringdist", "stringi", "stringr", "tidyr"))   # dependencies, once
+install.packages("CleanMatch_1.0.0.tar.gz", repos = NULL, type = "source")
+packageVersion("CleanMatch")   # 1.0.0
 ```
 
 Names with accents, or in Greek or Cyrillic, need an R session that uses UTF-8 (the default in R 4.2 and

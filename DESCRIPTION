@@ -1,7 +1,7 @@
 Package: CleanMatch
 Type: Package
 Title: CleanMatch
-Version: 0.1.0
+Version: 1.0.0
 Author: Michał Kazimierczak
 Maintainer: The package maintainer <michal.kazimierczak@euipo.europa.eu>
 Description: Normalises company names from different data sources (legal forms, 'trading as' phrases,

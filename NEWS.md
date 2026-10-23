@@ -1,4 +1,4 @@
-# CleanMatch (development version)
+# CleanMatch 1.0.0
 
 ## Licence
 
@@ -193,3 +193,7 @@ made, before the changes above.
 * `nmatch()` builds the matching key in one pass over the distinct names. About 5 times faster.
   It no longer fails when every name in `b` has the same number of words (0.1.0 stopped with
   "replacement has n rows").
+
+# CleanMatch 0.1.0
+
+* First version.
