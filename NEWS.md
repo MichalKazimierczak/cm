@@ -18,7 +18,9 @@
 * `norma_legal()`, and so `norma()`, removes every weak word of a rule, not only the first one in the
   name: `DIE DELTA HOLDING GMBH` now gives `DELTA` (0.1.0: `DELTA HOLDING`), and `MUELLER BAECKEREI`
   gives `MULLER BACKEREI` (0.1.0: `MULLER BAECKEREI`). Names of the same company from two sources now
-  normalise alike more often.
+  normalise alike more often. The DE, AT and BG rule that turns `UE`, `AE` and `OE` into `U`, `A` and `O`
+  now also applies to every occurrence, including names without umlauts: `MICHAEL` gives `MICHAL`, `BAUER`
+  gives `BAUR` (0.1.0 changed only the first occurrence).
 
 * `norma()` and `norma_trans()` transliterate only names that contain Greek or Cyrillic letters. The
   test for "Greek or Cyrillic" (`[Α-ΩA-Я]`) began with a Latin `A`, so it covered every Latin capital and
@@ -56,7 +58,8 @@
 
 ## Performance
 
-These changes keep the output of 0.1.0; the tests in `tests/testthat/` check it.
+These changes on their own keep the output of 0.1.0; the tests in `tests/testthat/` checked it when they were
+made, before the changes above.
 
 * `harmonize_cities()` looks city names up in a table instead of running one regex per city of the
   country over all rows (41,031 for DE). It also cleans each distinct name once. About 100 times
