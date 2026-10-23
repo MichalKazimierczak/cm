@@ -6,6 +6,6 @@
 \alias{CleanMatch-package}
 \title{CleanMatch: CleanMatch}
 \description{
-Package normalizes names in different datasources, helps to match and disambiguate matches
+Normalises company names from different data sources (legal forms, 'trading as' phrases, transliteration, cities, postal codes), matches them and scores the candidate matches.
 }
 \keyword{internal}

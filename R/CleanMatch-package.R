@@ -1,4 +1,5 @@
 #' @keywords internal
+#' @importFrom utils globalVariables
 "_PACKAGE"
 
 ## data.table is used through data.table::data.table() only; this tells data.table that the
