@@ -66,6 +66,10 @@
   `MULLER`; `GUENTHER` gives `GUNTHER`; `MINERALOEL` gives `MINERALOL`). Rare cases such as `POET`,
   `BLUE` or `MICHAELA` are still shortened. The change is made by `data-raw/weak_words_umlaut_exceptions.R`.
 
+* `detect_region()` gives no region (`""`, or `NA` for a missing code) for a country without postal codes
+  in `zip_codes`, such as CH or GB, instead of stopping. `clean()` therefore works for these countries
+  and uses the region from dataset A (`orb_reg`); before, it stopped with an error.
+
 ## Bug fixes
 
 * `harmonize_cities()`, `detect_address()`, `detect_region()`, `norma_legal()` (and so `norma()` and

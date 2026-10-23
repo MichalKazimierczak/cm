@@ -13,7 +13,12 @@ detect_region<-function(pc,cc){
   zips<-CleanMatch::zips
   zipc<-zips[zips$country_code==cc,]
 
-  if(nrow(zipc)==0) stop("detect_region: no postal codes for country ",cc)
+  ###no postal codes for this country (for example CH or GB): no region, so that clean() can use its fallback
+  if(nrow(zipc)==0){
+    reg<-rep("",length(pc))
+    reg[is.na(pc)]<-NA
+    return(reg)
+  }
   if(any(stringr::str_detect(zipc$CODE,"[^A-Z0-9 -]"))) stop("detect_region: postal codes with regex characters")
 
   ###A code is found in pc when a piece of pc as long as the code equals it, so look those pieces up
