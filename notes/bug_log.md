@@ -88,6 +88,12 @@ Priority: ⏫ changes match results, 🔼 can crash or corrupt your session, �
 	- The comment above `name_sim` says "Leventshein distance", a third method.
 	- Proposed fix: add an argument `p = 0` to `clean()` and pass it to the four `stringsim()` calls; document it (`p = 0.1` for Jaro-Winkler, maximum 0.25). The default `p = 0` keeps today's results; decide whether to change the default to 0.1, which changes scores. Correct the comment.
 
+- [ ] ⏫ `norma_legal`: weak words are removed only once per rule ➕ 2026-10-23
+	- Tested (DE): `DIE DELTA HOLDING GMBH` becomes `DELTA HOLDING` (`DIE` removed, `HOLDING` kept); `DELTA GROUP HOLDING GMBH` becomes `DELTA HOLDING`; `MUELLER BAECKEREI GMBH` becomes `MULLER BAECKEREI` (only the first `UE` converted).
+	- Cause: the weak-word loop uses `str_replace()`, which replaces only the first match, and each rule is one long pattern (`GROUP|HOLDING|DIE|...`). Same in 0.1.0.
+	- Effect: names of the same company from two sources normalise differently when they hold a different number of weak words or umlaut spellings, so exact matching in `nmatch()` can miss them.
+	- Proposed fix: `str_replace_all()` in the weak-word loop; check the rules whose replacement is not empty (DE `(U|A|O)E` → `\\1`) still give the intended result; update the `norma` and `norma_legal` fixtures and add a NEWS entry.
+
 ## Can crash or corrupt your session
 
 - [ ] 🔼 All functions that call `data()`: package data overwrite objects in your global environment ➕ 2026-10-22
