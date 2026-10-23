@@ -51,3 +51,10 @@ test_that("the umlaut rule applies in DE, AT, CH and LI but not in BG", {
   x <- norma_legal(d, "name", "country")
   expect_equal(x$name[order(x$key)], c(rep("MULLER BACKEREI", 4), "BOEV"))
 })
+
+test_that("the umlaut rules skip common spots where UE, AE, OE are not umlauts", {
+  nm <- c("MICHAEL BAUER", "NEUE MEDIEN", "SAMUEL STEUER", "QUELLE ISRAEL", "MUELLER GUENTHER", "MINERALOEL WAELDER")
+  d <- data.frame(key = seq_along(nm), name = paste(nm, "GMBH"), country = "DE", stringsAsFactors = FALSE)
+  expect_equal(norma_legal(d, "name", "country")$name,
+               c("MICHAEL BAUER", "NEUE MEDIEN", "SAMUEL STEUER", "QUELLE ISRAEL", "MULLER GUNTHER", "MINERALOL WALDER"))
+})

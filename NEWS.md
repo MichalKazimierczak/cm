@@ -18,9 +18,8 @@
 * `norma_legal()`, and so `norma()`, removes every weak word of a rule, not only the first one in the
   name: `DIE DELTA HOLDING GMBH` now gives `DELTA` (0.1.0: `DELTA HOLDING`), and `MUELLER BAECKEREI`
   gives `MULLER BACKEREI` (0.1.0: `MULLER BAECKEREI`). Names of the same company from two sources now
-  normalise alike more often. The DE, AT and BG rule that turns `UE`, `AE` and `OE` into `U`, `A` and `O`
-  now also applies to every occurrence, including names without umlauts: `MICHAEL` gives `MICHAL`, `BAUER`
-  gives `BAUR` (0.1.0 changed only the first occurrence).
+  normalise alike more often. This includes the rule for umlauts written as `UE`, `AE`, `OE` (see the
+  next entries), which 0.1.0 applied only to the first occurrence in a name.
 
 * `norma()` and `norma_trans()` transliterate only names that contain Greek or Cyrillic letters. The
   test for "Greek or Cyrillic" (`[Α-ΩA-Я]`) began with a Latin `A`, so it covered every Latin capital and
@@ -59,6 +58,13 @@
   shortened them (`BOEV` gave `BOV`). LU is left out because its rules are also used for BX (Benelux),
   where Dutch names would be changed (`HOEK` would give `HOK`). The change is made by
   `data-raw/weak_words_umlaut_countries.R`.
+
+* The umlaut rule no longer shortens the most common German words and names where `UE`, `AE`, `OE`
+  are not umlauts. `UE` stays after `A`, `E` and `Q` (`BAUER`, `NEUE`, `FEUER`, `STEUER`, `QUELLE`) and in a
+  final `-UEL` (`SAMUEL`, `MANUEL`); `AE` stays in a final `-AEL` (`MICHAEL`, `ISRAEL`, `RAFAEL`). Umlauts
+  written as `UE`, `AE`, `OE` still match umlauts already removed (`MUELLER`, `MÜLLER` and `MULLER` all give
+  `MULLER`; `GUENTHER` gives `GUNTHER`; `MINERALOEL` gives `MINERALOL`). Rare cases such as `POET`,
+  `BLUE` or `MICHAELA` are still shortened. The change is made by `data-raw/weak_words_umlaut_exceptions.R`.
 
 ## Bug fixes
 

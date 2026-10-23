@@ -17,7 +17,9 @@ A data frame with 87 rows (39 countries) and 4 columns:
 Compiled for CleanMatch by Michal Kazimierczak; part of the package, licensed under the EUPL 1.2.
   Later corrections are made by scripts in \code{data-raw/}: \code{weak_words_gr_boundaries.R} added word
   boundaries to the Greek rules; \code{weak_words_umlaut_countries.R} limited the umlaut rule
-  (\code{UE}, \code{AE}, \code{OE} to \code{U}, \code{A}, \code{O}) to DE, AT, CH and LI (2026-10-23).
+  (\code{UE}, \code{AE}, \code{OE} to \code{U}, \code{A}, \code{O}) to DE, AT, CH and LI;
+  \code{weak_words_umlaut_exceptions.R} split it into three rules that skip common spots where these
+  letters are not umlauts (BAUER, NEUE, MICHAEL) (2026-10-23).
 }
 \usage{
 data(weak_words_regex)
