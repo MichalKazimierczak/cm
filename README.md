@@ -9,7 +9,9 @@ matches them, and scores the candidate matches with names, legal forms, cities, 
 remotes::install_github("MichalKazimierczak/cm")
 ```
 
-The package needs an R session that uses UTF-8 (the default in R 4.2 and later, also on Windows).
+Names with accents, or in Greek or Cyrillic, need an R session that uses UTF-8 (the default in R 4.2 and
+later, also on Windows; check with `l10n_info()$"UTF-8"`). In other sessions such names are read byte by byte
+and do not match (`München` gives `M C BC NCHEN`). The package code itself is ASCII only.
 
 ## Licence
 
