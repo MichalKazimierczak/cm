@@ -89,7 +89,7 @@ NULL
 #' Patterns are applied in the order of \code{order}, so longer forms (\code{GEMEINNUETZIGE AKTIENGESELLSCHAFT}) come before
 #' shorter ones they contain (\code{AKTIENGESELLSCHAFT}).
 #'
-#' @format A data frame with 671 rows (38 countries) and 4 columns:
+#' @format A data frame with 676 rows (38 countries) and 4 columns:
 #' \describe{
 #'   \item{Country}{country code}
 #'   \item{to.replace}{regex matching the legal form in a normalised name}
@@ -97,6 +97,8 @@ NULL
 #'   \item{order}{order in which the patterns are applied}
 #' }
 #' @source Compiled for CleanMatch by Michal Kazimierczak; part of the package, licensed under the EUPL 1.2.
+#'   Later corrections are made by scripts in \code{data-raw/}: \code{legal_forms_li.R} added the German-language
+#'   legal forms of Liechtenstein (AG, Stiftung, Anstalt, Trust reg.) (2026-10-23).
 #' @name l
 #' @aliases legal_forms_regex
 #' @usage data(legal_forms_regex)

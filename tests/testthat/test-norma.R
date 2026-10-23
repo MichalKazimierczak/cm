@@ -69,3 +69,11 @@ test_that("norma_short splits at every phrase and finds the repaired phrases", {
   expect_setequal(trimws(x$name[x$key == 4]), c("ABC WITH DISTINCTIVE TITLE XYZ", "ABC", "XYZ"))
   expect_equal(x$name[x$key == 5], "BANK ZACHODNI WBK")
 })
+
+test_that("Liechtenstein legal forms in German are recognised", {
+  d <- data.frame(key = 1:4, name = c("MUELLER BAECKEREI AG", "ALPHA ANSTALT", "BETA STIFTUNG", "GAMMA TRUST REG"),
+                  country = "LI", stringsAsFactors = FALSE)
+  x <- norma_legal(d, "name", "country")
+  expect_equal(x$name, c("MULLER BACKEREI", "ALPHA", "BETA", "GAMMA"))
+  expect_equal(trimws(sub(";\\s*$", "", x$lf)), c("AG", "ANSTALT", "FOUNDATION", "TRUST REG"))
+})

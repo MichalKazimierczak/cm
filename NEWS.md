@@ -105,6 +105,10 @@
 * `norma_short()` splits a name at every phrase: `A TRADING AS B TRADING AS C` gives `A`, `B` and `C`
   (0.1.0: `A TRADING AS B` and `C`). The parts no longer keep a trailing space.
 
+* `norma_legal()` recognises the German-language legal forms of Liechtenstein: `AG` and `AKTIENGESELLSCHAFT`
+  (AG), `STIFTUNG` (FOUNDATION, as for CH), `ANSTALT` and `TRUST REG` / `TREUUNTERNEHMEN`. The LI list had only
+  the French forms, so `MUELLER AG` kept `AG` in the name. The change is made by `data-raw/legal_forms_li.R`.
+
 ## Bug fixes
 
 * `detect_address()` no longer overwrites and deletes columns of yours named `city` or `miasto`, which it
