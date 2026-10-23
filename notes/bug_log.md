@@ -20,22 +20,25 @@ Priority: ⏫ changes match results, 🔼 can crash or corrupt your session, �
 
 ## Change match results
 
-- [ ] ⏫ `norma` / `norma_trans`: Latin-script names from BG, CY and GR go through transliteration ➕ 2026-10-22
+- [x] ⏫ `norma` / `norma_trans`: Latin-script names from BG, CY and GR go through transliteration ➕ 2026-10-22 ✅ 2026-10-23
 	- Tested: `"Maya Khristov Trading OOD"` (BG) becomes `MAA HRISTOV TRADING`; `"Kiyashko Yulia EOOD"` becomes `KIASHKO ULIA`.
 	- Cause: in `[Α-ΩA-Я]` the `A` is the Latin letter (U+0041), so the range runs from Latin A to Cyrillic Я and covers every Latin capital. Every BG name then gets the rules `YA→A`, `YU→U`, `IY→I`, `KH→H`.
 	- Same mistake in `norma.R` lines 31, 32 and 85 and `norma_trans.R` line 22.
 	- Fix: use Cyrillic `А-Я` (U+0410) and `а-я`, or `\\p{Cyrillic}` and `\\p{Greek}`.
+	- Fixed in commit `790495e`: transliteration only for names with `[\\p{Greek}\\p{Cyrillic}]`; `Maya Khristov Trading OOD` now gives `MAYA KHRISTOV TRADING`; test added.
 - [ ] ⏫ `norma_short`: four 'trading as' phrases never match ➕ 2026-10-22
 	- Tested: "OPERANDO COMO", "WITH DISTINCTIVE TITLE", "H O D N" (T H O D N) and "HODN" never split a name.
 	- Cause: the pattern string breaks across lines, so the alternatives that start a line need a newline character before them; `"\bHODN\b"` in a normal R string holds backspace characters, not word boundaries.
 	- Fix: build the pattern from a character vector, `paste(phrases, collapse = "|")`, and write `\\bHODN\\b`.
 	- Also: the group starts with `(:?`, probably meant as `(?:`; it works only because the code counts it as group 2.
-- [ ] ⏫ `norma_legal`: rows from countries without a legal-form list disappear ➕ 2026-10-22
+- [x] ⏫ `norma_legal`: rows from countries without a legal-form list disappear ➕ 2026-10-22 ✅ 2026-10-23
 	- Tested: of `DE`, `FR` and `US` rows, the `US` row is missing from the output.
 	- Fix: after the country loop, add back the rows of `x` whose country is not in `lis_co`, with `lf = ""`.
-- [ ] ⏫ `harmonize_cities`, `detect_address`, `norma`: character ranges `a-я` and `A-Я` start with Latin letters ➕ 2026-10-22
+	- Fixed in commit `e395b68`: rows of countries without a list, or without a country, are kept after the other rows with an empty legal form; test added.
+- [x] ⏫ `harmonize_cities`, `detect_address`, `norma`: character ranges `a-я` and `A-Я` start with Latin letters ➕ 2026-10-22 ✅ 2026-10-23
 	- The class `[^a-zA-Zα-ωΑ-Ωa-яA-Я]` keeps most characters between U+0041 and U+044F, such as `°`, `©`, `×`, `¿`, not only letters.
 	- Fix: use Cyrillic `а-яА-Я`; decide whether accented Latin letters should be kept (they are now, which helps the later `latin-ascii` step), and if so name them explicitly (`\\p{L}`).
+	- Fixed in commit `790495e`: cleaning keeps `\\p{Latin}`, `\\p{Greek}`, `\\p{Cyrillic}` (and digits where kept before); accented Latin letters are still kept for the `latin-ascii` step. Side effects: symbols such as `°` become spaces; lowercase Cyrillic letters outside `а-я` (`ё`, `і`, `ј`) are kept, so `пфаффенгофен ан дер ільм` now matches PFAFFENHOFEN AN DER ILM instead of the wrong city PFAFFENHOFEN. R code is now ASCII only. Tests added.
 - [ ] ⏫ `detect_address`: removing the city glues the words around it ➕ 2026-10-22
 	- From the code: the pattern `(^| )CITY( |$)` is replaced by `""`, so both spaces go: `"... 5 MUNICH CENTER"` would become `"... 5CENTER"` in the street column.
 	- Fix: replace with `" "` and squish the result.
@@ -77,11 +80,12 @@ Priority: ⏫ changes match results, 🔼 can crash or corrupt your session, �
 	- Tested: `1012AB` gives `""`; the list stores `1012 AB`.
 	- Proposed fix: for NL, insert the space before the lookup (`1012AB` → `1012 AB`), for example `stringr::str_replace_all(u,"\\b([0-9]{4}) ?([A-Z]{2})\\b","\\1 \\2")`. Check that `1012 ABC` still gives `""`.
 
-- [ ] ⏫ `clean`: the fallback to `orb_reg` is skipped when the postal code of A is missing ➕ 2026-10-23
+- [x] ⏫ `clean`: the fallback to `orb_reg` is skipped when the postal code of A is missing ➕ 2026-10-23 ✅ 2026-10-23
 	- Tested: a pair with `zip_a = NA`, `orb_reg = "DE300"` and B in DE300 gets `reg_a = NA` and `reg_sim = FALSE`, although both are in DE300.
 	- Cause: `detect_region()` returns `""` for a postal code not in the list but `NA` for a missing one; the fallback `ifelse(r$reg_a=="",r[,orb_reg],r$reg_a)` only catches `""`, because `NA == ""` is `NA`.
 	- Effect: true matches whose A record has no postal code lose the `reg_sim` part of their score in `rankmatch()`.
 	- Proposed fix: `r$reg_a<-ifelse(is.na(r$reg_a)|r$reg_a=="",r[,orb_reg],r$reg_a)`; update the `clean` fixture and add a NEWS entry.
+	- Fixed in commit `03235cf`: `is.na(reg_a) | reg_a == ""`; the `clean` fixture changes in exactly that row (`reg_a` DE300, `reg_sim` TRUE); test added.
 
 - [ ] ⏫ `clean`: similarities are Jaro, not Jaro-Winkler, and `p` cannot be set ➕ 2026-10-23
 	- Tested: `stringsim(..., method = "jw")` uses the default `p = 0`, which is pure Jaro similarity. Jaro-Winkler, which adds a bonus for a common start (useful for names), needs `p > 0`, usually `0.1`: `MUNCHEN` / `MUENCHEN` scores 0.863 with `p = 0` and 0.890 with `p = 0.1`.
@@ -89,17 +93,19 @@ Priority: ⏫ changes match results, 🔼 can crash or corrupt your session, �
 	- The comment above `name_sim` says "Leventshein distance", a third method.
 	- Proposed fix: add an argument `p = 0` to `clean()` and pass it to the four `stringsim()` calls; document it (`p = 0.1` for Jaro-Winkler, maximum 0.25). The default `p = 0` keeps today's results; decide whether to change the default to 0.1, which changes scores. Correct the comment.
 
-- [ ] ⏫ `norma_legal`: weak words are removed only once per rule ➕ 2026-10-23
+- [x] ⏫ `norma_legal`: weak words are removed only once per rule ➕ 2026-10-23 ✅ 2026-10-23
 	- Tested (DE): `DIE DELTA HOLDING GMBH` becomes `DELTA HOLDING` (`DIE` removed, `HOLDING` kept); `DELTA GROUP HOLDING GMBH` becomes `DELTA HOLDING`; `MUELLER BAECKEREI GMBH` becomes `MULLER BAECKEREI` (only the first `UE` converted).
 	- Cause: the weak-word loop uses `str_replace()`, which replaces only the first match, and each rule is one long pattern (`GROUP|HOLDING|DIE|...`). Same in 0.1.0.
 	- Effect: names of the same company from two sources normalise differently when they hold a different number of weak words or umlaut spellings, so exact matching in `nmatch()` can miss them.
 	- Proposed fix: `str_replace_all()` in the weak-word loop; check the rules whose replacement is not empty (DE `(U|A|O)E` → `\\1`) still give the intended result; update the `norma` and `norma_legal` fixtures and add a NEWS entry.
+	- Fixed in commit `327d644`: `str_replace_all()` in the weak-word loop; test added. See the new entry on the `(U|A|O)E` rule.
 
-- [ ] ⏫ `nmatch`: a missing name matches every empty name ➕ 2026-10-23
+- [x] ⏫ `nmatch`: a missing name matches every empty name ➕ 2026-10-23 ✅ 2026-10-23
 	- Tested: with `sort = TRUE` (the default), an A record with name `NA` is paired with a B record with name `""` (key `""` on both sides).
 	- Cause: `sort()` drops `NA`, so a missing name becomes an empty word list and the key `""`, the same as an empty name. With `sort = FALSE` the key is the text `"NA"` and this does not happen.
 	- Effect: every A record without a name pairs with every B record with an empty name (1,000 × 1,000 gives a million false pairs), which also slows down `clean()` and `rankmatch()`.
 	- Proposed fix: drop rows whose key is `""` or whose name is `NA` before `merge()` (or give them a key that cannot match); update the `nmatch` fixture and add a NEWS entry.
+	- Fixed in commit `08371e6`: rows with a missing or empty name are left out before `merge()`; the key is documented in `@details`. Fixture: same pairs, order within a key differs. Test added.
 
 - [ ] ⏫ `cities`: no Greek cities ➕ 2026-10-23
 	- Tested: `harmonize_cities(r, "a", "b", "GR")` stops with "no cities found for this country code"; `detect_address()` likewise. `cities` covers 26 EU countries, all except Greece; `zip_codes` covers all 27.
@@ -115,19 +121,25 @@ Priority: ⏫ changes match results, 🔼 can crash or corrupt your session, �
 		- Only Greece (suggested), or rebuild the whole list from one fresh download: consistent and documented, but changes results for every country, and the original build script is not in the repository.
 		- Greek-script names (`Αθήνα`) match only when the accents are the same (`Αθηνα` does not match), as for the 846 Greek-script names already in the list for other countries. Accent-free variants could be added, but the other countries do not have them; suggested to leave out of the first version.
 
+- [ ] ⏫ `norma_legal` (GR weak words): `ATHINAS?` cuts `ATHINA` out of longer words ➕ 2026-10-23
+	- Tested: `ATHINAIKI ZYTHOPOIIA AE` (GR) gives `IKI ZYTHOPOIIA`. The GR rule `ATHINAS?` has no word boundary and comes before `ATHINAIK[OI]`, so it removes `ATHINA` from `ATHINAIKI` and leaves `IKI`. Same in 0.1.0.
+	- Proposed fix: add word boundaries to the GR weak words (`\\bATHINAS?\\b`, `\\bATHINAIK[OI]\\b`, also `\\bGREECE\\b`, `\\bGREEK\\b`, `\\bINTERNATIONAL\\b`, `\\bATHENS\\b`), or move `ATHINAIK[OI]` before `ATHINAS?`; rule 4 also starts with `\\H` instead of `\\b`. Changes `weak_words_regex`.
+
 ## Can crash or corrupt your session
 
-- [ ] 🔼 All functions that call `data()`: package data overwrite objects in your global environment ➕ 2026-10-22
+- [x] 🔼 All functions that call `data()`: package data overwrite objects in your global environment ➕ 2026-10-22 ✅ 2026-10-23
 	- Tested: after `norma()`, the objects `l` and `w` exist in the global environment. `data()` loads into the global environment by default; the functions also overwrite `cities`, `zips` and `pc`.
 	- Fix: with `LazyData: true`, refer to the data directly (`cities`, or `CleanMatch::cities`), and give the objects the names of their files (`zip_codes` holds `zips`, `postal_codes_regex` holds `pc`, `legal_forms_regex` holds `l`, `weak_words_regex` holds `w`).
+	- Fixed in commit `d38f990`: the functions read `CleanMatch::cities`, `::zips`, `::pc`, `::l`, `::w` into local variables; test checks the global environment is untouched. Renaming the objects to match their file names is still open (it would change `data()` for users).
 - [ ] 🔼 `clean`: fails when a key column is named `key_a` or `key_b` ➕ 2026-10-22
 	- Tested: `get(key_a)` inside `data.table` finds the column, not the argument: "invalid first argument".
 	- Fix: `data.table(d)[, .(n = uniqueN(.SD[[1]])), by = key_b, .SDcols = key_a]`, or base R `tapply`.
-- [ ] 🔼 `harmonize_cities`: wrong name for the new columns ➕ 2026-10-22
+- [x] 🔼 `harmonize_cities`: wrong name for the new columns ➕ 2026-10-22 ✅ 2026-10-23
 	- Tested: `str_detect(city_a, colnames(r))` has its arguments swapped; it selects every column whose name appears inside `city_a`, and the first one gives the name.
 	- With columns `city` and `city_orbis`, both new columns are named `city_harmonized`; `r$city_harmonized` then returns only the first, so the second is silently lost, and a later `clean(..., "city_harmonized", "city_harmonized", ...)` would compare a column with itself (city similarity 1 for every pair).
 	- With an extra column `a` (before `city_a`), the new column is named `a_harmonized`. The only sign is the warning "number of items to replace is not a multiple of replacement length".
 	- Fix: `paste0(city_a, "_harmonized")`.
+	- Fixed in commit `a47a85b`: names are `paste0(city_a, "_harmonized")` and `paste0(city_b, "_harmonized")`; test added.
 - [ ] 🔼 `detect_address`: deletes your columns named `city` or `miasto` ➕ 2026-10-22
 	- From the code: it uses both as scratch columns and removes them at the end.
 	- Fix: keep the values in local vectors.
@@ -144,6 +156,9 @@ Priority: ⏫ changes match results, 🔼 can crash or corrupt your session, �
 
 ## Packaging and tidying
 
+- [ ] 🔽 Weak-word rule `(U|A|O)E` → `\\1` (DE, AT, BG) also changes names without umlauts ➕ 2026-10-23
+	- Tested: `MICHAEL` → `MICHAL`, `BAUER` → `BAUR`, `ISRAEL` → `ISRAL`, `MANUEL` → `MANUL`. Since commit `327d644` the rule applies to every occurrence; before, only the first one (so `MICHAEL MUELLER` kept `MUELLER`).
+	- Both datasets are normalised the same way, so exact matching is mostly unaffected, but different names can become identical (MICHAEL and MICHAL). Decide whether to limit the rule (for example to `UE`, or to names that come from umlauts) and whether it belongs in the BG list.
 - [ ] 🔽 `nmatch`: the comment at the top (lines 16 to 19) about transliteration standards was copied from `norma_trans()`; replace it with one that describes `nmatch()` ➕ 2026-10-23
 - [ ] 🔽 `DESCRIPTION`: `stringdist` and `plyr` are used but missing from `Imports` (`R CMD check` stops with an ERROR) ➕ 2026-10-22
 - [x] 🔽 `DESCRIPTION`: `License:` was empty (`R CMD check` stopped with an ERROR) ➕ 2026-10-22 ✅ 2026-10-23
@@ -158,6 +173,7 @@ Priority: ⏫ changes match results, 🔼 can crash or corrupt your session, �
 	- `zips`: NUTS version, TERCET file version and download date; check the GISCO conditions for individual countries.
 - [ ] 🔽 `cities` data: 2,272 keys point to more than one city in the same country (AT `ALTENMARKT`: 4) and the first row wins silently; some entries are junk (a Wikipedia URL) ➕ 2026-10-22
 - [ ] 🔽 The regexes need a UTF-8 R session (Greek and Cyrillic ranges); R 4.2 or later on Windows is UTF-8. Say so in the README, or write the ranges as `\\u` escapes ➕ 2026-10-22
+	- Since commit `790495e` the R code is ASCII only (`\\p{Latin}`, `\\p{Greek}`, `\\p{Cyrillic}`), so the code itself no longer depends on the session encoding; input data with non-ASCII names still needs UTF-8 to be read correctly. Say so in the README (done in `README.md`), then close.
 - [ ] 🔽 `norma_trans`: `if(nrow(r_trans!=0))` has the bracket in the wrong place; it works by accident ➕ 2026-10-22
 - [ ] 🔽 `clean`: the `ifelse(is.na(...))` lines for `city_sim` and `street_sim` appear twice ➕ 2026-10-22
 - [ ] 🔽 `.Rhistory` and `.Rproj.user/` are tracked in git; add them to `.gitignore` ➕ 2026-10-22
