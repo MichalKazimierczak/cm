@@ -33,3 +33,14 @@ test_that("clean looks postal codes up in each row's own country", {
   expect_equal(out$reg_a[order(out$id_a)], c("DE212", "PL911"))
   expect_true(all(out$reg_sim))
 })
+
+test_that("clean works when the key columns are named key_a and key_b", {
+  x <- fixture("clean")
+  m <- x$input
+  names(m)[names(m) == "id_a"] <- "key_a"
+  names(m)[names(m) == "id_b"] <- "key_b"
+  out <- clean(m, "key_a", "key_b", "name_a", "name_b", "lf_a", "lf_b", "zip_a", "zip_b",
+               "city_a", "city_b", "street_a", "street_b", "nuts", "cc")
+  expect_equal(out$one_to_one, x$output$one_to_one)
+  expect_equal(out$key_b, x$output$id_b)
+})

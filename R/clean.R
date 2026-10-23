@@ -30,10 +30,13 @@
 clean<-function(r,key_a,key_b,name_a,name_b,lf_a,lf_b,zip_a,zip_b,city_a,city_b,street_a,street_b,orb_reg,cc){
 
   ##create internal function which separates unique matches from the multiple matches
+  ###(base R: data.table's get(key_a) found a column named "key_a" instead of the argument)
   filter<-function(d,key_a,key_b){
-    st<-data.table::data.table(d)[,list(n=data.table::uniqueN(get(key_a))),by=key_b]
-    st<-data.frame(st)
-    dd<-d[d[,key_b]%in%st[st$n==1,key_b],]
+    ###number of different A entities matched to each B entity (a missing key counts as one value)
+    p<-unique(data.frame(a=d[,key_a],b=d[,key_b]))
+    n<-table(p$b,useNA="ifany")
+    one<-names(n)[n==1]
+    dd<-d[as.character(d[,key_b])%in%one,]
     return (data.frame(dd))
   }
 

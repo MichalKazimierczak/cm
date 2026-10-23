@@ -111,6 +111,9 @@
 
 ## Bug fixes
 
+* `clean()` works when the key columns are literally named `key_a` or `key_b`; it stopped with
+  "invalid first argument".
+
 * `detect_address()` no longer overwrites and deletes columns of yours named `city` or `miasto`, which it
   used for its own intermediate results.
 
