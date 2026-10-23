@@ -104,7 +104,16 @@ Priority: ⏫ changes match results, 🔼 can crash or corrupt your session, �
 - [ ] ⏫ `cities`: no Greek cities ➕ 2026-10-23
 	- Tested: `harmonize_cities(r, "a", "b", "GR")` stops with "no cities found for this country code"; `detect_address()` likewise. `cities` covers 26 EU countries, all except Greece; `zip_codes` covers all 27.
 	- Cause unknown: the GeoNames export may have lacked Greece, or Greece was dropped when the list was built (the build script is not in the repository).
-	- Proposed fix: add the Greek cities from GeoNames in the same format (official name, alternate names as patterns, `o`, `l`, sorted), with a script in `data-raw/` so the list can be rebuilt. Decide whether to add only Greece or rebuild the whole list from one fresh download.
+	- Low risk: Greece gives an error today, so adding it cannot make an existing result worse, and no other country changes.
+	- Proposed solution (Greece only):
+		1. Download `cities1000.zip` (cities with 1,000 or more inhabitants, about 10 MB) from GeoNames (<https://download.geonames.org/export/dump/>); the current list (51,301 cities in 26 countries) looks like this export. Needs a go-ahead before downloading.
+		2. Keep the rows with country code `GR`. For each city, one row for the official name and one per alternate name; clean each name as `harmonize_cities()` cleans its input; write it as `(^| )NAME( |$)`; set `o` (official name) and `l` (length); sort official names first, then longest first.
+		3. Add the rows to `cities` and save `data/cities.rda` again (xz compression). `city_lookup()` works per country, so only the order within Greece matters.
+		4. Put the steps in a script in `data-raw/` (standard place for code that builds a dataset; add `^data-raw$` to `.Rbuildignore`), with the download date and file, so the list can be rebuilt; fill the matching placeholder in `R/data.R`.
+		5. Add tests (Athens, Thessaloniki), update `?cities` to 27 countries, add a NEWS entry.
+	- Decisions:
+		- Only Greece (suggested), or rebuild the whole list from one fresh download: consistent and documented, but changes results for every country, and the original build script is not in the repository.
+		- Greek-script names (`Αθήνα`) match only when the accents are the same (`Αθηνα` does not match), as for the 846 Greek-script names already in the list for other countries. Accent-free variants could be added, but the other countries do not have them; suggested to leave out of the first version.
 
 ## Can crash or corrupt your session
 
