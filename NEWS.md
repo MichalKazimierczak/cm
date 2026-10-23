@@ -114,6 +114,17 @@
   "jw" and a comment said Levenshtein, but the result was Jaro); `p = 0.1` gives the usual Jaro-Winkler
   similarity.
 
+* `detect_address()` chooses the city by its position: the place that follows the postal code most closely
+  (or the one just before the code, as in `London SW1A 2AA`); without a postal code, a place directly after a
+  street word (`UL`, `RUE`, `VIA` and others) comes last. Street and district names that are also place names
+  were taken as the city: `ul. Lesna 50, 31-123 Ploty` gave LESNA, now PLOTY; `80331 Muenchen Altstadt` gave
+  ALTSTADT, now MUNICH. In the test addresses, 42 of 150 cities change, all to the right town. Without a
+  postal code a district after the city can still win.
+
+* `detect_address()` no longer takes the last letter of the word before the postal code as a country letter
+  (`London SW1A 2AA` gave `LONDO` and the code `W1A 2AA`; `Berlin 10117` gave `BERLI`). `Cedex` is removed in
+  any case, with its number (`Paris Cedex 01`); before, only `CEDEX` in capitals was.
+
 ## Bug fixes
 
 * All functions that take a table accept tibbles and data.tables as well as data frames; they return a data

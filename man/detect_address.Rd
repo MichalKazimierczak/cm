@@ -27,6 +27,13 @@ the names in \code{cities}) in a free-text address, and puts them into new colum
 The address is cleaned first: Latin, Greek and Cyrillic letters and digits are kept, Latin letters converted to
 ASCII capitals, \code{CEDEX} removed.
 }
+\details{
+When an address holds several place names (a street named after a town, a district after the city),
+the city is the place that follows the postal code most closely, or the one just before the code when none
+follows it (\code{London SW1A 2AA}). Without a postal code, a place directly after a street word (\code{UL},
+\code{RUE}, \code{VIA} and others, see \code{CleanMatch:::street_words}) comes last; otherwise official names,
+longer names and larger places come first, as in \code{\link{harmonize_cities}}.
+}
 \examples{
 r <- data.frame(adr = c("Marienplatz 1, 80331 Muenchen", "Unter den Linden 5, D-10117 Berlin"))
 detect_address(r, "adr", "x", "DE")

@@ -22,18 +22,16 @@ city_lookup<-function(citiesc){
   list(key=key[keep],row=row[keep],max_words=max(lengths(strsplit(key," ",fixed=TRUE))))
 }
 
-#' Find the first matching city pattern for each string
+#' Find all city names in each string, with their positions
 #'
-#' Gives the same result as testing the patterns of `citiesc` one by one, in order, and keeping the first
-#' that matches (with the notes removed by city_lookup()). Each string is split into words and every run
-#' of consecutive words (an n-gram) is looked up in the table. Of all hits, the one with the lowest row in
-#' `citiesc` wins.
+#' Each string is split into words and every run of consecutive words (an n-gram) is looked up in the table.
 #' @param u distinct strings to look up, without NA
 #' @param lk the table returned by city_lookup()
-#' @returns for each string, the row of the matching city in `citiesc`, or NA when nothing matches
+#' @returns a data frame with one row per hit: the string (\code{id}), the row of the city in \code{citiesc}
+#'   (\code{row}) and the positions of its first and last word in the string (\code{from}, \code{to})
 #' @noRd
 
-city_match<-function(u,lk){
+city_hits<-function(u,lk){
   w<-strsplit(u," ",fixed=TRUE)
   k<-lengths(w)
   id<-rep(seq_along(u),k)
@@ -43,6 +41,8 @@ city_match<-function(u,lk){
   gram<-word
   hit_id<-integer(0)
   hit_row<-integer(0)
+  hit_from<-integer(0)
+  hit_n<-integer(0)
   for(n in seq_len(lk$max_words)){
     ###add the word that follows each n-gram; keep only the n-grams that stay inside their string
     if(n>1) gram<-paste(gram,c(word[-seq_len(n-1)],rep("",n-1)))
@@ -52,10 +52,27 @@ city_match<-function(u,lk){
     f<-!is.na(h)
     hit_id<-c(hit_id,id[ok][f])
     hit_row<-c(hit_row,lk$row[h[f]])
+    hit_from<-c(hit_from,pos[ok][f])
+    hit_n<-c(hit_n,rep(n,sum(f)))
   }
-  o<-order(hit_id,hit_row)
-  first<-o[!duplicated(hit_id[o])]
+  data.frame(id=hit_id,row=hit_row,from=hit_from,to=hit_from+hit_n-1L)
+}
+
+#' Find the first matching city pattern for each string
+#'
+#' Gives the same result as testing the patterns of `citiesc` one by one, in order, and keeping the first
+#' that matches (with the notes removed by city_lookup()). Of all hits found by city_hits(), the one with the
+#' lowest row in `citiesc` wins.
+#' @param u distinct strings to look up, without NA
+#' @param lk the table returned by city_lookup()
+#' @returns for each string, the row of the matching city in `citiesc`, or NA when nothing matches
+#' @noRd
+
+city_match<-function(u,lk){
+  h<-city_hits(u,lk)
+  o<-order(h$id,h$row)
+  first<-o[!duplicated(h$id[o])]
   out<-rep(NA_integer_,length(u))
-  out[hit_id[first]]<-hit_row[first]
+  out[h$id[first]]<-h$row[first]
   out
 }
