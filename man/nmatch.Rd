@@ -25,6 +25,12 @@ a new dataframe only with matched pairs of names
 \description{
 This function matches records from different sources. It implements exact match method
 }
+\details{
+The matching key is built from the words of the name: split, sorted (if \code{sort}), repeated words
+dropped (if \code{unique}), and pasted together without spaces, so that spacing variants match
+("AB C" and "A BC" both give "ABC"). Rows with a missing or empty name are left out: they would all share
+the empty key and match each other.
+}
 \examples{
 nmatch(x,y,"xname","yname",sort=T)
 }

@@ -32,6 +32,10 @@
   example `пфаффенгофен ан дер ільм` matched the wrong city (PFAFFENHOFEN), now PFAFFENHOFEN AN DER ILM.
   The R code is now pure ASCII.
 
+* `nmatch()` leaves out rows with a missing or empty name. With `sort = TRUE` (the default) a missing
+  name got the empty key and was paired with every empty name in the other dataset, which could create
+  many false pairs. Matched pairs between real names are unchanged; their order within a key can differ.
+
 ## Performance
 
 These changes keep the output of 0.1.0; the tests in `tests/testthat/` check it.

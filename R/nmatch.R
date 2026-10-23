@@ -7,6 +7,10 @@
 #' @param bname harmonized name in the second dataset
 #' @param sort whether the words in harmonized names should be sorted alphabetically before matching
 #' @param unique whether the duplicate names in harmonized names should be eliminated before matching
+#' @details The matching key is built from the words of the name: split, sorted (if \code{sort}), repeated words
+#' dropped (if \code{unique}), and pasted together without spaces, so that spacing variants match
+#' ("AB C" and "A BC" both give "ABC"). Rows with a missing or empty name are left out: they would all share
+#' the empty key and match each other.
 #' @returns a new dataframe only with matched pairs of names
 #' @examples nmatch(x,y,"xname","yname",sort=T)
 #' @export
@@ -30,6 +34,14 @@ nmatch<-function(a,b,aname,bname,sort=T,unique=T){
   }
   an<-key(a[,aname])
   bn<-key(b[,bname])
+
+  ###leave out missing and empty names: they would all get the key "" and match each other
+  ka<-!is.na(a[,aname])&an!=""
+  kb<-!is.na(b[,bname])&bn!=""
+  a<-a[ka,,drop=FALSE]
+  b<-b[kb,,drop=FALSE]
+  an<-an[ka]
+  bn<-bn[kb]
 
   a[,aname]<-NULL
   b[,bname]<-NULL
