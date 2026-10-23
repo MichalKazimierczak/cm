@@ -15,6 +15,8 @@ A data frame with 87 rows (39 countries) and 4 columns:
 }
 \source{
 Compiled for CleanMatch by Michal Kazimierczak; part of the package, licensed under the EUPL 1.2.
+  Later corrections are made by scripts in \code{data-raw/}: \code{weak_words_gr_boundaries.R} added word
+  boundaries to the Greek rules (2026-10-23).
 }
 \usage{
 data(weak_words_regex)

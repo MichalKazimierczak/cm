@@ -37,3 +37,9 @@ test_that("norma transliterates only names written in Greek or Cyrillic", {
   expect_equal(x$norm_name[x$key == 2], "MAA HRISTOVA")
   expect_equal(x$lf, c("OOD", "OOD"))
 })
+
+test_that("Greek weak words are removed only as whole words", {
+  d <- data.frame(key = 1:4, name = c("ATHINAIKI ZYTHOPOIIA AE", "ANELLADA AE", "GREEKFOOD AE", "ATHINA TRADE AE"),
+                  country = "GR", stringsAsFactors = FALSE)
+  expect_equal(norma_legal(d, "name", "country")$name, c("ZYTHOPOIIA", "ANELLADA", "GREEKFOOD", "TRADE"))
+})

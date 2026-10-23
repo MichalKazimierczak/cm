@@ -48,6 +48,11 @@
   a missing code left `reg_a` as `NA` and `reg_sim` as `FALSE`, lowering the score of true matches in
   `rankmatch()`.
 
+* The Greek weak words in `weak_words_regex` are removed only as whole words. Six rules had no word
+  boundaries and one began with `\H` instead of `\b`, so they cut parts out of longer words:
+  `ATHINAIKI ZYTHOPOIIA` gave `IKI ZYTHOPOIIA` (now `ZYTHOPOIIA`), `GREEKFOOD` gave `FOOD`, `ANELLADA`
+  gave `A`. The change is made by `data-raw/weak_words_gr_boundaries.R`.
+
 ## Bug fixes
 
 * `harmonize_cities()`, `detect_address()`, `detect_region()`, `norma_legal()` (and so `norma()` and
