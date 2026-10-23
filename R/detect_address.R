@@ -12,6 +12,9 @@
 #' \code{GB})
 #' @returns the dataset with three new columns: \code{<prefix>_zip} (postal code, \code{""} if none found),
 #' \code{<prefix>_city} (official name of the city, \code{""} if none found) and \code{<prefix>_street} (the rest)
+#' @examples
+#' r <- data.frame(adr = c("Marienplatz 1, 80331 Muenchen", "Unter den Linden 5, D-10117 Berlin"))
+#' detect_address(r, "adr", "x", "DE")
 #' @export
 
 detect_address<-function(r,address,prefix,cc){

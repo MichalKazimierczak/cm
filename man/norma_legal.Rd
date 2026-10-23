@@ -24,5 +24,6 @@ Treatment is country specific and the algorithm is not dealing with legal forms,
 be associated with countries other than countries of seat.
 }
 \examples{
-norma_legal(df,"name","country_code")
+df <- data.frame(name = c("MUELLER BAECKEREI GMBH", "NOWAK SP Z O O", "ACME INC"), country = c("DE", "PL", "US"))
+norma_legal(df, "name", "country")
 }

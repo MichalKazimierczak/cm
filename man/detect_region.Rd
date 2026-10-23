@@ -21,3 +21,7 @@ Looks postal codes up in \code{zip_codes} (Eurostat TERCET tables) and returns t
 A code is also found inside a longer value (\code{"D-80331"}, \code{"80331 Muenchen"}). For NL, codes written
 without the space or in lower case are found too (\code{"1012ab"}).
 }
+\examples{
+detect_region(c("80331", "D-10115", "99999", NA), "DE")
+detect_region(c("1012 AB", "1012ab"), "NL")
+}

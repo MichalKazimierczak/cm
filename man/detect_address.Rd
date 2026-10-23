@@ -27,3 +27,7 @@ the names in \code{cities}) in a free-text address, and puts them into new colum
 The address is cleaned first: Latin, Greek and Cyrillic letters and digits are kept, Latin letters converted to
 ASCII capitals, \code{CEDEX} removed.
 }
+\examples{
+r <- data.frame(adr = c("Marienplatz 1, 80331 Muenchen", "Unter den Linden 5, D-10117 Berlin"))
+detect_address(r, "adr", "x", "DE")
+}

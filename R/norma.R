@@ -13,8 +13,11 @@
 #' \code{new_col = FALSE}) and, with \code{legal = TRUE}, the standardised legal forms in \code{lf} (several separated
 #' by \code{;}). With \code{short = TRUE}, records with a 'trading as' phrase appear more than once, once per part of
 #' the name
-#' @examples df<-data.frame(name="Andrzej Beata Celina spółka z ograniczoną odpowiedzialnoscią nazwa skrócona ABC sp. z o.o. SP.J",
-#'  country="PL",key=1)
+#' @examples
+#' df <- data.frame(key = 1:3, country = c("PL", "DE", "BG"),
+#'                  name = c("Nowak spolka z ograniczona odpowiedzialnoscia nazwa skrocona NWK sp. z o.o.",
+#'                           "Mueller Baeckerei GmbH & Co. KG", "Maya Khristov Trading OOD"))
+#' norma(df, "name", "country", "key")
 #' @export
 
 #dfn<-norma(df,"name","country","key",new_col=T,short=T,translit=T,legal=T)

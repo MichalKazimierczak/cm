@@ -41,3 +41,8 @@ the dataframe with a column \code{final_score} (between 0 and 1), sorted by it, 
 \description{
 This function is being used after the disambiguation of matches to rank possible candidates for the match
 }
+\examples{
+r <- data.frame(id_a = 1, id_b = c(10, 11), name_sim = c(1, 0.75), lf_sim = c(1, 0),
+                reg_sim = c(TRUE, TRUE), city_sim = 1, street_sim = c(1, 0.6))
+rankmatch(r)
+}

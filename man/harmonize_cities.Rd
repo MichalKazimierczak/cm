@@ -27,3 +27,7 @@ found); with \code{new_col = FALSE} the official names replace \code{city_a} and
 \description{
 This function allows for proper comparison of the cities' names if they come from different sources
 }
+\examples{
+r <- data.frame(city_a = c("Muenchen", "Nuernberg", "Berlin-Mitte"), city_b = c("Munich", "Nuremberg", "Berlin"))
+harmonize_cities(r, "city_a", "city_b", "DE")
+}

@@ -6,7 +6,11 @@
 #' @param country name of the column storing country of seat, it has to be a string
 #' @param key name of the column storing key id, it has to be a string
 #' @returns an original dataframe with transliterated version of name
-#' @examples norma_trans(df,"name","country_code")
+#' @examples
+#' ## a Bulgarian name in Cyrillic (written with intToUtf8 to keep this example ASCII)
+#' cyr <- intToUtf8(c(1052, 1040, 1071, 32, 1061, 1056, 1048, 1057, 1058, 1054, 1042, 1040))
+#' df <- data.frame(key = 1:2, name = c(cyr, "ALPHA OOD"), country = "BG")
+#' norma_trans(df, "name", "country", "key")
 #' @export
 
 

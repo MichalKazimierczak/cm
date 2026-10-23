@@ -12,7 +12,11 @@
 #' ("AB C" and "A BC" both give "ABC"). Rows with a missing or empty name are left out: they would all share
 #' the empty key and match each other.
 #' @returns a new dataframe only with matched pairs of names
-#' @examples nmatch(x,y,"xname","yname",sort=T)
+#' @examples
+#' a <- data.frame(id_a = 1:3, n = c("ALPHA BETA", "NOWAK", "ROSSI"))
+#' b <- data.frame(id_b = 4:6, n = c("BETA ALPHA", "NOWAK", "BIANCHI"))
+#' nmatch(a, b, "n", "n")
+#' nmatch(a, b, "n", "n", sort = FALSE)
 #' @export
 
 

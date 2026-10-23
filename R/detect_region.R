@@ -8,6 +8,9 @@
 #' @returns a character vector as long as \code{pc}: the NUTS 3 region of each value, several separated by
 #' \code{", "} when a value contains codes of several regions, \code{""} when no code is found (also for countries
 #' without postal codes in \code{zip_codes}), \code{NA} for a missing value
+#' @examples
+#' detect_region(c("80331", "D-10115", "99999", NA), "DE")
+#' detect_region(c("1012 AB", "1012ab"), "NL")
 #' @export
 
 detect_region<-function(pc,cc){

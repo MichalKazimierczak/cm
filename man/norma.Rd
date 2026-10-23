@@ -33,6 +33,8 @@ the name
 This is the main function of the package
 }
 \examples{
-df<-data.frame(name="Andrzej Beata Celina spółka z ograniczoną odpowiedzialnoscią nazwa skrócona ABC sp. z o.o. SP.J",
- country="PL",key=1)
+df <- data.frame(key = 1:3, country = c("PL", "DE", "BG"),
+                 name = c("Nowak spolka z ograniczona odpowiedzialnoscia nazwa skrocona NWK sp. z o.o.",
+                          "Mueller Baeckerei GmbH & Co. KG", "Maya Khristov Trading OOD"))
+norma(df, "name", "country", "key")
 }

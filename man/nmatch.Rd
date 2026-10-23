@@ -32,5 +32,8 @@ dropped (if \code{unique}), and pasted together without spaces, so that spacing 
 the empty key and match each other.
 }
 \examples{
-nmatch(x,y,"xname","yname",sort=T)
+a <- data.frame(id_a = 1:3, n = c("ALPHA BETA", "NOWAK", "ROSSI"))
+b <- data.frame(id_b = 4:6, n = c("BETA ALPHA", "NOWAK", "BIANCHI"))
+nmatch(a, b, "n", "n")
+nmatch(a, b, "n", "n", sort = FALSE)
 }

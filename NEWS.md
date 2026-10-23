@@ -138,6 +138,9 @@
 
 ## Packaging
 
+* Every exported function has an example that runs (`example(clean)` and so on); the old examples used objects
+  that did not exist. `norma_short()` returns its result visibly.
+
 * `detect_address()` and `detect_region()` are exported and documented: they can be used on their own
   (`clean()` uses `detect_region()`).
 

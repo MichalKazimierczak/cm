@@ -9,7 +9,9 @@
 #' @returns an original dataframe with cleaned version of original name and additional column with standardized version of legal form.
 #' Rows from countries without a list of legal forms, or without a country, are kept with an empty legal form;
 #' they come after the other rows.
-#' @examples norma_legal(df,"name","country_code")
+#' @examples
+#' df <- data.frame(name = c("MUELLER BAECKEREI GMBH", "NOWAK SP Z O O", "ACME INC"), country = c("DE", "PL", "US"))
+#' norma_legal(df, "name", "country")
 #' @export
 
 norma_legal <- function(r,name,country){

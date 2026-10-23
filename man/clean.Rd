@@ -70,3 +70,16 @@ regions) and \code{reg_sim} (\code{TRUE} when the regions or the postal codes ar
 This function is being used after the match, to correct multiple matches. It uses additional features such as
 original names, address and legal form information to assign similarity scores
 }
+\examples{
+m <- data.frame(id_a = c(1, 1, 2), id_b = c(10, 11, 12),
+                name_a = c("Alpha GmbH", "Alpha GmbH", "Beta AG"),
+                name_b = c("ALPHA GMBH", "ALPHA HOLDING", "BETA AG"),
+                lf_a = c("GMBH", "GMBH", "AG"), lf_b = c("GMBH", "", "AG"),
+                zip_a = c("80331", "80331", "10115"), zip_b = c("80331", "80333", "10115"),
+                city_a = c("MUNICH", "MUNICH", "BERLIN"), city_b = c("MUNICH", "MUNICH", "BERLIN"),
+                street_a = c("MARIENPLATZ 1", "MARIENPLATZ 1", "UNTER DEN LINDEN 5"),
+                street_b = c("MARIENPLATZ 1", "KAUFINGERSTR 2", "UNTER DEN LINDEN 5"),
+                nuts = c("DE212", "DE212", "DE300"), cc = "DE")
+clean(m, "id_a", "id_b", "name_a", "name_b", "lf_a", "lf_b", "zip_a", "zip_b",
+      "city_a", "city_b", "street_a", "street_b", "nuts", "cc")
+}

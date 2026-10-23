@@ -13,6 +13,8 @@
 #' and, with \code{new_col = TRUE}, two new columns with the official city names (the cleaned name when no city is
 #' found); with \code{new_col = FALSE} the official names replace \code{city_a} and \code{city_b}
 #' @examples
+#' r <- data.frame(city_a = c("Muenchen", "Nuernberg", "Berlin-Mitte"), city_b = c("Munich", "Nuremberg", "Berlin"))
+#' harmonize_cities(r, "city_a", "city_b", "DE")
 #' @export
 
 

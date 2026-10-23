@@ -8,7 +8,9 @@
 #' @param r dataset to be transformed
 #' @param name name of the column storing name to be transformed, it has to be a string
 #' @returns the original dataframe with the additional copies, without duplicate rows
-#' @examples norma_short(df,"name")
+#' @examples
+#' df <- data.frame(key = 1:2, name = c("ALPHA GMBH TRADING AS BETA SHOP", "ROSSI SRL"))
+#' norma_short(df, "name")
 #' @export
 
 
@@ -45,4 +47,5 @@ norma_short<- function(r,name)
 
   ###leave only unique observations
   r<-unique(r)
+  return(r)
 }

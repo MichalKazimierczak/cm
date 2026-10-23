@@ -21,5 +21,6 @@ before, between and after the phrases ("A TRADING AS B" gives A and B; "A TRADIN
 The record with the original name is kept.
 }
 \examples{
-norma_short(df,"name")
+df <- data.frame(key = 1:2, name = c("ALPHA GMBH TRADING AS BETA SHOP", "ROSSI SRL"))
+norma_short(df, "name")
 }
