@@ -45,8 +45,9 @@ Priority: ⏫ changes match results, 🔼 can crash or corrupt your session, �
 - [ ] 🔼 `detect_region`: countries without postal codes stop `clean()` ➕ 2026-10-22
 	- Tested: for CH (and any code not in `zip_codes`, such as GB or BX) the function stops; 0.1.0 also stopped, or returned `character(0)` for a single value.
 	- Fix: return `""` for every value, so `clean()` falls back to `orb_reg`.
-- [ ] 🔽 `nmatch`: words are pasted without a separator ➕ 2026-10-22
-	- `"AB C"` and `"A BC"` get the same key `ABC`. Decide whether this is wanted (it catches spacing variants) or use `collapse = " "`.
+- [-] 🔽 `nmatch`: words are pasted without a separator ➕ 2026-10-22 ❌ 2026-10-23
+	- `"AB C"` and `"A BC"` get the same key `ABC`.
+	- Not a bug: intended, so that spacing variants match (Michal, 2026-10-23). Worth one sentence in the `nmatch()` documentation (`@details`).
 
 - [x] ⏫ `cities` / city lookup: notes such as `[A ]` in historical names were read as regex ➕ 2026-10-22 ✅ 2026-10-22
 	- Tested: 94 German alternate names end in a note: `[A ]` (88), `[ A ]`, `[~ A ]`, `[~A ]` and `[IPA]`; for example `WIRZIBURG [A ]` (Wuerzburg), `GERSBEKE[A ]` (Gorsbach), `LEIVƏNƆ: [IPA]` (Liebenau).
@@ -94,6 +95,12 @@ Priority: ⏫ changes match results, 🔼 can crash or corrupt your session, �
 	- Effect: names of the same company from two sources normalise differently when they hold a different number of weak words or umlaut spellings, so exact matching in `nmatch()` can miss them.
 	- Proposed fix: `str_replace_all()` in the weak-word loop; check the rules whose replacement is not empty (DE `(U|A|O)E` → `\\1`) still give the intended result; update the `norma` and `norma_legal` fixtures and add a NEWS entry.
 
+- [ ] ⏫ `nmatch`: a missing name matches every empty name ➕ 2026-10-23
+	- Tested: with `sort = TRUE` (the default), an A record with name `NA` is paired with a B record with name `""` (key `""` on both sides).
+	- Cause: `sort()` drops `NA`, so a missing name becomes an empty word list and the key `""`, the same as an empty name. With `sort = FALSE` the key is the text `"NA"` and this does not happen.
+	- Effect: every A record without a name pairs with every B record with an empty name (1,000 × 1,000 gives a million false pairs), which also slows down `clean()` and `rankmatch()`.
+	- Proposed fix: drop rows whose key is `""` or whose name is `NA` before `merge()` (or give them a key that cannot match); update the `nmatch` fixture and add a NEWS entry.
+
 ## Can crash or corrupt your session
 
 - [ ] 🔼 All functions that call `data()`: package data overwrite objects in your global environment ➕ 2026-10-22
@@ -123,6 +130,7 @@ Priority: ⏫ changes match results, 🔼 can crash or corrupt your session, �
 
 ## Packaging and tidying
 
+- [ ] 🔽 `nmatch`: the comment at the top (lines 16 to 19) about transliteration standards was copied from `norma_trans()`; replace it with one that describes `nmatch()` ➕ 2026-10-23
 - [ ] 🔽 `DESCRIPTION`: `License:` is empty; `stringdist` and `plyr` are used but missing from `Imports` ➕ 2026-10-22
 - [ ] 🔽 Examples: empty in `clean`, `rankmatch`, `harmonize_cities`; the others use objects that do not exist (`df`, `x`, `y`). `R CMD check` runs them ➕ 2026-10-22
 - [ ] 🔽 `@return` texts copied from `rankmatch` ("ordered and ranked matched dataframe") in `harmonize_cities`, `detect_address` and others ➕ 2026-10-22
