@@ -131,7 +131,9 @@ Priority: ⏫ changes match results, 🔼 can crash or corrupt your session, �
 ## Packaging and tidying
 
 - [ ] 🔽 `nmatch`: the comment at the top (lines 16 to 19) about transliteration standards was copied from `norma_trans()`; replace it with one that describes `nmatch()` ➕ 2026-10-23
-- [ ] 🔽 `DESCRIPTION`: `License:` is empty; `stringdist` and `plyr` are used but missing from `Imports` ➕ 2026-10-22
+- [ ] 🔽 `DESCRIPTION`: `stringdist` and `plyr` are used but missing from `Imports` (`R CMD check` stops with an ERROR) ➕ 2026-10-22
+- [x] 🔽 `DESCRIPTION`: `License:` was empty (`R CMD check` stopped with an ERROR) ➕ 2026-10-22 ✅ 2026-10-23
+	- Set to `EUPL (>= 1.2)`, full text in `LICENSE.md`. R 4.3 accepts `EUPL (>= 1.2)` but not `EUPL-1.2`. Copyright holder (probably EUIPO) still to confirm with EUIPO.
 - [ ] 🔽 Examples: empty in `clean`, `rankmatch`, `harmonize_cities`; the others use objects that do not exist (`df`, `x`, `y`). `R CMD check` runs them ➕ 2026-10-22
 - [ ] 🔽 `@return` texts copied from `rankmatch` ("ordered and ranked matched dataframe") in `harmonize_cities`, `detect_address` and others ➕ 2026-10-22
 - [ ] 🔽 `detect_address` and `detect_region` are not exported; decide whether they are internal ➕ 2026-10-22

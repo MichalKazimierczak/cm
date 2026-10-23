@@ -1,5 +1,9 @@
 # CleanMatch (development version)
 
+## Licence
+
+* CleanMatch is licensed under the European Union Public Licence, version 1.2 or later (`LICENSE.md`).
+
 ## Changes that affect results
 
 * `harmonize_cities()` and `detect_address()` now match 91 historical German city names that end in
