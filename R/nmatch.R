@@ -17,10 +17,8 @@
 
 
 nmatch<-function(a,b,aname,bname,sort=T,unique=T){
-  ###This is a dataframe that stores the transliteration standards specific for a given country
-  ###of seat. If you want to modify standard of transliteration, modify this dataframe.
-  ###More than one standards per country are possible. This will multiply rows by number of
-  ###standards use to transliterate names
+  ###Records of a and b match when their names give the same key (exact match): every pair of a record of a
+  ###and a record of b with the same key becomes one row of the result
 
   ###build the key once per distinct name, in one pass: split into words, sort, drop repeated words, paste
   key<-function(x){
