@@ -5,7 +5,7 @@ tags:
   - bug-log
   - r-package
 created: 2026-10-22
-updated: 2026-10-22
+updated: 2026-10-23
 repository: MichalKazimierczak/cm
 ---
 
@@ -75,6 +75,12 @@ Priority: ⏫ changes match results, 🔼 can crash or corrupt your session, �
 - [ ] 🔼 `detect_region`: Dutch codes written without the space are not found ➕ 2026-10-22
 	- Tested: `1012AB` gives `""`; the list stores `1012 AB`.
 	- Proposed fix: for NL, insert the space before the lookup (`1012AB` → `1012 AB`), for example `stringr::str_replace_all(u,"\\b([0-9]{4}) ?([A-Z]{2})\\b","\\1 \\2")`. Check that `1012 ABC` still gives `""`.
+
+- [ ] ⏫ `clean`: the fallback to `orb_reg` is skipped when the postal code of A is missing ➕ 2026-10-23
+	- Tested: a pair with `zip_a = NA`, `orb_reg = "DE300"` and B in DE300 gets `reg_a = NA` and `reg_sim = FALSE`, although both are in DE300.
+	- Cause: `detect_region()` returns `""` for a postal code not in the list but `NA` for a missing one; the fallback `ifelse(r$reg_a=="",r[,orb_reg],r$reg_a)` only catches `""`, because `NA == ""` is `NA`.
+	- Effect: true matches whose A record has no postal code lose the `reg_sim` part of their score in `rankmatch()`.
+	- Proposed fix: `r$reg_a<-ifelse(is.na(r$reg_a)|r$reg_a=="",r[,orb_reg],r$reg_a)`; update the `clean` fixture and add a NEWS entry.
 
 ## Can crash or corrupt your session
 
