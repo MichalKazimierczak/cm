@@ -62,10 +62,11 @@ clean<-function(r,key_a,key_b,name_a,name_b,lf_a,lf_b,zip_a,zip_b,city_a,city_b,
   ###In the first step separate unique matches from the multiple matches
   ###create a separate function for that as it will be constantly used
   rd<-filter(r,key_a,key_b)
-  rd$one_to_one<-T
+  ###rep() so that this also works when there are no one-to-one matches (or no rows at all)
+  rd$one_to_one<-rep(TRUE,nrow(rd))
   if(nrow(rd)!=nrow(r)){
     rn<-r[!r[,key_b]%in%rd[,key_b],]
-    rn$one_to_one<-F
+    rn$one_to_one<-rep(FALSE,nrow(rn))
     #length(unique(rd$key_b))
 
     r<-rbind(rd,rn)

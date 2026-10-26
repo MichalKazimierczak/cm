@@ -1,3 +1,11 @@
+# CleanMatch 1.0.1
+
+## Bug fixes
+
+* `clean()` works when no pair is one-to-one, for example a chunk of data in which every B entity is matched
+  to several A entities: it stopped with "replacement has 1 row, data has 0" (also in 0.1.0). It also works
+  on an empty table, and so does `rankmatch()`.
+
 # CleanMatch 1.0.0
 
 ## Licence

@@ -56,3 +56,16 @@ test_that("clean uses Jaro by default and Jaro-Winkler with p", {
   expect_true(all(jw$name_sim >= jaro$name_sim))
   expect_gt(jw$city_sim[1], jaro$city_sim[1])
 })
+
+test_that("clean works when no pair is one-to-one, and on no rows", {
+  x <- fixture("clean")
+  args <- list("id_a", "id_b", "name_a", "name_b", "lf_a", "lf_b", "zip_a", "zip_b",
+               "city_a", "city_b", "street_a", "street_b", "nuts", "cc")
+  none <- x$input[x$input$id_b == 12, ]
+  out <- do.call(clean, c(list(none), args))
+  expect_equal(nrow(out), 2)
+  expect_false(any(out$one_to_one))
+  empty <- do.call(clean, c(list(x$input[0, ]), args))
+  expect_equal(nrow(empty), 0)
+  expect_true(all(c("one_to_one", "name_sim", "reg_sim") %in% names(empty)))
+})

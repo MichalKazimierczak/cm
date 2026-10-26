@@ -29,7 +29,7 @@ rankmatch<-function(r,prefer_root=T,bvd_is_root=1,name_sim=1,lf_sim=1,reg_sim=1,
   ###Without the column, its term is left out of the score and prefer_root has no effect
   if(!"bvd_is_root"%in%names(r)){
     message("rankmatch: no column bvd_is_root; the score uses the other similarities only")
-    r$bvd_is_root<-0
+    r$bvd_is_root<-rep(0,nrow(r))
     bvd_is_root<-0
     prefer_root<-FALSE
     drop_root<-TRUE

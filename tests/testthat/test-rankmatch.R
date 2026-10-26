@@ -10,3 +10,8 @@ test_that("rankmatch prefers root entities when bvd_is_root is given", {
   expect_equal(rankmatch(r)$id, c(1, 2))
   expect_equal(rankmatch(r, prefer_root = FALSE)$id, c(2, 1))
 })
+
+test_that("rankmatch works on no rows", {
+  r <- data.frame(name_sim = numeric(0), lf_sim = numeric(0), reg_sim = logical(0), city_sim = numeric(0), street_sim = numeric(0))
+  expect_equal(nrow(suppressMessages(rankmatch(r))), 0)
+})
