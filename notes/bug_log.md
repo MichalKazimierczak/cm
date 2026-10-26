@@ -19,7 +19,7 @@ Priority: ⏫ changes match results, 🔼 can crash or corrupt your session, �
 "Tested" means reproduced in R; "from the code" means found by reading only.
 
 > [!info] Numbers
-> Open bugs are numbered **[1]** to **[26]** (2026-10-23), grouped: [1]–[5] postal codes and regions, [6]–[9] cities and addresses, [10]–[13] name normalisation, [14]–[17] scoring and ranking, [18] input handling, [19]–[26] packaging and documentation. New entries continue from **[29]**; numbers are never reused.
+> Open bugs are numbered **[1]** to **[26]** (2026-10-23), grouped: [1]–[5] postal codes and regions, [6]–[9] cities and addresses, [10]–[13] name normalisation, [14]–[17] scoring and ranking, [18] input handling, [19]–[26] packaging and documentation. New entries continue from **[31]**; numbers are never reused.
 
 ## Change match results
 
@@ -154,6 +154,12 @@ Priority: ⏫ changes match results, 🔼 can crash or corrupt your session, �
 
 ## Can crash or corrupt your session
 
+- [x] 🔼 **[29]** `clean`: stops when no pair is one-to-one ➕ 2026-10-26 ✅ 2026-10-26
+	- Reported by Michal for a chunk of IT matches: "replacement has 1 row, data has 0". Tested: happens when every B entity is matched to several A entities, and on an empty table; also in 0.1.0. `rankmatch()` had the same problem on an empty table.
+	- Fixed in commit `b36cae9` (version 1.0.1): `rep(TRUE, nrow(rd))` and `rep(FALSE, nrow(rn))` instead of a single value; the same in `rankmatch()`; tests.
+- [x] 🔼 **[30]** `clean`: stops when a column name is not a syntactic R name ➕ 2026-10-26 ✅ 2026-10-26
+	- Tested: a column `street a` gives "names do not match previous names" (0.1.0: "undefined columns selected"): the one-to-one helper returned `data.frame(dd)`, which renamed the column.
+	- Fixed in commit `810abd7`: the helper returns `dd` unchanged; test.
 - [x] 🔼 All functions that call `data()`: package data overwrite objects in your global environment ➕ 2026-10-22 ✅ 2026-10-23
 	- Tested: after `norma()`, the objects `l` and `w` exist in the global environment. `data()` loads into the global environment by default; the functions also overwrite `cities`, `zips` and `pc`.
 	- Fix: with `LazyData: true`, refer to the data directly (`cities`, or `CleanMatch::cities`), and give the objects the names of their files (`zip_codes` holds `zips`, `postal_codes_regex` holds `pc`, `legal_forms_regex` holds `l`, `weak_words_regex` holds `w`).
