@@ -69,3 +69,13 @@ test_that("clean works when no pair is one-to-one, and on no rows", {
   expect_equal(nrow(empty), 0)
   expect_true(all(c("one_to_one", "name_sim", "reg_sim") %in% names(empty)))
 })
+
+test_that("clean keeps column names that are not syntactic R names", {
+  x <- fixture("clean")
+  m <- x$input
+  names(m)[names(m) == "street_a"] <- "street a"
+  out <- clean(m, "id_a", "id_b", "name_a", "name_b", "lf_a", "lf_b", "zip_a", "zip_b",
+               "city_a", "city_b", "street a", "street_b", "nuts", "cc")
+  expect_equal(nrow(out), nrow(m))
+  expect_true("street a" %in% names(out))
+})

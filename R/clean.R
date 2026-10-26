@@ -52,7 +52,8 @@ clean<-function(r,key_a,key_b,name_a,name_b,lf_a,lf_b,zip_a,zip_b,city_a,city_b,
     n<-table(p$b,useNA="ifany")
     one<-names(n)[n==1]
     dd<-d[as.character(d[,key_b])%in%one,]
-    return (data.frame(dd))
+    ###dd is already a data frame; data.frame() would rename columns such as "street a" to "street.a"
+    return (dd)
   }
 
   ###work on a plain data frame, so that tibbles and data.tables work too
