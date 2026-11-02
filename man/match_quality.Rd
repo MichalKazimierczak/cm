@@ -29,6 +29,12 @@ match_quality(
   unique = TRUE,
   type_a = NULL,
   type_b = NULL,
+  type_side = c("both", "a", "b"),
+  first_names = NULL,
+  country_a = NULL,
+  country_b = NULL,
+  first_name_share = 0.9,
+  first_name_count = 5,
   name_sim_min = 0.8,
   city_sim_min = 0.8,
   street_sim_min = 0.8,
@@ -63,6 +69,17 @@ many entities share a name and to find matches made through part of a name ('tra
 \item{type_a, type_b}{optional: names of columns in \code{pairs} with the entity type, for example the EUIPO
 applicant type and PATSTAT \code{psn_sector}}
 
+\item{type_side}{which side decides the type of the pair: \code{"both"} (both sides, "mixed" when they differ),
+or only \code{"a"} or \code{"b"}, for example the IP side when the other side is Orbis}
+
+\item{first_names}{optional: a table from \code{\link{build_first_names}}; names without a type and without a
+legal form are persons when they contain one of its first names (see \code{\link{guess_person}})}
+
+\item{country_a, country_b}{optional: names of columns with the countries, to look first names up per country}
+
+\item{first_name_share, first_name_count}{passed to \code{\link{guess_person}} as \code{min_share} and
+\code{min_count}}
+
 \item{name_sim_min}{original names (words sorted) less similar than this differ}
 
 \item{city_sim_min, street_sim_min}{cities (streets) at least this similar agree; cities below it are a conflict}
@@ -82,8 +99,8 @@ has no value), \code{q_name_sim} (similarity of the original names, words sorted
 \code{q_candidates_a}, \code{q_candidates_b} (number of candidates of the
 A and the B entity), \code{q_best} (best candidate on both sides), \code{q_margin} (score gap to the next
 candidate), \code{q_key_freq_a}, \code{q_key_freq_b} (entities sharing the name), \code{q_alias}, \code{q_type_a},
-\code{q_type_b}, \code{q_type_source_a}, \code{q_type_source_b} (field or guessed) and \code{q_type_pair}
-(organisation, person or mixed)
+\code{q_type_b}, \code{q_type_source_a}, \code{q_type_source_b} (field, first name or guessed) and
+\code{q_type_pair} (organisation, person or mixed)
 }
 \description{
 Describes how well each matched pair is supported by the data, so that users can decide which
@@ -103,8 +120,9 @@ Classes (\code{q_class}):
   \item{D, conflicting}{at least one conflict: legal forms with nothing in common, different regions, or different
   cities}
 }
-The entity type is taken from \code{type_a} and \code{type_b} where they say person or organisation; otherwise
-it is guessed: a person has no legal form and a name of two to four words without digits, company words or
+The entity type is taken from \code{type_a} and \code{type_b} where they say person or organisation; otherwise,
+with \code{first_names}, from a first name in the name (\code{q_type_source} "first name"); otherwise it is
+guessed: a person has no legal form and a name of two to four words without digits, company words or
 legal-form words. The original names are compared with their words sorted (\code{q_name_sim}), so that a surname
 first equals a surname last; differing names are only a weak signal, because normalisation removes words on
 purpose. Without \code{norm_a} and \code{norm_b}, matches through part of a name cannot be recognised and their

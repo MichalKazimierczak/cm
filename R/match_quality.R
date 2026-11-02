@@ -18,6 +18,13 @@
 #' @param sort,unique the settings used in \code{\link{nmatch}}, so that the keys are built the same way
 #' @param type_a,type_b optional: names of columns in \code{pairs} with the entity type, for example the EUIPO
 #' applicant type and PATSTAT \code{psn_sector}
+#' @param type_side which side decides the type of the pair: \code{"both"} (both sides, "mixed" when they differ),
+#' or only \code{"a"} or \code{"b"}, for example the IP side when the other side is Orbis
+#' @param first_names optional: a table from \code{\link{build_first_names}}; names without a type and without a
+#' legal form are persons when they contain one of its first names (see \code{\link{guess_person}})
+#' @param country_a,country_b optional: names of columns with the countries, to look first names up per country
+#' @param first_name_share,first_name_count passed to \code{\link{guess_person}} as \code{min_share} and
+#' \code{min_count}
 #' @param name_sim_min original names (words sorted) less similar than this differ
 #' @param city_sim_min,street_sim_min cities (streets) at least this similar agree; cities below it are a conflict
 #' @param margin_min a best candidate whose score is less than this above the next candidate is a close call
@@ -34,8 +41,9 @@
 #'   \item{D, conflicting}{at least one conflict: legal forms with nothing in common, different regions, or different
 #'   cities}
 #' }
-#' The entity type is taken from \code{type_a} and \code{type_b} where they say person or organisation; otherwise
-#' it is guessed: a person has no legal form and a name of two to four words without digits, company words or
+#' The entity type is taken from \code{type_a} and \code{type_b} where they say person or organisation; otherwise,
+#' with \code{first_names}, from a first name in the name (\code{q_type_source} "first name"); otherwise it is
+#' guessed: a person has no legal form and a name of two to four words without digits, company words or
 #' legal-form words. The original names are compared with their words sorted (\code{q_name_sim}), so that a surname
 #' first equals a surname last; differing names are only a weak signal, because normalisation removes words on
 #' purpose. Without \code{norm_a} and \code{norm_b}, matches through part of a name cannot be recognised and their
@@ -50,8 +58,8 @@
 #' \code{q_candidates_a}, \code{q_candidates_b} (number of candidates of the
 #' A and the B entity), \code{q_best} (best candidate on both sides), \code{q_margin} (score gap to the next
 #' candidate), \code{q_key_freq_a}, \code{q_key_freq_b} (entities sharing the name), \code{q_alias}, \code{q_type_a},
-#' \code{q_type_b}, \code{q_type_source_a}, \code{q_type_source_b} (field or guessed) and \code{q_type_pair}
-#' (organisation, person or mixed)
+#' \code{q_type_b}, \code{q_type_source_a}, \code{q_type_source_b} (field, first name or guessed) and
+#' \code{q_type_pair} (organisation, person or mixed)
 #' @examples
 #' pairs <- data.frame(id_a = c(1, 2, 3, 3), id_b = c(11, 12, 13, 14), norm_name = c("ALPHA", "DEJANVRIES", "BETA", "BETA"),
 #'                     name_a = c("Alpha GmbH", "Jan de Vries", "Beta AG", "Beta AG"),
@@ -70,11 +78,14 @@ match_quality<-function(pairs,key_a,key_b,name_a,name_b,lf_a=NULL,lf_b=NULL,zip_
                         city_a=NULL,city_b=NULL,street_a=NULL,street_b=NULL,match_key="norm_name",
                         norm_a=NULL,norm_b=NULL,norm_key_a=key_a,norm_key_b=key_b,
                         norm_name_a="norm_name",norm_name_b="norm_name",sort=TRUE,unique=TRUE,
-                        type_a=NULL,type_b=NULL,name_sim_min=0.8,city_sim_min=0.8,street_sim_min=0.8,
+                        type_a=NULL,type_b=NULL,type_side=c("both","a","b"),first_names=NULL,country_a=NULL,
+                        country_b=NULL,first_name_share=0.9,first_name_count=5,
+                        name_sim_min=0.8,city_sim_min=0.8,street_sim_min=0.8,
                         margin_min=0.05,short_key=5,
                         person_pattern="INDIVIDUAL|NATURAL|PHYSICAL|PERSON",
                         org_pattern="COMPANY|LEGAL|ENTITY|GOV|UNIVERSIT|HOSPITAL|ORGANI|NON-PROFIT"){
   r<-as.data.frame(pairs)
+  type_side<-match.arg(type_side)
   need<-c(key_a,key_b,name_a,name_b,match_key,"one_to_one","name_sim","city_sim","street_sim","reg_a","reg_b","reg_sim")
   miss<-setdiff(need,names(r))
   if(length(miss)>0) stop("match_quality: pairs lacks the columns ",paste(miss,collapse=", "),
@@ -189,20 +200,28 @@ match_quality<-function(pairs,key_a,key_b,name_a,name_b,lf_a=NULL,lf_b=NULL,zip_
   q_names_differ<-ifelse(q_alias%in%TRUE,NA,q_name_sim<name_sim_min)
   short<-!is.na(mk)&nchar(mk)<short_key
 
-  ###5. entity type: from the type columns where they say person or organisation, otherwise guessed
-  type_of<-function(field,name,lf){
+  ###5. entity type: from the type columns where they say person or organisation; otherwise from a first name
+  ###in the first_names table (names without a legal form only); otherwise guessed by the rule
+  type_of<-function(field,name,lf,cc){
     f<-toupper(field)
     t<-ifelse(!is.na(f)&grepl(org_pattern,f),"organisation",ifelse(!is.na(f)&grepl(person_pattern,f),"person",NA))
     src<-ifelse(is.na(t),"guessed","field")
+    if(!is.null(first_names)&&n>0){
+      g<-guess_person(name,cc,first_names,min_share=first_name_share,min_count=first_name_count)$type
+      use<-is.na(t)&!has(lf)&!is.na(g)
+      t[use]<-g[use]
+      src[use]<-"first name"
+    }
     nm<-stringr::str_squish(toupper(ifelse(is.na(name),"",name)))
     words<-lengths(strsplit(nm," ",fixed=TRUE))
     guess<-ifelse(!has(lf)&words>=2&words<=4&!grepl("[0-9]",nm)&!grepl(company_words,nm),"person","organisation")
     t[is.na(t)]<-guess[is.na(t)]
     list(type=t,src=src)
   }
-  ta<-type_of(col(type_a),col(name_a),lfa)
-  tb<-type_of(col(type_b),col(name_b),lfb)
-  q_type_pair<-ifelse(ta$type==tb$type,ta$type,"mixed")
+  ta<-type_of(col(type_a),col(name_a),lfa,col(country_a))
+  tb<-type_of(col(type_b),col(name_b),lfb,col(country_b))
+  ###the type of the pair: from both sides, or from one side only (for example the IP side against Orbis)
+  q_type_pair<-switch(type_side,both=ifelse(ta$type==tb$type,ta$type,"mixed"),a=ta$type,b=tb$type)
   person<-q_type_pair=="person"
   mixed<-q_type_pair=="mixed"
   freq_unknown<-is.na(q_key_freq_a)|is.na(q_key_freq_b)
@@ -215,10 +234,12 @@ match_quality<-function(pairs,key_a,key_b,name_a,name_b,lf_a=NULL,lf_b=NULL,zip_
 
   ###reasons in words: one phrase per finding, without numbers, so that they can be counted
   why<-function(cond,text) ifelse(cond,text,NA)
-  guessed<-ta$src=="guessed"|tb$src=="guessed"
+  src<-switch(type_side,both=ifelse(ta$src=="guessed"|tb$src=="guessed","guessed",
+                                     ifelse(ta$src=="first name"|tb$src=="first name","first name","field")),
+              a=ta$src,b=tb$src)
+  type_label<-if(type_side=="both") ifelse(person,"both persons",ifelse(mixed,"person and organisation","both organisations")) else q_type_pair
   parts<-cbind(
-    paste0(ifelse(person,"both persons",ifelse(mixed,"person and organisation","both organisations")),
-           ifelse(guessed," (type guessed)","")),
+    paste0(type_label,ifelse(src=="guessed"," (type guessed)",ifelse(src=="first name"," (type from first name)",""))),
     why(q_conflict_lf%in%TRUE,"legal forms differ"),
     why(q_conflict_region%in%TRUE,"regions differ"),
     why(q_conflict_city%in%TRUE,"cities differ"),

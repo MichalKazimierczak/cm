@@ -33,7 +33,7 @@ quality_summary<-function(q){
   ###each reason once per pair; the entity type is in classes, the agreeing signals are counted together
   rs<-strsplit(as.character(ifelse(is.na(q$q_reasons),"",q$q_reasons)),"; ",fixed=TRUE)
   rs<-lapply(rs,function(x){
-    x<-x[!grepl("^both |^person and organisation",x)&x!=""]
+    x<-x[!grepl("^both |^person( |$)|^organisation( |$)",x)&x!=""]
     base::unique(sub("^agreeing: .*","agreeing evidence",x))
   })
   d<-data.frame(class=factor(rep(as.character(cls),lengths(rs)),levels=lv),reason=as.character(unlist(rs,use.names=FALSE)))
