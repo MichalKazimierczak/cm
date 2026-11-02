@@ -238,7 +238,7 @@ match_quality<-function(pairs,key_a,key_b,name_a,name_b,lf_a=NULL,lf_b=NULL,zip_
   )
   q_reasons<-if(n>0) apply(parts,1,function(x) paste(x[!is.na(x)],collapse="; ")) else character(0)
 
-  r$q_class<-q_class
+  r$q_class<-as.character(q_class)
   r$q_reasons<-q_reasons
   r$q_evidence<-q_evidence
   r$q_agree<-q_agree

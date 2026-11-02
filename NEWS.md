@@ -1,3 +1,22 @@
+# CleanMatch 1.1.0
+
+## New functions
+
+* `match_quality()` flags the quality of matched pairs, so that users can decide which matches to keep. It
+  removes and changes nothing: it adds columns starting with `q_` to the output of `clean()` or `rankmatch()`:
+  the evidence present on both sides and how much of it agrees (legal form, region, city, street), conflicts
+  (legal forms, regions, cities), how similar the original names are (with words sorted, so a surname first
+  equals a surname last), candidates per entity with the score margin to the next one, the entity type (from
+  the EUIPO applicant type and PATSTAT `psn_sector` where given, otherwise guessed), and a class with its reasons
+  in words: A confirmed, B plausible (name only, a name that is not weak), C uncertain, D conflicting.
+  The stored output of `norma()` for each dataset is optional; with it, the function also counts how many
+  entities share a name and recognises matches through part of a name ('trading as', 'h.o.d.n.').
+
+* `quality_summary()` counts the pairs per class for organisations, persons and mixed pairs, and how often each
+  reason occurs per class.
+
+The matching functions are unchanged; results are the same as in 1.0.1.
+
 # CleanMatch 1.0.1
 
 ## Bug fixes

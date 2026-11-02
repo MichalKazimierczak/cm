@@ -23,6 +23,24 @@ Names with accents, or in Greek or Cyrillic, need an R session that uses UTF-8 (
 later, also on Windows; check with `l10n_info()$"UTF-8"`). In other sessions such names are read byte by byte
 and do not match (`München` gives `M C BC NCHEN`). The package code itself is ASCII only.
 
+## Checking the quality of matches
+
+`match_quality()` adds flags to the matched pairs; it removes nothing, so you decide which matches to keep.
+
+```r
+q <- match_quality(pairs, "id_a", "id_b", "name_a", "name_b",
+                   lf_a = "lf_a", lf_b = "lf_b", zip_a = "zip_a", zip_b = "zip_b",
+                   city_a = "city_a", city_b = "city_b", street_a = "street_a", street_b = "street_b",
+                   norm_a = norma_output_a, norm_b = norma_output_b,      # optional: stored norma() results
+                   norm_key_a = "id_a", norm_key_b = "id_b",
+                   type_a = "applicant_type", type_b = "psn_sector")      # optional: entity type columns
+table(q$q_class)              # A confirmed, B plausible, C uncertain, D conflicting
+quality_summary(q)            # pairs per class and type, and the reasons
+```
+
+Every flag is its own column (`q_conflict_city`, `q_key_freq_a`, `q_alias`, ...), so you can filter on the criteria
+you trust; `?match_quality` explains each of them.
+
 ## Licence
 
 The code is licensed under the European Union Public Licence, version 1.2 or later (`LICENSE.md`).
