@@ -1,3 +1,27 @@
+# CleanMatch 1.2.0
+
+## New functions
+
+* `build_first_names()` builds a table of first names from data with a separate first-name field, such as natural
+  persons in the EUIPO register: per country and over all countries, how many persons have each word in their
+  first name and how often it occurs in organisation names. Names common in company names (MARK, ROSE) get a low
+  person share and do not count. The table is built from personal data: keep it with your data, it is not part
+  of the package.
+
+* `guess_person()` recognises names of natural persons with that table: after the comma for "SURNAME, FIRSTNAME"
+  (as in PATSTAT), otherwise at the first and last word, for the name's country when it has enough data,
+  otherwise for all countries. Legal forms and company words make an organisation.
+
+## Changes to `match_quality()`
+
+* New argument `first_names`: where the type columns give no type and the name has no legal form, the type is
+  taken from a first name (`q_type_source` "first name") before falling back to the rule.
+* New argument `type_side`: `"a"` or `"b"` lets one side decide the type of the pair, for example the IP side
+  (EUIPO, PATSTAT) when the other side is Orbis. The default `"both"` works as in 1.1.0.
+* New arguments `country_a` and `country_b` for looking first names up per country.
+
+Results of the matching functions and the default results of `match_quality()` are unchanged.
+
 # CleanMatch 1.1.0
 
 ## New functions

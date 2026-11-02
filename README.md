@@ -41,6 +41,20 @@ quality_summary(q)            # pairs per class and type, and the reasons
 Every flag is its own column (`q_conflict_city`, `q_key_freq_a`, `q_alias`, ...), so you can filter on the criteria
 you trust; `?match_quality` explains each of them.
 
+### Persons without a type field
+
+Build a table of first names once from a source with a first-name field (for example EUIPO natural persons) and
+keep it with your data; `match_quality()` then recognises persons in records without a type (for example PATSTAT
+without `psn_sector`), with the type decided by the IP side only:
+
+```r
+fn <- build_first_names(euipo_persons$first_name, euipo_persons$country,
+                        org_names = euipo_legal_entities$name, org_country = euipo_legal_entities$country)
+saveRDS(fn, "first_names.rds")      # personal data: keep with the project data, not in the package
+q <- match_quality(pairs, "id_ip", "id_orbis", "name_ip", "name_orbis", lf_a = "lf_ip", lf_b = "lf_orbis",
+                   type_a = "psn_sector", type_side = "a", first_names = fn, country_a = "country_ip")
+```
+
 ## Licence
 
 The code is licensed under the European Union Public Licence, version 1.2 or later (`LICENSE.md`).
