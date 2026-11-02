@@ -79,3 +79,17 @@ test_that("match_quality says which columns are missing", {
   x <- quality_example()
   expect_error(match_quality(x$rk[, setdiff(names(x$rk), "reg_sim")], "id_a", "id_b", "name_a", "name_b"), "reg_sim")
 })
+
+test_that("quality_summary counts classes and reasons", {
+  q <- quality_full(quality_example())
+  s <- quality_summary(q)
+  expect_equal(s$classes$class, c("A", "B", "C", "D"))
+  expect_equal(sum(s$classes$total), nrow(q))
+  expect_equal(s$classes$total, as.vector(table(factor(q$q_class, levels = c("A", "B", "C", "D")))))
+  expect_true("name only" %in% s$reasons$reason)
+  expect_equal(s$reasons$total[s$reasons$reason == "name only"], sum(grepl("name only", q$q_reasons)))
+  expect_false(any(grepl("^both |^agreeing:", s$reasons$reason)))
+  e <- quality_summary(quality_full(quality_example(), quality_example()$rk[0, ]))
+  expect_equal(sum(e$classes$total), 0)
+  expect_equal(nrow(e$reasons), 0)
+})
