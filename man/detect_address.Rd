@@ -2,24 +2,39 @@
 % Please edit documentation in R/detect_address.R
 \name{detect_address}
 \alias{detect_address}
-\title{returns a dataset enriched with additional variables indicating elements of address}
+\title{Split a free-text address into postal code, city and street}
 \usage{
 detect_address(r, address, prefix, cc)
 }
 \arguments{
-\item{r}{dataset containing freeline address data}
+\item{r}{dataset containing free-text addresses}
 
-\item{address}{name of the column containing unstructured address data}
+\item{address}{name of the column containing the address; it is replaced by the cleaned address without postal
+code and city}
 
-\item{prefix}{a string that will be addedd to the names of the column with found address elements}
+\item{prefix}{text put before the names of the new columns}
 
-\item{cc}{indicates a code of a country where the cities A and B are located
-
-along with the original version of the name}
+\item{cc}{ISO 3166-1 code of the country of the addresses (as used in \code{cities}, for example \code{DE}, \code{GR},
+\code{GB}); Eurostat's \code{EL} and \code{UK} and lower case work too}
 }
 \value{
-an original dataframe with ordered and ranked matched dataframe
+the dataset with three new columns: \code{<prefix>_zip} (postal code, \code{""} if none found),
+\code{<prefix>_city} (official name of the city, \code{""} if none found) and \code{<prefix>_street} (the rest)
 }
 \description{
-This functions detects different elements of address in the unstructured address field and puts it into separate columns
+Finds the postal code (with the country's pattern in \code{postal_codes_regex}) and the city (with
+the names in \code{cities}) in a free-text address, and puts them into new columns; what is left is the street.
+The address is cleaned first: Latin, Greek and Cyrillic letters and digits are kept, Latin letters converted to
+ASCII capitals, \code{CEDEX} removed.
+}
+\details{
+When an address holds several place names (a street named after a town, a district after the city),
+the city is the place that follows the postal code most closely, or the one just before the code when none
+follows it (\code{London SW1A 2AA}). Without a postal code, a place directly after a street word (\code{UL},
+\code{RUE}, \code{VIA} and others, see \code{CleanMatch:::street_words}) comes last; otherwise official names,
+longer names and larger places come first, as in \code{\link{harmonize_cities}}.
+}
+\examples{
+r <- data.frame(adr = c("Marienplatz 1, 80331 Muenchen", "Unter den Linden 5, D-10117 Berlin"))
+detect_address(r, "adr", "x", "DE")
 }

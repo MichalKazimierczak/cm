@@ -6,12 +6,17 @@
 #' @param r dataset to be transformed
 #' @param name name of the column storing name to be transformed, it has to be a string
 #' @param country name of the column storing country of seat, it has to be a string
-#' @returns an original dataframe with cleaned version of original name and additional column with standardized version of legal form
-#' @examples norma_legal(df,"name","country_code")
+#' @returns an original dataframe with cleaned version of original name and additional column with standardized version of legal form.
+#' Rows from countries without a list of legal forms, or without a country, are kept with an empty legal form;
+#' they come after the other rows.
+#' @examples
+#' df <- data.frame(name = c("MUELLER BAECKEREI GMBH", "NOWAK SP Z O O", "ACME INC"), country = c("DE", "PL", "US"))
+#' norma_legal(df, "name", "country")
 #' @export
 
 norma_legal <- function(r,name,country){
-  x<-r
+  ###work on a plain data frame, so that tibbles and data.tables work too
+  x<-as.data.frame(r)
   ###Pre clean data before cleaning legal forms
   x[,name] <- stringr::str_replace_all(x[,name],"GESELL?SC?HAFT"," GESELLSCHAFT")
   x[,name] <- stringr::str_replace_all(x[,name],"(GESELL?SC?HAFT (?:FUE?R|ZUE?R)?)?(.*)(GES M B H|GES MBH|GESMBH|G ?M ?B ?H)","\\2  GMBH")
@@ -30,16 +35,19 @@ norma_legal <- function(r,name,country){
   r<-data.frame()
 
   ###read list of regex expressions that store the legal forms specific for EU MS countries
-  data(legal_forms_regex)
+  l<-CleanMatch::l
   l<-l[order(l$order),]
   # l<-read.csv("legal_forms.csv",colClasses=
   #               c("character","character","character","integer"))
-  data(weak_words_regex)
+  w<-CleanMatch::w
   w<-w[order(w$order),]
 
   ###As Benelux countries have one composed IPR register in some data sets we have to foresee special treatment of those countries,
 
-  if("BX"%in%unique(x[,country])){
+  ###country codes as in the lists: EL (Eurostat) is GR, UK is GB; the country column itself is not changed
+  ctry<-iso_country(x[,country])
+
+  if("BX"%in%ctry){
 
     lb<-l[l$Country%in%c("BE","NL","LU"),]
     lb$Country<-"BX"
@@ -56,7 +64,7 @@ norma_legal <- function(r,name,country){
   #                c("character","character","character","integer"))
 
   ###create a list of legal forms limited only to countries present in a dataset
-  lis_co <- l[l$Country%in%unique(x[,country]),]
+  lis_co <- l[l$Country%in%unique(ctry),]
   ###and then loop over all countries present in this dataset
   for (i in unique(lis_co$Country))
   {
@@ -66,7 +74,7 @@ norma_legal <- function(r,name,country){
     cw<-w[w$Country==i,]
 
     ###a dataset with observations limited to i country
-    cd<-x[x[,country]==i,]
+    cd<-x[which(ctry==i),]
     cd$lf<-""
     ##and a dataset for storing cleaned data for i country
     #cl<-data.frame()
@@ -76,14 +84,14 @@ norma_legal <- function(r,name,country){
 
       for (n in 1:nrow(co))
       {
-        ###create a new column with standardized legal form information in case we found legal form expression
-        cd$lf<-ifelse(stringr::str_detect(cd[,name],as.character(co[n,"to.replace"])),
-                      paste(cd$lf,co[n,"replacement"],"; "),
-                      cd$lf)
+        ###detect the legal form expression once and change only the names where it was found
+        found<-stringr::str_detect(cd[,name],as.character(co[n,"to.replace"]))
+        cd$lf[is.na(found)]<-NA
+        hit<-which(found)
+        ###add the standardized legal form to lf
+        cd$lf[hit]<-paste(cd$lf[hit],co[n,"replacement"],"; ")
         ###replace legal form expression from the name
-        cd[,name]<-ifelse(stringr::str_detect(cd[,name],as.character(co[n,"to.replace"])),
-                          stringr::str_replace(cd[,name],as.character(co[n,"to.replace"])," "),
-                          cd[,name])
+        cd[hit,name]<-stringr::str_replace(cd[hit,name],as.character(co[n,"to.replace"])," ")
 
       }
 
@@ -95,14 +103,19 @@ norma_legal <- function(r,name,country){
     for (n in 1:nrow(cw))
     {
 
-      ###replace legal form expression from the name
-      cd[,name]<-ifelse(stringr::str_detect(cd[,name],as.character(cw[n,"to.replace"])),
-                        stringr::str_replace(cd[,name],as.character(cw[n,"to.replace"]),cw[n,"replacement"]),
-                        cd[,name])
+      ###replace every weak word of the rule in the name (str_replace_all leaves names without a match unchanged)
+      cd[,name]<-stringr::str_replace_all(cd[,name],as.character(cw[n,"to.replace"]),cw[n,"replacement"])
 
     }
     r<-rbind(r,cd)
 
+  }
+
+  ###keep the rows of countries without a list of legal forms, and rows without a country, with an empty legal form
+  rest<-x[!ctry%in%lis_co$Country,]
+  if(nrow(rest)>0){
+    rest$lf<-rep("",nrow(rest))
+    r<-rbind(r,rest)
   }
 
   ###do some additional cleaning for

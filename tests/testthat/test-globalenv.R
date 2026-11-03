@@ -1,0 +1,12 @@
+test_that("functions do not create or overwrite objects in the global environment", {
+  assign("w", "my own object", envir = globalenv())
+  withr::defer(rm("w", envir = globalenv()))
+  before <- ls(globalenv())
+  d <- data.frame(key = 1, name = "ABC GMBH", country = "DE", stringsAsFactors = FALSE)
+  norma_legal(d, "name", "country")
+  harmonize_cities(data.frame(a = "Muenchen", b = ""), "a", "b", "DE")
+  detect_region("80331", "DE")
+  detect_address(data.frame(adr = "Marienplatz 1, 80331 Muenchen"), "adr", "x", "DE")
+  expect_identical(ls(globalenv()), before)
+  expect_identical(get("w", envir = globalenv()), "my own object")
+})

@@ -22,5 +22,8 @@ an original dataframe with transliterated version of name
 This function is developed to transliterate the strings in other alphabets than Latin
 }
 \examples{
-norma_trans(df,"name","country_code")
+## a Bulgarian name in Cyrillic (written with intToUtf8 to keep this example ASCII)
+cyr <- intToUtf8(c(1052, 1040, 1071, 32, 1061, 1056, 1048, 1057, 1058, 1054, 1042, 1040))
+df <- data.frame(key = 1:2, name = c(cyr, "ALPHA OOD"), country = "BG")
+norma_trans(df, "name", "country", "key")
 }
