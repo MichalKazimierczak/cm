@@ -35,6 +35,9 @@ match_quality(
   country_b = NULL,
   first_name_share = 0.9,
   first_name_count = 5,
+  person_like_share = 0.5,
+  reference = c("b", "a"),
+  namesakes_max = 1,
   name_sim_min = 0.8,
   city_sim_min = 0.8,
   street_sim_min = 0.8,
@@ -80,6 +83,16 @@ legal form are persons when they contain one of its first names (see \code{\link
 \item{first_name_share, first_name_count}{passed to \code{\link{guess_person}} as \code{min_share} and
 \code{min_count}}
 
+\item{person_like_share}{a name is person-like when it contains a word that is a first name at least this share
+of the time in \code{first_names}; lower than \code{first_name_share}, because a risk flag may err on the cautious
+side}
+
+\item{reference}{the side whose names are used to judge how distinctive a name is, normally the larger reference
+database (Orbis): \code{"b"} or \code{"a"}; needs \code{norm_b} (or \code{norm_a})}
+
+\item{namesakes_max}{a name is not distinctive when the expected number of reference names with all its words
+(\code{q_namesakes}) is at least this}
+
 \item{name_sim_min}{original names (words sorted) less similar than this differ}
 
 \item{city_sim_min, street_sim_min}{cities (streets) at least this similar agree; cities below it are a conflict}
@@ -100,7 +113,8 @@ has no value), \code{q_name_sim} (similarity of the original names, words sorted
 A and the B entity), \code{q_best} (best candidate on both sides), \code{q_margin} (score gap to the next
 candidate), \code{q_key_freq_a}, \code{q_key_freq_b} (entities sharing the name), \code{q_alias}, \code{q_type_a},
 \code{q_type_b}, \code{q_type_source_a}, \code{q_type_source_b} (field, first name or guessed) and
-\code{q_type_pair} (organisation, person or mixed)
+\code{q_type_pair} (organisation, person or mixed), \code{q_person_like}, \code{q_namesakes} and
+\code{q_rarest_word}
 }
 \description{
 Describes how well each matched pair is supported by the data, so that users can decide which
@@ -116,7 +130,7 @@ Classes (\code{q_class}):
   \item{B, plausible}{no conflict, matched on the name alone, with a name that is not weak}
   \item{C, uncertain}{no conflict, but the pair is not the best candidate of its entity, a close call, or matched
   on the name alone with a weak name: shared by several entities, short, matched through a 'trading as' part,
-  person against organisation, original names that differ, or a person whose name frequency is unknown}
+  person against organisation, original names that differ, person-like, or not distinctive}
   \item{D, conflicting}{at least one conflict: legal forms with nothing in common, different regions, or different
   cities}
 }
@@ -127,6 +141,12 @@ legal-form words. The original names are compared with their words sorted (\code
 first equals a surname last; differing names are only a weak signal, because normalisation removes words on
 purpose. Without \code{norm_a} and \code{norm_b}, matches through part of a name cannot be recognised and their
 names show as differing.
+The person-like flag and distinctiveness are risk signals, not classifications: a company named after a person
+(JAN DE VRIES HOLDING) is as easy to confuse as the person. Distinctiveness uses the words of the matched name on
+the \code{reference} side: \code{q_rarest_word} is the number of reference names with its rarest word, and
+\code{q_namesakes} the number of reference names expected to contain all its words by chance (the number of
+names times the share of names with each word, multiplied); 1 or more means other entities with the name are
+likely.
 Matches through part of a name are recognised when another name of the same entity in \code{norm_a} or
 \code{norm_b} contains the matched name as whole words (\code{JAN DE VRIES} in
 \code{JAN DE VRIES H O D N BAKKERIJ DE MOLEN}).

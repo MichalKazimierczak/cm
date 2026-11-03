@@ -55,5 +55,12 @@ test_that("match_quality takes the type from one side, with first names where th
   expect_match(p$q_reasons, "^person \\(type from first name\\)")
   expect_true(all(q$q_type_pair %in% c("person", "organisation")))
   s <- quality_summary(q)
-  expect_false(any(grepl("^person|^organisation", s$reasons$reason)))
+  expect_false(any(grepl("^person( |$)|^organisation( |$)", s$reasons$reason)))
+  expect_true("person-like name" %in% s$reasons$reason)
+})
+
+test_that("one country code applies to all names", {
+  fn <- build_first_names(c("Jan", "Jan", "Piet"), country = "NL", org_names = c("Piet Bouw BV", "Alpha BV"), org_country = "NL", min_count = 1)
+  expect_equal(fn$n_person[fn$word == "JAN" & fn$country == "NL"], 2)
+  expect_equal(guess_person(c("DE VRIES, JAN", "SMIT, JAN"), country = "NL", first_names = fn, min_count = 1)$type, c("person", "person"))
 })

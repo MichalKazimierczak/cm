@@ -7,4 +7,4 @@
 .datatable.aware <- TRUE
 
 ## column names used inside data.table expressions
-utils::globalVariables("lf")
+utils::globalVariables(c("lf","f","i","w","o","s"))

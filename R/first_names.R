@@ -6,7 +6,8 @@
 #' Build it once, for example from the first-name field of natural persons in the EUIPO register, and keep it with
 #' your data (\code{saveRDS()}): it is derived from personal data and is not part of the package.
 #' @param first_names first names of natural persons (one or more per value, such as "JAN PIETER")
-#' @param country country of each person (ISO 3166-1 code), or \code{NULL} for one table for all countries
+#' @param country country of each person (ISO 3166-1 code; one code applies to all), or \code{NULL} for one table
+#' for all countries
 #' @param org_names optional: names of organisations, to measure how often a first name occurs in them (MARK,
 #' ROSE and VICTORIA often do); without them every first name counts as a person word
 #' @param org_country country of each organisation, or \code{NULL}
@@ -23,6 +24,9 @@
 #' @export
 
 build_first_names<-function(first_names,country=NULL,org_names=NULL,org_country=NULL,min_count=5){
+  ###one country code for all names is repeated for each
+  if(!is.null(country)) country<-rep_len(as.character(country),length(first_names))
+  if(!is.null(org_country)&&!is.null(org_names)) org_country<-rep_len(as.character(org_country),length(org_names))
   ###one row per word of each first name, counted once per person
   words<-function(x,cc){
     w<-strsplit(clean_person_name(x)," ",fixed=TRUE)
@@ -87,7 +91,7 @@ build_first_names<-function(first_names,country=NULL,org_names=NULL,org_country=
 guess_person<-function(names,country=NULL,first_names,min_share=0.9,min_count=5){
   n0<-length(names)
   raw0<-as.character(names)
-  cc0<-if(is.null(country)) rep("*",n0) else iso_country(country)
+  cc0<-if(is.null(country)) rep("*",n0) else rep_len(iso_country(country),n0)
   cc0[is.na(cc0)]<-"*"
   ###each distinct name and country once
   key<-paste(raw0,cc0,sep="\r")

@@ -25,6 +25,13 @@
 #' @param country_a,country_b optional: names of columns with the countries, to look first names up per country
 #' @param first_name_share,first_name_count passed to \code{\link{guess_person}} as \code{min_share} and
 #' \code{min_count}
+#' @param person_like_share a name is person-like when it contains a word that is a first name at least this share
+#' of the time in \code{first_names}; lower than \code{first_name_share}, because a risk flag may err on the cautious
+#' side
+#' @param reference the side whose names are used to judge how distinctive a name is, normally the larger reference
+#' database (Orbis): \code{"b"} or \code{"a"}; needs \code{norm_b} (or \code{norm_a})
+#' @param namesakes_max a name is not distinctive when the expected number of reference names with all its words
+#' (\code{q_namesakes}) is at least this
 #' @param name_sim_min original names (words sorted) less similar than this differ
 #' @param city_sim_min,street_sim_min cities (streets) at least this similar agree; cities below it are a conflict
 #' @param margin_min a best candidate whose score is less than this above the next candidate is a close call
@@ -37,7 +44,7 @@
 #'   \item{B, plausible}{no conflict, matched on the name alone, with a name that is not weak}
 #'   \item{C, uncertain}{no conflict, but the pair is not the best candidate of its entity, a close call, or matched
 #'   on the name alone with a weak name: shared by several entities, short, matched through a 'trading as' part,
-#'   person against organisation, original names that differ, or a person whose name frequency is unknown}
+#'   person against organisation, original names that differ, person-like, or not distinctive}
 #'   \item{D, conflicting}{at least one conflict: legal forms with nothing in common, different regions, or different
 #'   cities}
 #' }
@@ -48,6 +55,12 @@
 #' first equals a surname last; differing names are only a weak signal, because normalisation removes words on
 #' purpose. Without \code{norm_a} and \code{norm_b}, matches through part of a name cannot be recognised and their
 #' names show as differing.
+#' The person-like flag and distinctiveness are risk signals, not classifications: a company named after a person
+#' (JAN DE VRIES HOLDING) is as easy to confuse as the person. Distinctiveness uses the words of the matched name on
+#' the \code{reference} side: \code{q_rarest_word} is the number of reference names with its rarest word, and
+#' \code{q_namesakes} the number of reference names expected to contain all its words by chance (the number of
+#' names times the share of names with each word, multiplied); 1 or more means other entities with the name are
+#' likely.
 #' Matches through part of a name are recognised when another name of the same entity in \code{norm_a} or
 #' \code{norm_b} contains the matched name as whole words (\code{JAN DE VRIES} in
 #' \code{JAN DE VRIES H O D N BAKKERIJ DE MOLEN}).
@@ -59,7 +72,8 @@
 #' A and the B entity), \code{q_best} (best candidate on both sides), \code{q_margin} (score gap to the next
 #' candidate), \code{q_key_freq_a}, \code{q_key_freq_b} (entities sharing the name), \code{q_alias}, \code{q_type_a},
 #' \code{q_type_b}, \code{q_type_source_a}, \code{q_type_source_b} (field, first name or guessed) and
-#' \code{q_type_pair} (organisation, person or mixed)
+#' \code{q_type_pair} (organisation, person or mixed), \code{q_person_like}, \code{q_namesakes} and
+#' \code{q_rarest_word}
 #' @examples
 #' pairs <- data.frame(id_a = c(1, 2, 3, 3), id_b = c(11, 12, 13, 14), norm_name = c("ALPHA", "DEJANVRIES", "BETA", "BETA"),
 #'                     name_a = c("Alpha GmbH", "Jan de Vries", "Beta AG", "Beta AG"),
@@ -79,13 +93,15 @@ match_quality<-function(pairs,key_a,key_b,name_a,name_b,lf_a=NULL,lf_b=NULL,zip_
                         norm_a=NULL,norm_b=NULL,norm_key_a=key_a,norm_key_b=key_b,
                         norm_name_a="norm_name",norm_name_b="norm_name",sort=TRUE,unique=TRUE,
                         type_a=NULL,type_b=NULL,type_side=c("both","a","b"),first_names=NULL,country_a=NULL,
-                        country_b=NULL,first_name_share=0.9,first_name_count=5,
+                        country_b=NULL,first_name_share=0.9,first_name_count=5,person_like_share=0.5,
+                        reference=c("b","a"),namesakes_max=1,
                         name_sim_min=0.8,city_sim_min=0.8,street_sim_min=0.8,
                         margin_min=0.05,short_key=5,
                         person_pattern="INDIVIDUAL|NATURAL|PHYSICAL|PERSON",
                         org_pattern="COMPANY|LEGAL|ENTITY|GOV|UNIVERSIT|HOSPITAL|ORGANI|NON-PROFIT"){
   r<-as.data.frame(pairs)
   type_side<-match.arg(type_side)
+  reference<-match.arg(reference)
   need<-c(key_a,key_b,name_a,name_b,match_key,"one_to_one","name_sim","city_sim","street_sim","reg_a","reg_b","reg_sim")
   miss<-setdiff(need,names(r))
   if(length(miss)>0) stop("match_quality: pairs lacks the columns ",paste(miss,collapse=", "),
@@ -95,8 +111,16 @@ match_quality<-function(pairs,key_a,key_b,name_a,name_b,lf_a=NULL,lf_b=NULL,zip_
   col<-function(x) if(is.null(x)) rep(NA_character_,n) else as.character(r[[x]])
   has<-function(x) !is.na(x)&stringr::str_trim(x)!=""
   ###values separated by sep, as a list of sets ("GMBH;KG", "DE212, DE300")
-  sets<-function(x,sep) lapply(strsplit(ifelse(is.na(x),"",x),sep,fixed=TRUE),function(s){s<-stringr::str_trim(s); unique(s[s!=""])})
-  overlap<-function(x,y) vapply(seq_len(n),function(i) length(intersect(x[[i]],y[[i]]))>0,TRUE)
+  ###do two lists of values ("GMBH;KG" and "GMBH", "DE212, DE300" and "DE212") have a value in common, row by row
+  overlap<-function(x,y,sep){
+    long<-function(v){
+      w<-strsplit(as.character(ifelse(is.na(v),"",as.character(v))),sep,fixed=TRUE)
+      d<-data.table::data.table(i=rep(seq_along(w),lengths(w)),v=stringi::stri_trim_both(unlist(w,use.names=FALSE)))
+      unique(d[d$v!="",])
+    }
+    m<-merge(long(x),long(y),by=c("i","v"))
+    seq_len(n)%in%m$i
+  }
 
   ###1. evidence: the signals present on both sides, and those that agree
   lfa<-col(lf_a)
@@ -105,8 +129,8 @@ match_quality<-function(pairs,key_a,key_b,name_a,name_b,lf_a=NULL,lf_b=NULL,zip_
   ev_reg<-(has(r$reg_a)&has(r$reg_b))|(has(col(zip_a))&has(col(zip_b)))
   ev_city<-has(col(city_a))&has(col(city_b))
   ev_street<-has(col(street_a))&has(col(street_b))
-  lf_common<-overlap(sets(lfa,";"),sets(lfb,";"))
-  reg_common<-r$reg_sim%in%TRUE|overlap(sets(r$reg_a,","),sets(r$reg_b,","))
+  lf_common<-overlap(lfa,lfb,";")
+  reg_common<-r$reg_sim%in%TRUE|overlap(r$reg_a,r$reg_b,",")
   ag_lf<-ev_lf&lf_common
   ag_reg<-ev_reg&reg_common
   ag_city<-ev_city&r$city_sim>=city_sim_min
@@ -126,20 +150,26 @@ match_quality<-function(pairs,key_a,key_b,name_a,name_b,lf_a=NULL,lf_b=NULL,zip_
   kb<-as.character(r[[key_b]])
   score<-if("final_score"%in%names(r)) r$final_score else rep(NA_real_,n)
   side<-function(g,o){
-    cand<-tapply(o,g,function(v) length(unique(v)))
-    cand<-as.integer(cand[g])
+    d<-data.table::data.table(row=seq_len(n),g=g,o=o,s=score)
+    cnt<-d[!is.na(g),list(cand=data.table::uniqueN(o)),by=g]
+    cand<-cnt$cand[match(g,cnt$g)]
     best<-rep(NA,n)
     margin<-rep(NA_real_,n)
-    multi<-which(cand>1&!is.na(score))
-    for(idx in split(multi,g[multi])){
-      ###best score of each candidate (a candidate can appear in several rows)
-      s<-tapply(score[idx],o[idx],max)
-      s<-sort(s,decreasing=TRUE)
-      best[idx]<-score[idx]>=s[1]&o[idx]==names(s)[1]
-      margin[idx]<-s[1]-s[2]
+    ###best score of each candidate of an entity with several (a candidate can appear in several rows)
+    sel<-!is.na(g)&!is.na(score)&g%in%cnt$g[cnt$cand>1]
+    if(any(sel)){
+      bo<-d[sel,list(s=max(s)),by=list(g,o)]
+      bo<-bo[order(bo$g,-bo$s,bo$o),]
+      bo$rank<-stats::ave(seq_len(nrow(bo)),bo$g,FUN=seq_along)
+      top<-bo[bo$rank==1,]
+      sec<-bo[bo$rank==2,]
+      m<-match(g,top$g)
+      has<-!is.na(m)&!is.na(score)
+      best[has]<-o[has]==top$o[m[has]]&score[has]>=top$s[m[has]]
+      margin[has]<-top$s[m[has]]-sec$s[match(g[has],sec$g)]
     }
     best[!is.na(cand)&cand==1]<-TRUE
-    list(cand=cand,best=best,margin=margin)
+    list(cand=as.integer(cand),best=best,margin=margin)
   }
   sa<-side(ka,kb)
   sb<-side(kb,ka)
@@ -150,34 +180,28 @@ match_quality<-function(pairs,key_a,key_b,name_a,name_b,lf_a=NULL,lf_b=NULL,zip_
   ambiguous<-(q_candidates_a>1)%in%TRUE|(q_candidates_b>1)%in%TRUE|!(r$one_to_one%in%TRUE)
 
   ###4. names: how many entities share the name, short names, matches through part of a name
-  key_of<-function(x){
-    x<-as.character(x)
-    u<-base::unique(x)
-    k<-vapply(stringr::str_split(u,"\\s"),function(w){
-      if(sort==T) w<-base::sort(w)
-      if(unique==T) w<-stringi::stri_unique(w)
-      paste(w,collapse="")
-    },"")
-    k[is.na(u)|k==""]<-NA
-    k[match(x,u)]
-  }
   mk<-as.character(r[[match_key]])
-  freq<-function(nt,idcol,namecol){
-    if(is.null(nt)) return(rep(NA_integer_,n))
+  ###the stored names of each side once: distinct entity and name, with the key nmatch() builds from the name
+  prep<-function(nt,idcol,namecol){
+    if(is.null(nt)) return(NULL)
     nt<-as.data.frame(nt)
-    d<-unique(data.frame(id=as.character(nt[[idcol]]),k=key_of(nt[[namecol]])))
-    d<-d[!is.na(d$k),]
-    cnt<-table(d$k)
+    d<-unique(data.frame(id=as.character(nt[[idcol]]),nm=as.character(nt[[namecol]]),stringsAsFactors=FALSE))
+    d<-d[!is.na(d$nm)&d$nm!="",]
+    d$k<-match_keys(d$nm,sort,unique)
+    d
+  }
+  pa<-prep(norm_a,norm_key_a,norm_name_a)
+  pb<-prep(norm_b,norm_key_b,norm_name_b)
+  freq<-function(d){
+    if(is.null(d)) return(rep(NA_integer_,n))
+    u<-unique(d[!is.na(d$k),c("id","k")])
+    cnt<-table(u$k)
     as.integer(cnt[match(mk,names(cnt))])
   }
-  q_key_freq_a<-freq(norm_a,norm_key_a,norm_name_a)
-  q_key_freq_b<-freq(norm_b,norm_key_b,norm_name_b)
-  alias<-function(nt,idcol,namecol,pid){
-    if(is.null(nt)) return(rep(NA,n))
-    nt<-as.data.frame(nt)
-    d<-unique(data.frame(id=as.character(nt[[idcol]]),nm=as.character(nt[[namecol]])))
-    d<-d[!is.na(d$nm)&d$nm!="",]
-    d$k<-key_of(d$nm)
+  q_key_freq_a<-freq(pa)
+  q_key_freq_b<-freq(pb)
+  alias<-function(d,pid){
+    if(is.null(d)) return(rep(NA,n))
     ###a name is a part when another name of the same entity contains it as whole words
     multi<-d[d$id%in%d$id[duplicated(d$id)],]
     j<-merge(multi,multi,by="id",suffixes=c("","_long"))
@@ -186,18 +210,49 @@ match_quality<-function(pairs,key_a,key_b,name_a,name_b,lf_a=NULL,lf_b=NULL,zip_
     out[!pid%in%d$id]<-NA
     out
   }
-  al_a<-alias(norm_a,norm_key_a,norm_name_a,ka)
-  al_b<-alias(norm_b,norm_key_b,norm_name_b,kb)
+  al_a<-alias(pa,ka)
+  al_b<-alias(pb,kb)
   q_alias<-ifelse(al_a%in%TRUE|al_b%in%TRUE,TRUE,ifelse(is.na(al_a)&is.na(al_b),NA,FALSE))
   shared<-(q_key_freq_a>1)%in%TRUE|(q_key_freq_b>1)%in%TRUE
   ###similarity of the original names with their words sorted, so that DE VRIES JAN equals JAN DE VRIES;
   ###not checked for matches through part of a name, where the full name differs by nature
   words_sorted<-function(x){
-    x<-stringi::stri_trans_general(stringr::str_replace_all(ifelse(is.na(x),"",x),"[^\\p{Latin}\\p{Greek}\\p{Cyrillic}0-9]"," "),"latin-ascii; upper")
-    vapply(strsplit(stringr::str_squish(x)," ",fixed=TRUE),function(w) paste(base::sort(w),collapse=" "),"")
+    x<-stringi::stri_trans_general(stringr::str_replace_all(as.character(ifelse(is.na(x),"",x)),"[^\\p{Latin}\\p{Greek}\\p{Cyrillic}0-9]"," "),"latin-ascii; upper")
+    sort_words(stringr::str_squish(x))
   }
   q_name_sim<-stringdist::stringsim(words_sorted(col(name_a)),words_sorted(col(name_b)),method="jw")
   q_names_differ<-ifelse(q_alias%in%TRUE,NA,q_name_sim<name_sim_min)
+  ###distinctiveness, on the reference side: how many of its names contain each word of the matched name. The
+  ###expected number of names with all these words by chance is N * (share of names with word 1) * (share with
+  ###word 2) * ...; 1 or more means that other entities with this name are likely (JAN DE VRIES)
+  distinct<-function(d,pid){
+    if(is.null(d)) return(list(ns=rep(NA_real_,n),rare=rep(NA_integer_,n)))
+    nms<-base::unique(d$nm)
+    N<-length(nms)
+    ###each word once per name, then the number of names with each word
+    w<-strsplit(nms," ",fixed=TRUE)
+    wd<-unlist(w,use.names=FALSE)
+    wid<-rep(seq_along(w),lengths(w))
+    once<-!duplicated(data.table::data.table(wid,wd))
+    df<-table(wd[once])
+    ###the matched name of each pair: the name of the reference entity that gives the pair's key
+    pm<-d$nm[match(paste(pid,mk),paste(d$id,d$k))]
+    up<-base::unique(pm[!is.na(pm)])
+    uw<-strsplit(up," ",fixed=TRUE)
+    x<-unique(data.table::data.table(i=rep(seq_along(up),lengths(uw)),w=unlist(uw,use.names=FALSE)))
+    x$f<-as.vector(df[match(x$w,names(df))])
+    ###N * product of the shares, on the log scale, and the count of the rarest word, per name
+    agg<-x[,list(ns=N*exp(sum(log(f/N))),rare=as.integer(min(f))),by=i]
+    ns<-rep(NA_real_,length(up))
+    rare<-rep(NA_integer_,length(up))
+    ns[agg$i]<-agg$ns
+    rare[agg$i]<-agg$rare
+    list(ns=ns[match(pm,up)],rare=rare[match(pm,up)])
+  }
+  ds<-if(reference=="b") distinct(pb,kb) else distinct(pa,ka)
+  q_namesakes<-ds$ns
+  q_rarest_word<-ds$rare
+  not_distinct<-(q_namesakes>=namesakes_max)%in%TRUE
   short<-!is.na(mk)&nchar(mk)<short_key
 
   ###5. entity type: from the type columns where they say person or organisation; otherwise from a first name
@@ -224,12 +279,21 @@ match_quality<-function(pairs,key_a,key_b,name_a,name_b,lf_a=NULL,lf_b=NULL,zip_
   q_type_pair<-switch(type_side,both=ifelse(ta$type==tb$type,ta$type,"mixed"),a=ta$type,b=tb$type)
   person<-q_type_pair=="person"
   mixed<-q_type_pair=="mixed"
-  freq_unknown<-is.na(q_key_freq_a)|is.na(q_key_freq_b)
+  ###person-like name: a risk signal, not a classification. The side is of type person, or its name contains a
+  ###word that is a first name at least person_like_share of the time (also in names with company words)
+  person_like_side<-function(t,name,cc){
+    fn_hit<-if(!is.null(first_names)&&n>0) !is.na(guess_person(name,cc,first_names,min_share=person_like_share,
+                                                                min_count=first_name_count)$first_name) else rep(FALSE,n)
+    t$type=="person"|fn_hit
+  }
+  pl_a<-person_like_side(ta,col(name_a),col(country_a))
+  pl_b<-person_like_side(tb,col(name_b),col(country_b))
+  q_person_like<-switch(type_side,both=pl_a|pl_b,a=pl_a,b=pl_b)
 
   ###6. class
   ###a close call: not the best candidate, or the best by less than margin_min, or no score to tell
   close<-ambiguous&(q_best%in%FALSE|is.na(q_margin)|q_margin<margin_min)
-  weak<-q_agree==0&(shared|short|q_alias%in%TRUE|mixed|q_names_differ%in%TRUE|(person&freq_unknown))
+  weak<-q_agree==0&(shared|short|q_alias%in%TRUE|mixed|q_names_differ%in%TRUE|q_person_like|not_distinct)
   q_class<-ifelse(conflict,"D",ifelse(close|weak,"C",ifelse(q_agree>=1,"A","B")))
 
   ###reasons in words: one phrase per finding, without numbers, so that they can be counted
@@ -255,7 +319,8 @@ match_quality<-function(pairs,key_a,key_b,name_a,name_b,lf_a=NULL,lf_b=NULL,zip_
     why((q_key_freq_b>1)%in%TRUE,"name shared in B"),
     why(short,"short name"),
     why(q_alias%in%TRUE,"matched through part of a name"),
-    why(person&freq_unknown,"name frequency not available")
+    why(q_person_like,"person-like name"),
+    why(not_distinct,"name not distinctive")
   )
   q_reasons<-if(n>0) apply(parts,1,function(x) paste(x[!is.na(x)],collapse="; ")) else character(0)
 
@@ -280,6 +345,9 @@ match_quality<-function(pairs,key_a,key_b,name_a,name_b,lf_a=NULL,lf_b=NULL,zip_
   r$q_type_source_a<-ta$src
   r$q_type_source_b<-tb$src
   r$q_type_pair<-q_type_pair
+  r$q_person_like<-q_person_like
+  r$q_namesakes<-q_namesakes
+  r$q_rarest_word<-q_rarest_word
   r
 }
 
@@ -291,3 +359,37 @@ company_words<-paste0("\\b(COMPANY|CO|CORP|CORPORATION|INC|GROUP|HOLDINGS?|INTER
                       "GMBH|AG|KG|OHG|UG|SE|SA|SAS|SARL|SRL|SPA|SNC|BV|NV|VOF|LTD|LIMITED|LLC|LLP|PLC|OY|OYJ|AB|AS|ASA|APS|",
                       "SPZOO|SP Z O O|OOD|EOOD|AD|EAD|SRO|KFT|ZRT|DOO|DD|OU|UAB|SIA|LDA|SL|SLU|EPE|AE|IKE|",
                       "[A-Z]*GESELLSCHAFT|GENOSSENSCHAFT|SOCIETE|SOCIETA|SOCIEDAD[A-Z]*|SPOLKA|COOPERATIVE?|COOPERATIVA)\\b|&")
+
+## The keys nmatch() matches on, for many names at once: words split, sorted (in the same order as sort(), which
+## nmatch() uses), repeated words dropped, pasted together without spaces; NA for missing and empty names
+match_keys<-function(x,sort=TRUE,unique=TRUE){
+  x<-as.character(x)
+  u<-base::unique(x)
+  w<-stringr::str_split(u,"\\s")
+  d<-data.table::data.table(i=rep(seq_along(w),lengths(w)),w=unlist(w,use.names=FALSE))
+  d<-d[!is.na(d$w)&d$w!="",]
+  if(sort){
+    ###rank the words as sort() orders them (locale collation), then order by name and rank
+    lv<-base::sort(base::unique(d$w))
+    d$rank<-match(d$w,lv)
+    d<-d[order(d$i,d$rank),]
+  }
+  if(unique) d<-d[!duplicated(data.table::data.table(d$i,d$w)),]
+  agg<-d[,list(k=paste(w,collapse="")),by=i]
+  k<-rep(NA_character_,length(u))
+  k[agg$i]<-agg$k
+  k[match(x,u)]
+}
+
+## The words of each string sorted as sort() orders them, joined with spaces, for many strings at once
+sort_words<-function(x){
+  u<-base::unique(x)
+  w<-strsplit(u," ",fixed=TRUE)
+  d<-data.table::data.table(i=rep(seq_along(w),lengths(w)),w=unlist(w,use.names=FALSE))
+  lv<-base::sort(base::unique(d$w))
+  d<-d[order(d$i,match(d$w,lv)),]
+  agg<-d[,list(k=paste(w,collapse=" ")),by=i]
+  k<-rep("",length(u))
+  k[agg$i]<-agg$k
+  k[match(x,u)]
+}

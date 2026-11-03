@@ -38,7 +38,8 @@ test_that("match_quality works without the optional inputs", {
   expect_true(all(is.na(q$q_key_freq_a)))
   expect_true(all(is.na(q$q_alias)))
   expect_true(all(q$q_class %in% c("A", "B", "C", "D")))
-  expect_match(pick(q, 2, 12)$q_reasons, "name frequency not available")
+  expect_match(pick(q, 2, 12)$q_reasons, "person-like name")
+  expect_true(all(is.na(q$q_namesakes)))
 })
 
 test_that("match_quality works on the output of clean() without a score, and on no rows", {
@@ -66,4 +67,34 @@ test_that("quality_summary counts classes and reasons", {
   e <- quality_summary(quality_full(quality_example(), quality_example()$rk[0, ]))
   expect_equal(sum(e$classes$total), 0)
   expect_equal(nrow(e$reasons), 0)
+})
+
+test_that("match_quality flags names that are not distinctive on the reference side", {
+  x <- quality_example()
+  ## a reference side where JAN, DE and VRIES are common words, and BAKKERIJ and MOLEN rare
+  common <- data.frame(id_b = 100 + 1:300,
+                       norm_name = c(paste("JAN", sample(c("BAKKER", "JANSEN", "SMIT"), 100, TRUE)),
+                                     paste("DE", sample(c("BOER", "GROOT", "JONG"), 100, TRUE)),
+                                     paste("PIET", sample(c("VRIES", "MEER", "WIT"), 100, TRUE))), stringsAsFactors = FALSE)
+  nb <- rbind(x$nb[, c("id_b", "norm_name")], common)
+  q <- match_quality(x$rk, "id_a", "id_b", "name_a", "name_b", lf_a = "lf_a", lf_b = "lf_b",
+                     norm_a = x$na, norm_b = nb, norm_key_a = "id_a", norm_key_b = "id_b")
+  jan <- pick(q, 2, 12)
+  molen <- pick(q, 5, 16)
+  expect_gt(jan$q_namesakes, molen$q_namesakes)
+  expect_gt(jan$q_rarest_word, molen$q_rarest_word)
+  q2 <- match_quality(x$rk, "id_a", "id_b", "name_a", "name_b", lf_a = "lf_a", lf_b = "lf_b",
+                      norm_a = x$na, norm_b = nb, norm_key_a = "id_a", norm_key_b = "id_b", namesakes_max = jan$q_namesakes)
+  expect_match(pick(q2, 2, 12)$q_reasons, "name not distinctive")
+  expect_false(grepl("name not distinctive", pick(q2, 5, 16)$q_reasons))
+})
+
+test_that("person-like names are flagged also when the name has company words", {
+  x <- quality_example()
+  fn <- build_first_names(c(rep("Jan", 10), rep("Mark", 10)), country = c(rep("NL", 10), rep("DE", 10)),
+                          org_names = c(rep("Mark Media GmbH", 4), rep("Other GmbH", 6)), org_country = "DE", min_count = 5)
+  q <- match_quality(x$rk, "id_a", "id_b", "name_a", "name_b", lf_a = "lf_a", lf_b = "lf_b",
+                     type_side = "a", first_names = fn, country_a = "country_a")
+  expect_true(pick(q, 5, 16)$q_person_like)       # Jan de Vries h.o.d.n. Bakkerij de Molen: JAN
+  expect_false(pick(q, 1, 11)$q_person_like)      # Alpha GmbH
 })

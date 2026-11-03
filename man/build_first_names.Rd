@@ -15,7 +15,8 @@ build_first_names(
 \arguments{
 \item{first_names}{first names of natural persons (one or more per value, such as "JAN PIETER")}
 
-\item{country}{country of each person (ISO 3166-1 code), or \code{NULL} for one table for all countries}
+\item{country}{country of each person (ISO 3166-1 code; one code applies to all), or \code{NULL} for one table
+for all countries}
 
 \item{org_names}{optional: names of organisations, to measure how often a first name occurs in them (MARK,
 ROSE and VICTORIA often do); without them every first name counts as a person word}
