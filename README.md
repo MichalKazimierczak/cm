@@ -41,7 +41,9 @@ quality_summary(q)            # pairs per class and type, and the reasons
 Every flag is its own column (`q_conflict_city`, `q_key_freq_a`, `q_alias`, `q_person_like`, `q_namesakes`, ...),
 so you can filter on the criteria you trust; `?match_quality` explains each of them. Names that look like person
 names, or whose words are common on the reference side (`norm_b`, for example Orbis), are flagged as risks when the
-match rests on the name alone.
+match rests on the name alone. By default each A entity (the IP side) needs one match: several B candidates for
+one A entity make a pair uncertain, several A entities for one B entity do not (`candidates_side`). Run the check on
+all ranked pairs, before keeping the best one of each entity.
 
 ### Persons without a type field
 

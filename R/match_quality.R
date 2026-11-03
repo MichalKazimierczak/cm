@@ -34,6 +34,10 @@
 #' (\code{q_namesakes}) is at least this
 #' @param name_sim_min original names (words sorted) less similar than this differ
 #' @param city_sim_min,street_sim_min cities (streets) at least this similar agree; cities below it are a conflict
+#' @param candidates_side whose candidates count as ambiguity: \code{"a"} (default) when each A entity needs one
+#' match, for example the IP side against Orbis: several B entities for one A entity make the pair uncertain,
+#' several A entities for one B entity do not (the same applicant recorded twice); \code{"b"} the reverse;
+#' \code{"both"} both sides, as in versions before 1.4.0
 #' @param margin_min a best candidate whose score is less than this above the next candidate is a close call
 #' @param short_key matching keys with fewer characters than this are short
 #' @param person_pattern,org_pattern regular expressions (on the type values in capitals) for persons and for
@@ -43,8 +47,8 @@
 #'   \item{A, confirmed}{no conflict and at least one agreeing piece of evidence besides the name}
 #'   \item{B, plausible}{no conflict, matched on the name alone, with a name that is not weak}
 #'   \item{C, uncertain}{no conflict, but the pair is not the best candidate of its entity, a close call, or matched
-#'   on the name alone with a weak name: shared by several entities, short, matched through a 'trading as' part,
-#'   person against organisation, original names that differ, person-like, or not distinctive}
+#'   on the name alone with a weak name: shared by several entities on the other side, short, matched through a
+#'   'trading as' part, person against organisation, original names that differ, person-like, or not distinctive}
 #'   \item{D, conflicting}{at least one conflict: legal forms with nothing in common, different regions, or different
 #'   cities}
 #' }
@@ -61,6 +65,12 @@
 #' \code{q_namesakes} the number of reference names expected to contain all its words by chance (the number of
 #' names times the share of names with each word, multiplied); 1 or more means other entities with the name are
 #' likely.
+#' Ambiguity follows \code{candidates_side}. With \code{"a"}, a pair is ambiguous when its A entity has several
+#' candidates; \code{q_best} and \code{q_margin} compare the candidates of the A entity, and a name shared by several
+#' B entities is weak (several B entities could be the match). Candidates of the B entity (\code{q_candidates_b}),
+#' \code{one_to_one} from \code{clean()} and names shared within A (\code{q_key_freq_a}) are reported but do not change
+#' the class. Run the check on all ranked pairs, before keeping the best one of each entity: otherwise every entity has
+#' one candidate left and close calls cannot be seen.
 #' Matches through part of a name are recognised when another name of the same entity in \code{norm_a} or
 #' \code{norm_b} contains the matched name as whole words (\code{JAN DE VRIES} in
 #' \code{JAN DE VRIES H O D N BAKKERIJ DE MOLEN}).
@@ -69,8 +79,8 @@
 #' (signals that agree), \code{q_conflict_lf}, \code{q_conflict_region}, \code{q_conflict_city} (\code{NA} when a side
 #' has no value), \code{q_name_sim} (similarity of the original names, words sorted), \code{q_names_differ},
 #' \code{q_candidates_a}, \code{q_candidates_b} (number of candidates of the
-#' A and the B entity), \code{q_best} (best candidate on both sides), \code{q_margin} (score gap to the next
-#' candidate), \code{q_key_freq_a}, \code{q_key_freq_b} (entities sharing the name), \code{q_alias}, \code{q_type_a},
+#' A and the B entity), \code{q_best} (best candidate of its entity, on the side or sides of \code{candidates_side}),
+#' \code{q_margin} (score gap to the next candidate), \code{q_key_freq_a}, \code{q_key_freq_b} (entities sharing the name), \code{q_alias}, \code{q_type_a},
 #' \code{q_type_b}, \code{q_type_source_a}, \code{q_type_source_b} (field, first name or guessed) and
 #' \code{q_type_pair} (organisation, person or mixed), \code{q_person_like}, \code{q_namesakes} and
 #' \code{q_rarest_word}
@@ -94,7 +104,7 @@ match_quality<-function(pairs,key_a,key_b,name_a,name_b,lf_a=NULL,lf_b=NULL,zip_
                         norm_name_a="norm_name",norm_name_b="norm_name",sort=TRUE,unique=TRUE,
                         type_a=NULL,type_b=NULL,type_side=c("both","a","b"),first_names=NULL,country_a=NULL,
                         country_b=NULL,first_name_share=0.9,first_name_count=5,person_like_share=0.5,
-                        reference=c("b","a"),namesakes_max=1,
+                        reference=c("b","a"),namesakes_max=1,candidates_side=c("a","b","both"),
                         name_sim_min=0.8,city_sim_min=0.8,street_sim_min=0.8,
                         margin_min=0.05,short_key=5,
                         person_pattern="INDIVIDUAL|NATURAL|PHYSICAL|PERSON",
@@ -102,6 +112,9 @@ match_quality<-function(pairs,key_a,key_b,name_a,name_b,lf_a=NULL,lf_b=NULL,zip_
   r<-as.data.frame(pairs)
   type_side<-match.arg(type_side)
   reference<-match.arg(reference)
+  candidates_side<-match.arg(candidates_side)
+  use_a<-candidates_side%in%c("a","both")
+  use_b<-candidates_side%in%c("b","both")
   need<-c(key_a,key_b,name_a,name_b,match_key,"one_to_one","name_sim","city_sim","street_sim","reg_a","reg_b","reg_sim")
   miss<-setdiff(need,names(r))
   if(length(miss)>0) stop("match_quality: pairs lacks the columns ",paste(miss,collapse=", "),
@@ -175,9 +188,11 @@ match_quality<-function(pairs,key_a,key_b,name_a,name_b,lf_a=NULL,lf_b=NULL,zip_
   sb<-side(kb,ka)
   q_candidates_a<-sa$cand
   q_candidates_b<-sb$cand
-  q_best<-sa$best&sb$best
-  q_margin<-pmin(sa$margin,sb$margin,na.rm=TRUE)
-  ambiguous<-(q_candidates_a>1)%in%TRUE|(q_candidates_b>1)%in%TRUE|!(r$one_to_one%in%TRUE)
+  ###only the side or sides of candidates_side count; one_to_one (clean(): the B entity has one A entity) belongs
+  ###to the B side
+  q_best<-switch(candidates_side,both=sa$best&sb$best,a=sa$best,b=sb$best)
+  q_margin<-switch(candidates_side,both=pmin(sa$margin,sb$margin,na.rm=TRUE),a=sa$margin,b=sb$margin)
+  ambiguous<-(use_a&(q_candidates_a>1)%in%TRUE)|(use_b&((q_candidates_b>1)%in%TRUE|!(r$one_to_one%in%TRUE)))
 
   ###4. names: how many entities share the name, short names, matches through part of a name
   mk<-as.character(r[[match_key]])
@@ -213,7 +228,11 @@ match_quality<-function(pairs,key_a,key_b,name_a,name_b,lf_a=NULL,lf_b=NULL,zip_
   al_a<-alias(pa,ka)
   al_b<-alias(pb,kb)
   q_alias<-ifelse(al_a%in%TRUE|al_b%in%TRUE,TRUE,ifelse(is.na(al_a)&is.na(al_b),NA,FALSE))
-  shared<-(q_key_freq_a>1)%in%TRUE|(q_key_freq_b>1)%in%TRUE
+  ###a name shared by several B entities means several possible B matches for the A entity, so it counts on the A
+  ###side, and the reverse
+  shared_a<-use_b&(q_key_freq_a>1)%in%TRUE
+  shared_b<-use_a&(q_key_freq_b>1)%in%TRUE
+  shared<-shared_a|shared_b
   ###similarity of the original names with their words sorted, so that DE VRIES JAN equals JAN DE VRIES;
   ###not checked for matches through part of a name, where the full name differs by nature
   words_sorted<-function(x){
@@ -226,7 +245,7 @@ match_quality<-function(pairs,key_a,key_b,name_a,name_b,lf_a=NULL,lf_b=NULL,zip_
   ###expected number of names with all these words by chance is N * (share of names with word 1) * (share with
   ###word 2) * ...; 1 or more means that other entities with this name are likely (JAN DE VRIES)
   distinct<-function(d,pid){
-    if(is.null(d)) return(list(ns=rep(NA_real_,n),rare=rep(NA_integer_,n)))
+    if(is.null(d)||n==0) return(list(ns=rep(NA_real_,n),rare=rep(NA_integer_,n)))
     nms<-base::unique(d$nm)
     N<-length(nms)
     ###each word once per name, then the number of names with each word
@@ -315,8 +334,8 @@ match_quality<-function(pairs,key_a,key_b,name_a,name_b,lf_a=NULL,lf_b=NULL,zip_
     why(ambiguous&q_best%in%FALSE,"not the best candidate"),
     why(ambiguous&q_best%in%TRUE&q_margin<margin_min,"close call"),
     why(ambiguous&is.na(q_margin),"several candidates, no score"),
-    why((q_key_freq_a>1)%in%TRUE,"name shared in A"),
-    why((q_key_freq_b>1)%in%TRUE,"name shared in B"),
+    why(shared_a,"name shared in A"),
+    why(shared_b,"name shared in B"),
     why(short,"short name"),
     why(q_alias%in%TRUE,"matched through part of a name"),
     why(q_person_like,"person-like name"),

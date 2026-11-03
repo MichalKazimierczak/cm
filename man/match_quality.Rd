@@ -38,6 +38,7 @@ match_quality(
   person_like_share = 0.5,
   reference = c("b", "a"),
   namesakes_max = 1,
+  candidates_side = c("a", "b", "both"),
   name_sim_min = 0.8,
   city_sim_min = 0.8,
   street_sim_min = 0.8,
@@ -93,6 +94,11 @@ database (Orbis): \code{"b"} or \code{"a"}; needs \code{norm_b} (or \code{norm_a
 \item{namesakes_max}{a name is not distinctive when the expected number of reference names with all its words
 (\code{q_namesakes}) is at least this}
 
+\item{candidates_side}{whose candidates count as ambiguity: \code{"a"} (default) when each A entity needs one
+match, for example the IP side against Orbis: several B entities for one A entity make the pair uncertain,
+several A entities for one B entity do not (the same applicant recorded twice); \code{"b"} the reverse;
+\code{"both"} both sides, as in versions before 1.4.0}
+
 \item{name_sim_min}{original names (words sorted) less similar than this differ}
 
 \item{city_sim_min, street_sim_min}{cities (streets) at least this similar agree; cities below it are a conflict}
@@ -110,8 +116,8 @@ words), \code{q_evidence} (signals present on both sides: legal form, region, ci
 (signals that agree), \code{q_conflict_lf}, \code{q_conflict_region}, \code{q_conflict_city} (\code{NA} when a side
 has no value), \code{q_name_sim} (similarity of the original names, words sorted), \code{q_names_differ},
 \code{q_candidates_a}, \code{q_candidates_b} (number of candidates of the
-A and the B entity), \code{q_best} (best candidate on both sides), \code{q_margin} (score gap to the next
-candidate), \code{q_key_freq_a}, \code{q_key_freq_b} (entities sharing the name), \code{q_alias}, \code{q_type_a},
+A and the B entity), \code{q_best} (best candidate of its entity, on the side or sides of \code{candidates_side}),
+\code{q_margin} (score gap to the next candidate), \code{q_key_freq_a}, \code{q_key_freq_b} (entities sharing the name), \code{q_alias}, \code{q_type_a},
 \code{q_type_b}, \code{q_type_source_a}, \code{q_type_source_b} (field, first name or guessed) and
 \code{q_type_pair} (organisation, person or mixed), \code{q_person_like}, \code{q_namesakes} and
 \code{q_rarest_word}
@@ -129,8 +135,8 @@ Classes (\code{q_class}):
   \item{A, confirmed}{no conflict and at least one agreeing piece of evidence besides the name}
   \item{B, plausible}{no conflict, matched on the name alone, with a name that is not weak}
   \item{C, uncertain}{no conflict, but the pair is not the best candidate of its entity, a close call, or matched
-  on the name alone with a weak name: shared by several entities, short, matched through a 'trading as' part,
-  person against organisation, original names that differ, person-like, or not distinctive}
+  on the name alone with a weak name: shared by several entities on the other side, short, matched through a
+  'trading as' part, person against organisation, original names that differ, person-like, or not distinctive}
   \item{D, conflicting}{at least one conflict: legal forms with nothing in common, different regions, or different
   cities}
 }
@@ -147,6 +153,12 @@ the \code{reference} side: \code{q_rarest_word} is the number of reference names
 \code{q_namesakes} the number of reference names expected to contain all its words by chance (the number of
 names times the share of names with each word, multiplied); 1 or more means other entities with the name are
 likely.
+Ambiguity follows \code{candidates_side}. With \code{"a"}, a pair is ambiguous when its A entity has several
+candidates; \code{q_best} and \code{q_margin} compare the candidates of the A entity, and a name shared by several
+B entities is weak (several B entities could be the match). Candidates of the B entity (\code{q_candidates_b}),
+\code{one_to_one} from \code{clean()} and names shared within A (\code{q_key_freq_a}) are reported but do not change
+the class. Run the check on all ranked pairs, before keeping the best one of each entity: otherwise every entity has
+one candidate left and close calls cannot be seen.
 Matches through part of a name are recognised when another name of the same entity in \code{norm_a} or
 \code{norm_b} contains the matched name as whole words (\code{JAN DE VRIES} in
 \code{JAN DE VRIES H O D N BAKKERIJ DE MOLEN}).

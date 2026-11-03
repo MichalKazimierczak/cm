@@ -5,7 +5,7 @@ tags:
   - bug-log
   - r-package
 created: 2026-10-22
-updated: 2026-10-23
+updated: 2026-11-03
 repository: MichalKazimierczak/cm
 ---
 
@@ -193,6 +193,9 @@ Priority: ⏫ changes match results, 🔼 can crash or corrupt your session, �
 	- Fixed by the speed change in commit `1b021e3` (`vapply` instead of `sapply`).
 
 ## Packaging and tidying
+
+- [x] 🔽 **[31]** `match_quality`: warnings "no non-missing arguments to min" and "NAs introduced by coercion" when `pairs` has no rows (for example an empty country chunk) ➕ 2026-11-03 ✅ 2026-11-03
+	- Tested in 1.3.0; the result was correct (no rows), only the warnings were wrong. Fixed in 1.4.0: the distinctiveness step is skipped for no rows; test added.
 
 - [x] 🔽 Weak-word rule `(U|A|O)E` → `\\1` (DE, AT, BG) also changes names without umlauts ➕ 2026-10-23 ✅ 2026-10-23
 	- Tested: `MICHAEL` → `MICHAL`, `BAUER` → `BAUR`, `ISRAEL` → `ISRAL`, `MANUEL` → `MANUL`. Since commit `327d644` the rule applies to every occurrence; before, only the first one (so `MICHAEL MUELLER` kept `MUELLER`).

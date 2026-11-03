@@ -1,3 +1,19 @@
+# CleanMatch 1.4.0
+
+## Changes to `match_quality()`
+
+* New argument `candidates_side` (default `"a"`): whose candidates make a pair uncertain. With `"a"`, several B
+  entities for one A entity (several Orbis ids for one IP person) count; several A entities for one B entity (the
+  same applicant recorded twice) do not. "Close call", "not the best candidate" and `q_margin` then compare the
+  candidates of the A entity only, "name shared in B" stays a weak signal and "name shared in A" no longer is.
+  `q_candidates_b`, `q_key_freq_a` and `one_to_one` are still reported. `candidates_side = "both"` gives the 1.3.0
+  results exactly.
+* This changes results: pairs whose Orbis entity is matched to several IP records, and names shared within the IP
+  data, no longer make a pair C on their own.
+* Run the check on all ranked pairs, before keeping the best one of each entity: otherwise every entity has one
+  candidate left and close calls cannot be seen.
+* No more warnings when `pairs` has no rows.
+
 # CleanMatch 1.3.0
 
 ## Changes to `match_quality()`

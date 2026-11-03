@@ -47,7 +47,8 @@ test_that("match_quality works on the output of clean() without a score, and on 
   q <- quality_full(x, x$cl)
   expect_true(all(is.na(q$q_margin)))
   expect_match(pick(q, 3, 13)$q_reasons, "several candidates, no score")
-  expect_equal(nrow(quality_full(x, x$rk[0, ])), 0)
+  expect_no_warning(e <- quality_full(x, x$rk[0, ]))
+  expect_equal(nrow(e), 0)
 })
 
 test_that("match_quality says which columns are missing", {
@@ -97,4 +98,31 @@ test_that("person-like names are flagged also when the name has company words", 
                      type_side = "a", first_names = fn, country_a = "country_a")
   expect_true(pick(q, 5, 16)$q_person_like)       # Jan de Vries h.o.d.n. Bakkerij de Molen: JAN
   expect_false(pick(q, 1, 11)$q_person_like)      # Alpha GmbH
+})
+
+test_that("candidates_side: several B entities for one A entity count, several A entities for one B entity do not", {
+  ## A entity 1 has two B candidates, close in score; B entity 20 has two A entities (the same applicant twice)
+  p <- data.frame(id_a = c(1, 1, 2, 3), id_b = c(10, 11, 20, 20), norm_name = c("ALPHA", "ALPHA", "GAMMA", "GAMMA"),
+                  name_a = c("Alpha GmbH", "Alpha GmbH", "Gamma GmbH", "Gamma GmbH"),
+                  name_b = c("ALPHA GMBH", "ALPHA GMBH", "GAMMA GMBH", "GAMMA GMBH"),
+                  lf_a = "GMBH", lf_b = "GMBH", one_to_one = c(TRUE, TRUE, FALSE, FALSE), name_sim = 1, city_sim = 0,
+                  street_sim = 0, reg_a = NA, reg_b = NA, reg_sim = FALSE, final_score = c(0.81, 0.80, 0.7, 0.6))
+  na <- data.frame(id_a = 1:3, norm_name = c("ALPHA", "GAMMA", "GAMMA"))
+  nb <- data.frame(id_b = c(10, 11, 20), norm_name = c("ALPHA", "ALPHA", "GAMMA"))
+  run <- function(cs) match_quality(p, "id_a", "id_b", "name_a", "name_b", lf_a = "lf_a", lf_b = "lf_b", norm_a = na,
+                                    norm_b = nb, norm_key_a = "id_a", norm_key_b = "id_b", candidates_side = cs)
+  q <- run("a")
+  expect_equal(pick(q, 1, 10)$q_class, "C")
+  expect_match(pick(q, 1, 10)$q_reasons, "close call")
+  expect_match(pick(q, 1, 11)$q_reasons, "not the best candidate")
+  expect_match(pick(q, 1, 10)$q_reasons, "name shared in B")
+  expect_equal(pick(q, 2, 20)$q_class, "A")
+  expect_equal(pick(q, 3, 20)$q_class, "A")
+  expect_false(grepl("name shared in A|not the best|close call", pick(q, 3, 20)$q_reasons))
+  expect_equal(pick(q, 3, 20)$q_candidates_b, 2L)
+  qb <- run("both")
+  expect_equal(pick(qb, 3, 20)$q_class, "C")
+  expect_match(pick(qb, 3, 20)$q_reasons, "name shared in A")
+  expect_equal(pick(qb, 1, 10)$q_class, "C")
+  expect_equal(run("b")$q_class[p$id_a == 1], c("A", "A"))
 })
