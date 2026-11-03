@@ -38,8 +38,10 @@ table(q$q_class)              # A confirmed, B plausible, C uncertain, D conflic
 quality_summary(q)            # pairs per class and type, and the reasons
 ```
 
-Every flag is its own column (`q_conflict_city`, `q_key_freq_a`, `q_alias`, ...), so you can filter on the criteria
-you trust; `?match_quality` explains each of them.
+Every flag is its own column (`q_conflict_city`, `q_key_freq_a`, `q_alias`, `q_person_like`, `q_namesakes`, ...),
+so you can filter on the criteria you trust; `?match_quality` explains each of them. Names that look like person
+names, or whose words are common on the reference side (`norm_b`, for example Orbis), are flagged as risks when the
+match rests on the name alone.
 
 ### Persons without a type field
 

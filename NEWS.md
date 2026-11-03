@@ -1,3 +1,25 @@
+# CleanMatch 1.3.0
+
+## Changes to `match_quality()`
+
+* Two new risk flags, meant to warn rather than to classify: a company named after a person is as easy to
+  confuse as the person.
+  - `q_person_like`: the entity is of type person, or its name contains a word that is a first name at least
+    half of the time in the `first_names` table (`person_like_share`), also when the name has company words.
+  - Distinctiveness on the reference side (`reference`, default the B side, for example Orbis):
+    `q_rarest_word` is the number of reference names containing the name's rarest word, and `q_namesakes` the
+    number of reference names expected to contain all its words by chance. At 1 or more (`namesakes_max`) the
+    name is "not distinctive". It needs the stored `norma()` output of that side.
+* A match on the name alone with a person-like or non-distinctive name is class C. This changes results:
+  person names matched on the name alone were B when their name was not shared within the datasets.
+  The reason "name frequency not available" is no longer given.
+* Much faster on large data, with the same values in the existing columns: 200,000 pairs against a reference
+  of 300,000 names take about 35 seconds (1.2.0: about 2 minutes).
+
+## Other changes
+
+* `build_first_names()` and `guess_person()` accept one country code for all names.
+
 # CleanMatch 1.2.0
 
 ## New functions
